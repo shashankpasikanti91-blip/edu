@@ -28,34 +28,120 @@ import {
   Loader2,
   BookA,
   Globe,
+  GraduationCap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
 
-const ADMIN_ROLES = ['SUPER_ADMIN', 'INSTITUTION_OWNER', 'INSTITUTION_ADMIN', 'DEPARTMENT_ADMIN'];
+const ADMIN_ROLES = ['SUPER_ADMIN', 'INSTITUTION_OWNER', 'INSTITUTION_ADMIN'];
+const ACADEMIC_ADMIN_ROLES = ['ACADEMIC_ADMIN', 'BRANCH_ADMIN', 'DEPARTMENT_ADMIN'];
+const TEACHER_ROLES = ['TEACHER', 'HOD'];
+const STAFF_ROLES = ['STAFF', 'COORDINATOR'];
 
 function getSidebarLinks(role?: string, accountType?: string) {
+  // ── Individual Student (B2C) ──
   if (accountType === 'B2C_STUDENT') {
     return [
       { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+      { icon: GraduationCap, label: 'Academic Profile', href: '/dashboard/academic-profile' },
       { icon: Brain, label: 'AI Study Assistant', href: '/dashboard/ai-assistant' },
-      { icon: BookOpen, label: 'Quiz / Practice', href: '/dashboard/exam-prep' },
+      { icon: BookOpen, label: 'Exam Prep', href: '/dashboard/exam-prep' },
       { icon: FileText, label: 'My Notes', href: '/dashboard/notes' },
-      { icon: Calendar, label: 'Revision Planner', href: '/dashboard/planner' },
-      { icon: TrendingUp, label: 'Progress', href: '/dashboard/progress' },
+      { icon: Calendar, label: 'Study Planner', href: '/dashboard/planner' },
+      { icon: TrendingUp, label: 'My Progress', href: '/dashboard/progress' },
       { icon: Library, label: 'Resources', href: '/dashboard/resources' },
       { icon: BookA, label: 'Dictionary', href: '/dashboard/dictionary' },
       { icon: Globe, label: 'Current Affairs', href: '/dashboard/current-affairs' },
       { icon: Upload, label: 'My Files', href: '/dashboard/files' },
       { icon: Users, label: 'Invite Friends', href: '/dashboard/referrals' },
-      { icon: CreditCard, label: 'Upgrade Plan', href: '/dashboard/billing' },
+      { icon: CreditCard, label: 'Subscription', href: '/dashboard/billing' },
       { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
       { icon: Heart, label: 'Wellness', href: '/dashboard/wellness' },
       { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
     ];
   }
 
-  const base = [
+  // ── Institution Owner / Admin ──
+  if (role && ADMIN_ROLES.includes(role)) {
+    return [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+      // Institution Management
+      { icon: Building2, label: 'Manage Users', href: '/dashboard/manage-users' },
+      { icon: Users, label: 'Departments', href: '/dashboard/departments' },
+      { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
+      // Academic
+      { icon: Brain, label: 'AI Assistant', href: '/dashboard/ai-assistant' },
+      { icon: BookOpen, label: 'Exam Prep', href: '/dashboard/exam-prep' },
+      { icon: Library, label: 'Resources', href: '/dashboard/resources' },
+      { icon: BookA, label: 'Dictionary', href: '/dashboard/dictionary' },
+      { icon: Globe, label: 'Current Affairs', href: '/dashboard/current-affairs' },
+      { icon: FileText, label: 'Notes', href: '/dashboard/notes' },
+      { icon: Calendar, label: 'Study Planner', href: '/dashboard/planner' },
+      // Admin
+      { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
+      { icon: Palette, label: 'Branding', href: '/dashboard/branding' },
+      { icon: Puzzle, label: 'Add-Ons', href: '/dashboard/addons' },
+      { icon: Upload, label: 'Files', href: '/dashboard/files' },
+      ...(role === 'SUPER_ADMIN' ? [
+        { icon: Building2, label: 'Tenants', href: '/dashboard/tenants' },
+        { icon: Shield, label: 'Admin Overview', href: '/dashboard/admin' },
+      ] : []),
+      { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
+      { icon: Heart, label: 'Wellness', href: '/dashboard/wellness' },
+      { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+    ];
+  }
+
+  // ── Academic Admin / Branch Admin / Department Admin ──
+  if (role && ACADEMIC_ADMIN_ROLES.includes(role)) {
+    return [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+      { icon: Users, label: 'Manage Users', href: '/dashboard/manage-users' },
+      { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
+      { icon: Brain, label: 'AI Assistant', href: '/dashboard/ai-assistant' },
+      { icon: BookOpen, label: 'Exam Prep', href: '/dashboard/exam-prep' },
+      { icon: Library, label: 'Resources', href: '/dashboard/resources' },
+      { icon: BookA, label: 'Dictionary', href: '/dashboard/dictionary' },
+      { icon: Globe, label: 'Current Affairs', href: '/dashboard/current-affairs' },
+      { icon: FileText, label: 'Notes', href: '/dashboard/notes' },
+      { icon: Calendar, label: 'Study Planner', href: '/dashboard/planner' },
+      { icon: Upload, label: 'Files', href: '/dashboard/files' },
+      { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
+      { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+    ];
+  }
+
+  // ── Teacher / HOD ──
+  if (role && TEACHER_ROLES.includes(role)) {
+    return [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+      { icon: Brain, label: 'AI Assistant', href: '/dashboard/ai-assistant' },
+      { icon: BookOpen, label: 'Exam Prep', href: '/dashboard/exam-prep' },
+      { icon: Library, label: 'Resources', href: '/dashboard/resources' },
+      { icon: FileText, label: 'Notes', href: '/dashboard/notes' },
+      { icon: Upload, label: 'Files & Materials', href: '/dashboard/files' },
+      { icon: TrendingUp, label: 'Student Progress', href: '/dashboard/progress' },
+      { icon: BookA, label: 'Dictionary', href: '/dashboard/dictionary' },
+      { icon: Globe, label: 'Current Affairs', href: '/dashboard/current-affairs' },
+      { icon: Calendar, label: 'Planner', href: '/dashboard/planner' },
+      { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
+      { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+    ];
+  }
+
+  // ── Staff / Coordinator ──
+  if (role && STAFF_ROLES.includes(role)) {
+    return [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+      { icon: Users, label: 'Student Records', href: '/dashboard/manage-users' },
+      { icon: Library, label: 'Resources', href: '/dashboard/resources' },
+      { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
+      { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+    ];
+  }
+
+  // ── Institution Student (B2B) ──
+  return [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Brain, label: 'AI Assistant', href: '/dashboard/ai-assistant' },
     { icon: BookOpen, label: 'Exam Prep', href: '/dashboard/exam-prep' },
@@ -64,31 +150,11 @@ function getSidebarLinks(role?: string, accountType?: string) {
     { icon: Globe, label: 'Current Affairs', href: '/dashboard/current-affairs' },
     { icon: FileText, label: 'My Notes', href: '/dashboard/notes' },
     { icon: Calendar, label: 'Study Planner', href: '/dashboard/planner' },
-  ];
-
-  if (role && ADMIN_ROLES.includes(role)) {
-    base.push({ icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' });
-    base.push({ icon: CreditCard, label: 'Billing', href: '/dashboard/billing' });
-    base.push({ icon: Palette, label: 'Branding', href: '/dashboard/branding' });
-    base.push({ icon: Puzzle, label: 'Add-Ons', href: '/dashboard/addons' });
-  }
-
-  if (role && ['TEACHER', ...ADMIN_ROLES].includes(role)) {
-    base.push({ icon: Upload, label: 'Files', href: '/dashboard/files' });
-  }
-
-  if (role === 'SUPER_ADMIN') {
-    base.push({ icon: Building2, label: 'Tenants', href: '/dashboard/tenants' });
-    base.push({ icon: Shield, label: 'Admin Overview', href: '/dashboard/admin' });
-  }
-
-  base.push(
+    { icon: TrendingUp, label: 'My Progress', href: '/dashboard/progress' },
     { icon: Bell, label: 'Notifications', href: '/dashboard/notifications' },
     { icon: Heart, label: 'Wellness', href: '/dashboard/wellness' },
     { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
-  );
-
-  return base;
+  ];
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

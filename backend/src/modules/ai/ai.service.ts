@@ -387,17 +387,29 @@ class AiService {
     difficulty?: 'easy' | 'medium' | 'hard' | 'mixed';
     count?: number;
     questionType?: 'mcq' | 'short' | 'long' | 'numerical' | 'mixed';
-    examType?: string; // JEE, NEET, CBSE Board, IELTS, etc.
+    examType?: string;
     language?: string;
+    educationCategory?: string;
+    stream?: string;
+    courseCode?: string;
+    classYear?: string;
+    tenantId?: string;
   }) {
-    const { subject, topic, grade, board, difficulty, count, questionType, examType, language } = params;
+    const {
+      subject, topic, grade, board, difficulty, count, questionType,
+      examType, language, educationCategory, stream, courseCode, classYear, tenantId,
+    } = params;
     const numQuestions = Math.min(count || 10, 30);
 
     let contextLine = `Subject: ${subject}`;
     if (topic) contextLine += ` | Topic: ${topic}`;
     if (grade) contextLine += ` | Grade/Class: ${grade}`;
+    if (classYear) contextLine += ` | Year/Semester: ${classYear}`;
     if (board) contextLine += ` | Board/Curriculum: ${board}`;
     if (examType) contextLine += ` | Exam: ${examType}`;
+    if (educationCategory) contextLine += ` | Level: ${educationCategory}`;
+    if (stream) contextLine += ` | Stream: ${stream}`;
+    if (courseCode) contextLine += ` | Course: ${courseCode}`;
     if (difficulty && difficulty !== 'mixed') contextLine += ` | Difficulty: ${difficulty}`;
     if (questionType && questionType !== 'mixed') contextLine += ` | Question Type: ${questionType}`;
     if (language && language !== 'en') contextLine += ` | Respond in: ${language} (keep technical terms in English)`;
@@ -410,6 +422,32 @@ class AiService {
     ];
 
     const response = await this.callOpenRouter(messages, undefined, { maxTokens: 4096, temperature: 0.6 });
+
+    // Persist session
+    try {
+      await prisma.examPrepSession.create({
+        data: {
+          userId,
+          tenantId: tenantId || undefined,
+          educationCategory: educationCategory || undefined,
+          stream: stream || undefined,
+          course: courseCode || undefined,
+          classYear: classYear || undefined,
+          board: board || undefined,
+          subject,
+          topic: topic || undefined,
+          difficulty: difficulty || 'mixed',
+          questionType: questionType || 'mixed',
+          questionCount: numQuestions,
+          language: language || 'en',
+          generatedContent: response,
+          contextType: tenantId ? 'B2B' : 'B2C',
+        },
+      });
+    } catch (err) {
+      logger.warn('Failed to persist ExamPrepSession', { userId, error: err instanceof Error ? err.message : String(err) });
+    }
+
     return { questions: response, subject, topic, grade, count: numQuestions };
   }
 

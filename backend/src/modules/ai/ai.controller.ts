@@ -96,7 +96,11 @@ class AiController {
 
   async generateQuestions(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    const { subject, topic, grade, board, difficulty, count, questionType, examType, language } = req.body;
+    const tenantId = req.user!.tenantId || undefined;
+    const {
+      subject, topic, grade, board, difficulty, count, questionType,
+      examType, language, educationCategory, stream, courseCode, classYear,
+    } = req.body;
 
     if (!subject) {
       return res.status(400).json({ success: false, message: 'Subject is required' });
@@ -112,6 +116,11 @@ class AiController {
       questionType,
       examType,
       language,
+      educationCategory,
+      stream,
+      courseCode,
+      classYear,
+      tenantId,
     });
 
     res.status(200).json({

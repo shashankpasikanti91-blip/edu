@@ -24,6 +24,20 @@ export const authController = {
     });
   }),
 
+  signupInstitution: asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const result = await authService.signupInstitution(
+      req.body,
+      getClientIp(req),
+      req.headers['user-agent']
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Institution registered successfully. Please complete onboarding.',
+      data: result,
+    });
+  }),
+
   login: asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const result = await authService.login(
       req.body,

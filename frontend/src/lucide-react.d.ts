@@ -62,10 +62,12 @@ declare module 'lucide-react' {
   export const Menu: LucideIcon;
   export const MessageSquare: LucideIcon;
   export const Minus: LucideIcon;
+  export const MoreVertical: LucideIcon;
   export const Newspaper: LucideIcon;
   export const Package: LucideIcon;
   export const Palette: LucideIcon;
   export const Pause: LucideIcon;
+  export const Pencil: LucideIcon;
   export const Phone: LucideIcon;
   export const Play: LucideIcon;
   export const Plus: LucideIcon;

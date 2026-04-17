@@ -71,6 +71,26 @@ router.post(
   })
 );
 
+// Get academic profile
+router.get(
+  '/academic-profile',
+  asyncHandler(async (req, res) => {
+    const authReq = req as AuthenticatedRequest;
+    const data = await studentDirectService.getAcademicProfile(authReq.user!.id);
+    res.json({ success: true, data });
+  })
+);
+
+// Save/update academic profile
+router.put(
+  '/academic-profile',
+  asyncHandler(async (req, res) => {
+    const authReq = req as AuthenticatedRequest;
+    const data = await studentDirectService.upsertAcademicProfile(authReq.user!.id, req.body);
+    res.json({ success: true, message: 'Academic profile updated', data });
+  })
+);
+
 // ─── NOTES CRUD ────────────────────────────────────────────
 
 router.get(

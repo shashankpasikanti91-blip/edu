@@ -2,6 +2,11 @@ export type UserRole =
   | 'STUDENT'
   | 'PARENT'
   | 'TEACHER'
+  | 'HOD'
+  | 'STAFF'
+  | 'COORDINATOR'
+  | 'BRANCH_ADMIN'
+  | 'ACADEMIC_ADMIN'
   | 'DEPARTMENT_ADMIN'
   | 'INSTITUTION_ADMIN'
   | 'INSTITUTION_OWNER'
@@ -27,6 +32,83 @@ export interface Tenant {
   slug: string;
   type: string;
   status: string;
+}
+
+// ─── INSTITUTION PROFILE TYPES ──────────────────────────────
+
+export interface InstitutionProfile {
+  id: string;
+  tenantId: string;
+  institutionName: string;
+  shortName: string | null;
+  institutionCode: string | null;
+  institutionType: string;
+  affiliationType: string | null;
+  affiliatedBody: string | null;
+  regulatoryBody: string | null;
+  institutionCategory: string | null;
+  country: string;
+  state: string | null;
+  city: string | null;
+  fullAddress: string | null;
+  pincode: string | null;
+  levelsOffered: string[];
+  streamsOffered: string[];
+  mediumOfInstruction: string[];
+  academicCalendarType: string | null;
+  yearModel: string | null;
+  officialEmail: string | null;
+  officialPhone: string | null;
+  website: string | null;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  supportContact: string | null;
+  maxTeachers: number | null;
+  maxStudents: number | null;
+  branchSupport: boolean;
+  attendanceModel: string | null;
+  examModel: string | null;
+  lmsEnabled: boolean;
+  aiEnabled: boolean;
+  onboardingStatus: string;
+  onboardingCompletedAt: string | null;
+}
+
+export interface TaxonomyOption {
+  value: string;
+  label: string;
+}
+
+export interface SubjectEntry {
+  name: string;
+  code: string;
+  category: 'core' | 'elective' | 'lab' | 'practical' | 'language';
+}
+
+export interface SubUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  status: string;
+  phone: string | null;
+  emailVerified: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+  studentProfile?: {
+    departmentId: string | null;
+    grade: string | null;
+    section: string | null;
+    rollNumber: string | null;
+  };
+  teacherProfile?: {
+    departmentId: string | null;
+    designation: string | null;
+    specialization: string | null;
+  };
 }
 
 export interface AuthTokens {

@@ -4,6 +4,7 @@ import { authenticate } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
 import {
   signupSchema,
+  institutionSignupSchema,
   loginSchema,
   refreshTokenSchema,
   forgotPasswordSchema,
@@ -15,6 +16,7 @@ const router = Router();
 
 // Public routes
 router.post('/signup', validate(signupSchema), authController.signup);
+router.post('/signup/institution', validate(institutionSignupSchema), authController.signupInstitution);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/refresh-token', validate(refreshTokenSchema), authController.refreshToken);
 router.post('/verify-email', validate(verifyEmailSchema), authController.verifyEmail);

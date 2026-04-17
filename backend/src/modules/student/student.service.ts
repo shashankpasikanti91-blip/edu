@@ -255,6 +255,74 @@ class StudentDirectService {
     logger.info('B2C student linked to institution', { userId, tenantId });
   }
 
+  // ─── INDIVIDUAL ACADEMIC PROFILE ───────────────────────────
+
+  async getAcademicProfile(userId: string) {
+    const academic = await prisma.individualStudentAcademic.findUnique({
+      where: { userId },
+    });
+    return academic;
+  }
+
+  async upsertAcademicProfile(userId: string, data: {
+    academicLevel: string;
+    stream?: string;
+    boardName?: string;
+    courseName?: string;
+    classYear?: string;
+    semester?: string;
+    subjectsOfInterest?: string[];
+    targetExams?: string[];
+    goals?: string;
+    state?: string;
+    preferredLang?: string;
+  }) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundError('User not found');
+
+    const academic = await prisma.individualStudentAcademic.upsert({
+      where: { userId },
+      update: {
+        academicLevel: data.academicLevel as any,
+        stream: data.stream as any || null,
+        boardName: data.boardName,
+        courseName: data.courseName,
+        classYear: data.classYear,
+        semester: data.semester,
+        subjectsOfInterest: data.subjectsOfInterest || [],
+        targetExams: data.targetExams || [],
+        goals: data.goals,
+        state: data.state,
+        preferredLang: data.preferredLang || 'en',
+      },
+      create: {
+        userId,
+        academicLevel: data.academicLevel as any,
+        stream: data.stream as any || null,
+        boardName: data.boardName,
+        courseName: data.courseName,
+        classYear: data.classYear,
+        semester: data.semester,
+        subjectsOfInterest: data.subjectsOfInterest || [],
+        targetExams: data.targetExams || [],
+        goals: data.goals,
+        state: data.state,
+        preferredLang: data.preferredLang || 'en',
+      },
+    });
+
+    // Also update preferredLang on user record
+    if (data.preferredLang) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { preferredLang: data.preferredLang },
+      });
+    }
+
+    logger.info('Student academic profile updated', { userId });
+    return academic;
+  }
+
   // ─── NOTES CRUD ────────────────────────────────────────────
 
   async listNotes(userId: string, query: Record<string, string>) {

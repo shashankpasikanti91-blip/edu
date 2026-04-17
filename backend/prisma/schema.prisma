@@ -13,6 +13,11 @@ enum UserRole {
   STUDENT
   PARENT
   TEACHER
+  HOD
+  STAFF
+  COORDINATOR
+  BRANCH_ADMIN
+  ACADEMIC_ADMIN
   DEPARTMENT_ADMIN
   INSTITUTION_ADMIN
   INSTITUTION_OWNER
@@ -27,12 +32,92 @@ enum AccountStatus {
   DEACTIVATED
 }
 
+enum InstitutionType {
+  SCHOOL
+  JUNIOR_COLLEGE
+  DEGREE_COLLEGE
+  UNIVERSITY
+  COACHING_CENTER
+  POLYTECHNIC
+  ENGINEERING_COLLEGE
+  MEDICAL_COLLEGE
+  NURSING_COLLEGE
+  PHARMACY_COLLEGE
+  DENTAL_COLLEGE
+  LAW_COLLEGE
+  TRAINING_INSTITUTE
+  OTHER
+}
+
+// Keep old enum for backward compatibility during migration
 enum TenantType {
   SCHOOL
   COLLEGE
   UNIVERSITY
   COACHING_INSTITUTE
   TRAINING_CENTER
+}
+
+enum AffiliationType {
+  STATE_BOARD
+  CENTRAL_BOARD
+  UNIVERSITY_AFFILIATED
+  AUTONOMOUS
+  DEEMED_UNIVERSITY
+  PRIVATE_UNIVERSITY
+  GOVERNMENT_INSTITUTION
+  INTERNATIONAL_CURRICULUM
+  OTHER
+}
+
+enum InstitutionCategory {
+  GOVERNMENT
+  PRIVATE
+  AIDED
+  AUTONOMOUS
+}
+
+enum AcademicLevel {
+  PRIMARY_SCHOOL
+  MIDDLE_SCHOOL
+  HIGH_SCHOOL
+  HIGHER_SECONDARY
+  DIPLOMA
+  UG
+  PG
+  DOCTORAL
+  PROFESSIONAL
+  COMPETITIVE_EXAM
+  SKILL_VOCATIONAL
+}
+
+enum StreamDomain {
+  GENERAL_SCHOOL
+  SCIENCE
+  COMMERCE
+  ARTS_HUMANITIES
+  ENGINEERING
+  MEDICAL
+  PHARMACY
+  NURSING
+  DENTAL
+  ALLIED_HEALTH
+  LAW
+  MANAGEMENT
+  COMPUTER_SCIENCE_IT
+  AGRICULTURE
+  VOCATIONAL
+  OTHER
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  STEP_1
+  STEP_2
+  STEP_3
+  STEP_4
+  STEP_5
+  COMPLETED
 }
 
 enum TenantStatus {
@@ -160,6 +245,8 @@ model Tenant {
   deletedAt    DateTime?    @map("deleted_at")
 
   settings          TenantSettings?
+  institutionProfile InstitutionProfile?
+  branches          Branch[]
   users             User[]
   departments       Department[]
   courses           Course[]
@@ -173,6 +260,7 @@ model Tenant {
   analyticsGoals    AnalyticsGoal[]
   analyticsReports  AnalyticsReport[]
   addOns            TenantAddOn[]
+  examPrepSessions  ExamPrepSession[]
 
   @@index([slug])
   @@index([status])
@@ -200,6 +288,208 @@ model TenantSettings {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("tenant_settings")
+}
+
+// ─── INSTITUTION PROFILE ────────────────────────────────────
+
+model InstitutionProfile {
+  id                   String              @id @default(uuid())
+  tenantId             String              @unique @map("tenant_id")
+
+  // Basic Details
+  institutionName      String              @map("institution_name")
+  shortName            String?             @map("short_name")
+  institutionCode      String?             @unique @map("institution_code")
+  institutionType      InstitutionType     @default(SCHOOL) @map("institution_type")
+
+  // Governance / Affiliation
+  affiliationType      AffiliationType?    @map("affiliation_type")
+  affiliatedBody       String?             @map("affiliated_body") // University / Board name
+  regulatoryBody       String?             @map("regulatory_body") // UGC, AICTE, NMC, etc.
+  institutionCategory  InstitutionCategory? @map("institution_category")
+
+  // Location
+  country              String              @default("India")
+  state                String?
+  city                 String?
+  fullAddress          String?             @map("full_address")
+  pincode              String?
+
+  // Academic Structure
+  levelsOffered        AcademicLevel[]     @default([]) @map("levels_offered")
+  streamsOffered       StreamDomain[]      @default([]) @map("streams_offered")
+  mediumOfInstruction  String[]            @default(["English"]) @map("medium_of_instruction")
+  academicCalendarType String?             @map("academic_calendar_type") // semester, trimester, annual
+  yearModel            String?             @map("year_model") // class-based, year-based, semester-based
+
+  // Contact / Branding
+  officialEmail        String?             @map("official_email")
+  officialPhone        String?             @map("official_phone")
+  website              String?
+  logoUrl              String?             @map("logo_url")
+  bannerUrl            String?             @map("banner_url")
+  primaryColor         String?             @map("primary_color")
+  secondaryColor       String?             @map("secondary_color")
+  supportContact       String?             @map("support_contact")
+
+  // Operational Settings
+  maxTeachers          Int?                @map("max_teachers")
+  maxStudents          Int?                @map("max_students")
+  branchSupport        Boolean             @default(false) @map("branch_support")
+  attendanceModel      String?             @map("attendance_model") // daily, period-wise, subject-wise
+  examModel            String?             @map("exam_model") // internal, board, both
+  lmsEnabled           Boolean             @default(false) @map("lms_enabled")
+  aiEnabled            Boolean             @default(true) @map("ai_enabled")
+
+  // Onboarding
+  onboardingStatus     OnboardingStatus    @default(NOT_STARTED) @map("onboarding_status")
+  onboardingCompletedAt DateTime?          @map("onboarding_completed_at")
+
+  createdAt            DateTime            @default(now()) @map("created_at")
+  updatedAt            DateTime            @updatedAt @map("updated_at")
+
+  tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([institutionType])
+  @@index([state, city])
+  @@map("institution_profiles")
+}
+
+// ─── BRANCHES ───────────────────────────────────────────────
+
+model Branch {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  name        String
+  code        String?
+  address     String?
+  city        String?
+  state       String?
+  phone       String?
+  email       String?
+  headUserId  String?  @map("head_user_id")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant  Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("branches")
+}
+
+// ─── ACADEMIC TAXONOMY ──────────────────────────────────────
+
+model AcademicBoard {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  shortName   String?  @map("short_name")
+  country     String   @default("India")
+  boardType   String?  @map("board_type") // state, central, international
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("academic_boards")
+}
+
+model AcademicStream {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  code        StreamDomain
+  description String?
+  isActive    Boolean      @default(true) @map("is_active")
+  sortOrder   Int          @default(0) @map("sort_order")
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  courseTemplates CourseCatalog[]
+
+  @@map("academic_streams")
+}
+
+model CourseCatalog {
+  id            String        @id @default(uuid())
+  name          String
+  code          String        @unique
+  streamId      String?       @map("stream_id")
+  level         AcademicLevel
+  duration      String?       // e.g., "4 years", "3 years"
+  description   String?
+  isActive      Boolean       @default(true) @map("is_active")
+  sortOrder     Int           @default(0) @map("sort_order")
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  stream         AcademicStream? @relation(fields: [streamId], references: [id])
+  subjectCatalog SubjectCatalog[]
+
+  @@index([streamId])
+  @@index([level])
+  @@map("course_catalog")
+}
+
+model SubjectCatalog {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  courseId     String?  @map("course_id")
+  level       AcademicLevel?
+  stream      StreamDomain?
+  category    String?  // core, elective, lab, practical
+  icon        String?
+  color       String?
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  course CourseCatalog? @relation(fields: [courseId], references: [id])
+
+  @@index([courseId])
+  @@index([level, stream])
+  @@map("subject_catalog")
+}
+
+// ─── INDIVIDUAL STUDENT ACADEMIC PROFILE ────────────────────
+
+model IndividualStudentAcademic {
+  id              String        @id @default(uuid())
+  userId          String        @unique @map("user_id")
+  academicLevel   AcademicLevel @map("academic_level")
+  stream          StreamDomain? 
+  boardName       String?       @map("board_name")
+  courseName      String?       @map("course_name")
+  classYear       String?       @map("class_year") // e.g., "Class 10", "2nd Year"
+  semester        String?
+  subjectsOfInterest String[]   @default([]) @map("subjects_of_interest")
+  targetExams     String[]      @default([]) @map("target_exams")
+  goals           String?
+  country         String        @default("India")
+  state           String?
+  preferredLang   String        @default("en") @map("preferred_lang")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("individual_student_academics")
+}
+
+// ─── ROLE TEMPLATES & PERMISSION MATRIX ─────────────────────
+
+model RoleTemplate {
+  id          String   @id @default(uuid())
+  tenantId    String?  @map("tenant_id") // null = system default
+  name        String
+  role        UserRole
+  description String?
+  permissions Json     // { "module": { "create": bool, "read": bool, "update": bool, "delete": bool } }
+  isDefault   Boolean  @default(false) @map("is_default")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([role])
+  @@map("role_templates")
 }
 
 // ─── USERS & AUTH ───────────────────────────────────────────
@@ -243,6 +533,7 @@ model User {
   studentProfile  StudentProfile?
   parentProfile   ParentProfile?
   teacherProfile  TeacherProfile?
+  individualAcademic IndividualStudentAcademic?
   userPermissions UserPermission[]
   studyPlans      StudyPlan[]
   notes           Note[]
@@ -257,6 +548,7 @@ model User {
   supportTickets  SupportTicket[]
   analyticsGoals  AnalyticsGoal[]
   aiChats         AiChat[]
+  examPrepSessions ExamPrepSession[]
   subscription    Subscription?    @relation("UserSubscription")
 
   @@index([email])
@@ -1308,6 +1600,39 @@ model AiChatMessage {
 
   @@index([chatId])
   @@map("ai_chat_messages")
+}
+
+// ─── EXAM PREP SESSIONS ─────────────────────────────────────
+
+model ExamPrepSession {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  tenantId       String?  @map("tenant_id")
+  // Academic context captured at generation time
+  educationCategory String? @map("education_category") // SCHOOL, UG, PG, etc.
+  stream         String?  // ENGINEERING, MEDICAL, etc.
+  course         String?  // B.Tech CSE, MBBS, etc.
+  classYear      String?  @map("class_year") // Class 10, Sem 3, etc.
+  board          String?  // CBSE, AP Board, etc.
+  subject        String
+  topic          String?
+  difficulty     String   @default("mixed")
+  questionType   String   @default("mixed") @map("question_type")
+  questionCount  Int      @map("question_count")
+  language       String   @default("en")
+  // Generated content
+  generatedContent String @map("generated_content")
+  // Metadata
+  contextType    String   @default("individual") @map("context_type") // individual / institution
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("exam_prep_sessions")
 }
 
 // ─── DIRECT STUDENT ID COUNTER ──────────────────────────────

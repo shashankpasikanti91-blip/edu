@@ -22,6 +22,16 @@ interface AuthState {
     preferredLang?: string;
   }) => Promise<void>;
 
+  signupInstitution: (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    institutionName: string;
+    institutionType: string;
+    phone?: string;
+  }) => Promise<void>;
+
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
@@ -36,6 +46,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signup: async (data) => {
     const response = await api.post<{ data: AuthResult }>('/auth/signup', data);
+    const { user, tokens } = response.data.data;
+
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+
+    set({ user, isAuthenticated: true, isLoading: false });
+  },
+
+  signupInstitution: async (data) => {
+    const response = await api.post<{ data: AuthResult }>('/auth/signup/institution', data);
     const { user, tokens } = response.data.data;
 
     localStorage.setItem('accessToken', tokens.accessToken);

@@ -26,6 +26,9 @@ import paymentRoutes from './modules/payment/payment.routes';
 import { aiRoutes } from './modules/ai/ai.routes';
 import { addOnRoutes } from './modules/addon/addon.routes';
 import { studentRoutes } from './modules/student/student.routes';
+import { institutionRoutes } from './modules/institution/institution.routes';
+import { subUserRoutes } from './modules/institution/subuser.routes';
+import { taxonomyRoutes } from './modules/taxonomy/taxonomy.routes';
 import { logger } from './shared/utils/logger';
 
 const app = express();
@@ -174,6 +177,9 @@ app.use('/api/v1/payments', strictLimiter, paymentRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/addons', addOnRoutes);
 app.use('/api/v1/students', studentRoutes);
+app.use('/api/v1/institution', institutionRoutes);
+app.use('/api/v1/institution/users', subUserRoutes);
+app.use('/api/v1/taxonomy', taxonomyRoutes);
 
 // ─── 404 handler ─────────────────────────────────────────────
 app.use((_req, res) => {

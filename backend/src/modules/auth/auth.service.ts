@@ -1,6 +1,7 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import { TenantType } from '@prisma/client';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
 import {
@@ -26,6 +27,7 @@ import type {
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  InstitutionSignupInput,
 } from './auth.validation';
 
 interface TokenPair {
@@ -192,6 +194,169 @@ class AuthService {
         },
       });
     }
+  }
+
+  /**
+   * Register a new institution owner.
+   * Creates Tenant → User (INSTITUTION_OWNER) → InstitutionProfile.
+   */
+  async signupInstitution(
+    data: InstitutionSignupInput,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<AuthResult> {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictError('An account with this email already exists');
+    }
+
+    const passwordHash = await argon2.hash(data.password, {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+
+    // Generate slug from institution name
+    const baseSlug = data.institutionName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .substring(0, 100);
+
+    // Ensure slug uniqueness
+    let slug = baseSlug;
+    let counter = 0;
+    while (await prisma.tenant.findUnique({ where: { slug } })) {
+      counter++;
+      slug = `${baseSlug}-${counter}`;
+    }
+
+    // Map institution type to tenant type
+    const tenantTypeMap: Record<string, TenantType> = {
+      SCHOOL: 'SCHOOL',
+      COLLEGE: 'COLLEGE',
+      UNIVERSITY: 'UNIVERSITY',
+      COACHING_INSTITUTE: 'COACHING_INSTITUTE',
+      TRAINING_CENTER: 'TRAINING_CENTER',
+      POLYTECHNIC: 'COLLEGE',
+      ITI: 'TRAINING_CENTER',
+      DEEMED_UNIVERSITY: 'UNIVERSITY',
+      AUTONOMOUS_COLLEGE: 'COLLEGE',
+      AFFILIATED_COLLEGE: 'COLLEGE',
+      RESEARCH_INSTITUTE: 'UNIVERSITY',
+      OPEN_UNIVERSITY: 'UNIVERSITY',
+      COMMUNITY_COLLEGE: 'COLLEGE',
+      OTHER: 'TRAINING_CENTER',
+    };
+
+    // Create everything in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Create Tenant
+      const tenant = await tx.tenant.create({
+        data: {
+          name: data.institutionName,
+          slug,
+          type: tenantTypeMap[data.institutionType] || 'SCHOOL',
+          status: 'ACTIVE',
+          email: data.email,
+          phone: data.phone,
+          country: 'India',
+          settings: {
+            create: {
+              allowStudentSignup: false,
+              requireApproval: true,
+              allowParentAccess: false,
+              enableAiAssistant: true,
+            },
+          },
+        },
+      });
+
+      // 2. Create User as INSTITUTION_OWNER
+      const user = await tx.user.create({
+        data: {
+          email: data.email,
+          passwordHash,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          role: 'INSTITUTION_OWNER',
+          tenantId: tenant.id,
+          accountType: AccountType.B2B_INSTITUTION,
+          phone: data.phone,
+          status: 'PENDING_VERIFICATION',
+        },
+      });
+
+      // 3. Create InstitutionProfile with NOT_STARTED onboarding
+      await tx.institutionProfile.create({
+        data: {
+          tenantId: tenant.id,
+          institutionName: data.institutionName,
+          institutionType: data.institutionType as any,
+          onboardingStatus: 'NOT_STARTED',
+        },
+      });
+
+      return { user, tenant };
+    });
+
+    // Generate email verification token
+    const verificationToken = uuidv4();
+    await prisma.verificationToken.create({
+      data: {
+        userId: result.user.id,
+        token: verificationToken,
+        type: TokenType.EMAIL_VERIFICATION,
+        expiresAt: new Date(Date.now() + EMAIL_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000),
+      },
+    });
+
+    emailService
+      .sendVerificationEmail(result.user.email, result.user.firstName, verificationToken)
+      .catch((err) => logger.error('Failed to send verification email', { err, userId: result.user.id }));
+
+    const tokens = await this.createSession(
+      result.user.id, result.user.email, result.user.role,
+      ipAddress, userAgent, result.tenant.id, AccountType.B2B_INSTITUTION
+    );
+
+    await this.createAuditLog(result.user.id, AuditAction.B2C_SIGNUP, ipAddress, userAgent);
+
+    logger.info('Institution owner signed up', {
+      userId: result.user.id,
+      tenantId: result.tenant.id,
+      institutionName: data.institutionName,
+    });
+
+    ownerNotifyService.onNewRegistration({
+      id: result.user.id,
+      email: result.user.email,
+      firstName: result.user.firstName,
+      lastName: result.user.lastName,
+      role: result.user.role,
+      accountType: AccountType.B2B_INSTITUTION,
+      tenantId: result.tenant.id,
+    }).catch((err) => logger.error('Owner notification failed', { err }));
+
+    return {
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        firstName: result.user.firstName,
+        lastName: result.user.lastName,
+        role: result.user.role,
+        accountType: result.user.accountType,
+        emailVerified: result.user.emailVerified,
+        tenantId: result.user.tenantId,
+        directStudentId: result.user.directStudentId,
+      },
+      tokens,
+    };
   }
 
   async login(
