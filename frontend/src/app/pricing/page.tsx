@@ -5,10 +5,21 @@ import { useState } from 'react';
 import {
   Sparkles, Check, ArrowRight, Building2, GraduationCap,
   Shield, BarChart3, Users, Zap, Globe, HeadphonesIcon,
-  ChevronDown, ChevronUp, Star, Clock, CreditCard, Puzzle
+  ChevronDown, ChevronUp, Star, Clock, CreditCard, Puzzle,
+  Menu, X, Mail, Phone,
 } from 'lucide-react';
 
 type BillingInterval = 'monthly' | 'yearly';
+
+const navLinks = [
+  { label: 'Features', href: '/#features' },
+  { label: 'Solutions', href: '/#solutions' },
+  { label: 'Analytics', href: '/#analytics' },
+  { label: 'Academics', href: '/#academics' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
+];
 
 const studentPlans = [
   {
@@ -251,29 +262,59 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<BillingInterval>('monthly');
   const [showComparison, setShowComparison] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50 via-white to-white">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100/50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-brand-600 to-violet-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
+      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-violet-600 flex items-center justify-center shadow-md">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold tracking-tight">
+                SRP <span className="gradient-text">Education AI</span>
+              </span>
+            </Link>
+
+            <div className="hidden lg:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link key={link.label} href={link.href} className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${link.label === 'Pricing' ? 'text-brand-600' : 'text-gray-600 hover:text-brand-600'}`}>
+                  {link.label}
+                </Link>
+              ))}
             </div>
-            <span className="text-xl font-bold text-gray-900">SRP Education AI</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/#features" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</Link>
-            <Link href="/pricing" className="text-sm text-gray-900 font-semibold">Pricing</Link>
-            <Link href="/about" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">About</Link>
-            <Link href="/contact" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">Contact</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="btn-ghost text-sm px-4 py-2">Log In</Link>
-            <Link href="/signup" className="btn-primary text-sm px-5 py-2">Get Started</Link>
+
+            <div className="hidden lg:flex items-center gap-3">
+              <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-brand-600 transition-colors">Log in</Link>
+              <Link href="/signup" className="btn-primary text-sm !py-2 !px-5">
+                Get Started Free <ArrowRight className="w-4 h-4 ml-1 inline" />
+              </Link>
+            </div>
+
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200/60 bg-white/95 backdrop-blur-xl">
+            <div className="px-4 py-4 space-y-1">
+              {navLinks.map((link) => (
+                <Link key={link.label} href={link.href} className="block px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
+                  {link.label}
+                </Link>
+              ))}
+              <div className="pt-3 border-t border-gray-100 space-y-2">
+                <Link href="/login" className="block text-center py-2.5 text-sm font-medium text-gray-700">Log in</Link>
+                <Link href="/signup" className="block text-center btn-primary text-sm">Get Started Free</Link>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
@@ -726,43 +767,67 @@ export default function PricingPage() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-violet-500 rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+              <Link href="/" className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-lg font-bold text-white">SRP Education AI</span>
+                <span className="text-white font-bold text-sm">SRP Education AI</span>
+              </Link>
+              <p className="text-sm text-gray-500 mb-4">AI-powered education platform for students and institutions across every academic stream.</p>
+              <div className="flex items-center gap-3">
+                <a href="mailto:support@srpailabs.com" className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
+                  <Mail className="w-4 h-4" />
+                </a>
+                <a href="tel:+919876543210" className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
+                  <Phone className="w-4 h-4" />
+                </a>
               </div>
-              <p className="text-sm leading-relaxed max-w-xs">Modern AI infrastructure for growing institutions.</p>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4 text-sm">Product</h4>
+              <h4 className="text-white text-sm font-semibold mb-4">Product</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/#features" className="text-gray-500 hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="text-gray-500 hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/#analytics" className="text-gray-500 hover:text-white transition-colors">Analytics</Link></li>
+                <li><Link href="/#academics" className="text-gray-500 hover:text-white transition-colors">Exam Prep</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4 text-sm">Legal</h4>
+              <h4 className="text-white text-sm font-semibold mb-4">Solutions</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/#solutions" className="text-gray-500 hover:text-white transition-colors">For Students</Link></li>
+                <li><Link href="/#solutions" className="text-gray-500 hover:text-white transition-colors">For Institutions</Link></li>
+                <li><Link href="/#solutions" className="text-gray-500 hover:text-white transition-colors">For Teachers</Link></li>
+                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Enterprise</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4 text-sm">Support</h4>
+              <h4 className="text-white text-sm font-semibold mb-4">Company</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><Link href="/contact" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><a href="mailto:support@srpailabs.com" className="hover:text-white transition-colors">support@srpailabs.com</a></li>
+                <li><Link href="/about" className="text-gray-500 hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/privacy" className="text-gray-500 hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="text-gray-500 hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white text-sm font-semibold mb-4">Support</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Help Center</Link></li>
+                <li><a href="mailto:support@srpailabs.com" className="text-gray-500 hover:text-white transition-colors">support@srpailabs.com</a></li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-gray-800 text-sm text-center">
-            &copy; {new Date().getFullYear()} SRP AI Labs. All rights reserved.
+          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-gray-600">&copy; {new Date().getFullYear()} SRP AI Labs. All rights reserved.</p>
+            <div className="flex items-center gap-6 text-xs text-gray-600">
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/contact" className="hover:text-white transition-colors">Support</Link>
+            </div>
           </div>
         </div>
       </footer>
