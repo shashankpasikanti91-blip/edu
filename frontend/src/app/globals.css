@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  body {
+    @apply bg-surface-secondary text-gray-900 font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-brand-600 text-white font-medium 
+           rounded-xl hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 
+           focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-white text-gray-700 font-medium 
+           rounded-xl border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 
+           focus:ring-brand-500 focus:ring-offset-2 transition-all duration-200 hover:border-gray-400;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-2.5 text-gray-600 font-medium 
+           rounded-xl hover:bg-gray-100 focus:outline-none transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 
+           placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 
+           focus:border-brand-500 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-card p-6;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-2xl shadow-elevated p-6;
+  }
+
+  .glass {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-gray-900/80 backdrop-blur-lg border border-gray-700/30;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 via-violet-600 to-brand-600;
+  }
+
+  .section-padding {
+    @apply px-6 sm:px-8 lg:px-12;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated;
+  }
+
+  .animate-on-scroll {
+    @apply opacity-0 translate-y-4 transition-all duration-700;
+  }
+
+  .animate-on-scroll.visible {
+    @apply opacity-100 translate-y-0;
+  }
+}

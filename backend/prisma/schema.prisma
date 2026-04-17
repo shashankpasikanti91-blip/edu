@@ -1,0 +1,1321 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ──────────────────────────────────────────────────
+
+enum UserRole {
+  STUDENT
+  PARENT
+  TEACHER
+  DEPARTMENT_ADMIN
+  INSTITUTION_ADMIN
+  INSTITUTION_OWNER
+  SUPER_ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  LOCKED
+  PENDING_VERIFICATION
+  DEACTIVATED
+}
+
+enum TenantType {
+  SCHOOL
+  COLLEGE
+  UNIVERSITY
+  COACHING_INSTITUTE
+  TRAINING_CENTER
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+  TRIAL
+}
+
+enum ContentType {
+  NOTE
+  REVISION_SHEET
+  QUESTION_BANK
+  FLASHCARD
+  ASSIGNMENT
+  MOCK_TEST
+  TEACHER_RESOURCE
+  INSTITUTION_RESOURCE
+  LICENSED_MATERIAL
+}
+
+enum ContentStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  FLAGGED
+  ARCHIVED
+}
+
+enum AssessmentType {
+  QUIZ
+  MOCK_TEST
+  ASSIGNMENT
+  PRACTICE_TEST
+}
+
+enum PlanInterval {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum PlanCategory {
+  STUDENT
+  INSTITUTION
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+  PAUSED
+  TRIALING
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  VOID
+}
+
+enum AccountType {
+  B2C_STUDENT
+  B2B_INSTITUTION
+}
+
+enum AddOnModuleSlug {
+  ATTENDANCE
+  BILLING_FINANCE
+  PARENT_PORTAL
+  TRANSPORT
+  FEE_REMINDER
+  WHATSAPP
+  LMS
+  AI_ANALYTICS
+}
+
+enum PaymentProvider {
+  RAZORPAY
+  STRIPE
+  MANUAL
+}
+
+enum AlertType {
+  RENEWAL_REMINDER
+  EXPIRY_WARNING
+  USAGE_LIMIT
+  UPGRADE_SUGGESTION
+  PAYMENT_FAILED
+  PLAN_CHANGED
+}
+
+enum BrandingTier {
+  BASIC
+  STANDARD
+  PREMIUM
+  WHITE_LABEL
+}
+
+// ─── TENANTS ────────────────────────────────────────────────
+
+model Tenant {
+  id           String       @id @default(uuid())
+  name         String
+  slug         String       @unique
+  type         TenantType
+  status       TenantStatus @default(PENDING)
+  domain       String?      @unique
+  logoUrl      String?      @map("logo_url")
+  primaryColor String?      @map("primary_color")
+  address      String?
+  city         String?
+  state        String?
+  country      String?      @default("India")
+  phone        String?
+  email        String?
+  website      String?
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  deletedAt    DateTime?    @map("deleted_at")
+
+  settings          TenantSettings?
+  users             User[]
+  departments       Department[]
+  courses           Course[]
+  subjects          Subject[]
+  contentItems      ContentItem[]
+  assessments       Assessment[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  subscription      Subscription?
+  analyticsEvents   AnalyticsEvent[]
+  analyticsGoals    AnalyticsGoal[]
+  analyticsReports  AnalyticsReport[]
+  addOns            TenantAddOn[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([type])
+  @@map("tenants")
+}
+
+model TenantSettings {
+  id                  String   @id @default(uuid())
+  tenantId            String   @unique @map("tenant_id")
+  allowStudentSignup  Boolean  @default(false) @map("allow_student_signup")
+  requireApproval     Boolean  @default(true) @map("require_approval")
+  allowParentAccess   Boolean  @default(false) @map("allow_parent_access")
+  enableAiAssistant   Boolean  @default(true) @map("enable_ai_assistant")
+  maxStudents         Int?     @map("max_students")
+  maxTeachers         Int?     @map("max_teachers")
+  maxStorageMb        Int      @default(5120) @map("max_storage_mb")
+  academicYear        String?  @map("academic_year")
+  timezone            String   @default("Asia/Kolkata")
+  dateFormat          String   @default("DD/MM/YYYY") @map("date_format")
+  customFields        Json?    @map("custom_fields")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+// ─── USERS & AUTH ───────────────────────────────────────────
+
+model User {
+  id              String        @id @default(uuid())
+  tenantId        String?       @map("tenant_id")
+  accountType     AccountType   @default(B2B_INSTITUTION) @map("account_type")
+  directStudentId String?       @unique @map("direct_student_id") // IND-STU-000001
+  email           String        @unique
+  passwordHash    String        @map("password_hash")
+  firstName       String        @map("first_name")
+  lastName        String        @map("last_name")
+  displayName     String?       @map("display_name")
+  role            UserRole      @default(STUDENT)
+  status          AccountStatus @default(PENDING_VERIFICATION)
+  emailVerified   Boolean       @default(false) @map("email_verified")
+  avatarUrl       String?       @map("avatar_url")
+  phone           String?
+  dateOfBirth     DateTime?     @map("date_of_birth")
+  bio             String?
+  preferredLang   String        @default("en") @map("preferred_lang")
+  timezone        String        @default("Asia/Kolkata")
+  loginAttempts   Int           @default(0) @map("login_attempts")
+  lockedUntil     DateTime?     @map("locked_until")
+  lastLoginAt     DateTime?     @map("last_login_at")
+  lastLoginIp     String?       @map("last_login_ip")
+  approvedAt      DateTime?     @map("approved_at")
+  approvedBy      String?       @map("approved_by")
+  referralCode    String?       @unique @map("referral_code")
+  referredBy      String?       @map("referred_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  tenant          Tenant?       @relation(fields: [tenantId], references: [id])
+  sessions        Session[]
+  verifyTokens    VerificationToken[]
+  authProviders   AuthProvider[]
+  auditLogs       AuditLog[]
+  studentProfile  StudentProfile?
+  parentProfile   ParentProfile?
+  teacherProfile  TeacherProfile?
+  userPermissions UserPermission[]
+  studyPlans      StudyPlan[]
+  notes           Note[]
+  quizAttempts    QuizAttempt[]
+  notifications   Notification[]
+  savedResources  SavedResource[]
+  contentItems    ContentItem[]    @relation("ContentCreator")
+  assessments     Assessment[]     @relation("AssessmentCreator")
+  uploads         Upload[]
+  enrollments     Enrollment[]
+  policyAcceptances PolicyAcceptance[]
+  supportTickets  SupportTicket[]
+  analyticsGoals  AnalyticsGoal[]
+  aiChats         AiChat[]
+  subscription    Subscription?    @relation("UserSubscription")
+
+  @@index([email])
+  @@index([tenantId])
+  @@index([role])
+  @@index([status])
+  @@index([accountType])
+  @@index([directStudentId])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  refreshToken String   @unique @map("refresh_token")
+  userAgent    String?  @map("user_agent")
+  ipAddress    String?  @map("ip_address")
+  deviceInfo   String?  @map("device_info")
+  isActive     Boolean  @default(true) @map("is_active")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  token     String    @unique
+  type      String
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("verification_tokens")
+}
+
+model AuthProvider {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  provider     String
+  providerId   String   @map("provider_id")
+  accessToken  String?  @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@map("auth_providers")
+}
+
+// ─── RBAC / PERMISSIONS ─────────────────────────────────────
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  resource    String
+  action      String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  userPermissions UserPermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model UserPermission {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  permissionId String   @map("permission_id")
+  grantedAt    DateTime @default(now()) @map("granted_at")
+  grantedBy    String?  @map("granted_by")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@map("user_permissions")
+}
+
+// ─── AUDIT LOG ──────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String?  @map("tenant_id")
+  userId     String?  @map("user_id")
+  action     String
+  resource   String?
+  resourceId String?  @map("resource_id")
+  details    Json?
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── PROFILES ───────────────────────────────────────────────
+
+model StudentProfile {
+  id             String    @id @default(uuid())
+  userId         String    @unique @map("user_id")
+  rollNumber     String?   @map("roll_number")
+  studentId      String?   @map("student_id")
+  grade          String?
+  classYear      String?   @map("class_year")
+  section        String?
+  board          String?
+  departmentId   String?   @map("department_id")
+  targetExams    String[]  @default([]) @map("target_exams")
+  guardianName   String?   @map("guardian_name")
+  guardianPhone  String?   @map("guardian_phone")
+  guardianEmail  String?   @map("guardian_email")
+  // B2C direct student fields
+  goalDescription String?  @map("goal_description")
+  courseName      String?  @map("course_name")
+  examCountdownDate DateTime? @map("exam_countdown_date")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  @@index([departmentId])
+  @@map("student_profiles")
+}
+
+model ParentProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique @map("user_id")
+  childrenIds    String[] @default([]) @map("children_ids")
+  relationship   String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("parent_profiles")
+}
+
+model TeacherProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  employeeId      String?  @map("employee_id")
+  designation     String?
+  departmentId    String?  @map("department_id")
+  specialization  String?
+  qualifications  String[] @default([])
+  experience      Int?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  @@index([departmentId])
+  @@map("teacher_profiles")
+}
+
+// ─── INSTITUTION STRUCTURE ──────────────────────────────────
+
+model Department {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  name        String
+  code        String?
+  headId      String?  @map("head_id")
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  courses  Course[]
+  subjects Subject[]
+  students StudentProfile[]
+  teachers TeacherProfile[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("departments")
+}
+
+model Course {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  departmentId String?  @map("department_id")
+  name         String
+  code         String?
+  description  String?
+  duration     String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department  Department?  @relation(fields: [departmentId], references: [id])
+  subjects    Subject[]
+  enrollments Enrollment[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("courses")
+}
+
+model Subject {
+  id           String   @id @default(uuid())
+  tenantId     String?  @map("tenant_id")
+  departmentId String?  @map("department_id")
+  courseId      String?  @map("course_id")
+  name         String
+  code         String   @unique
+  icon         String?
+  color        String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id])
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  course       Course?      @relation(fields: [courseId], references: [id])
+  topics       Topic[]
+  quizzes      Quiz[]
+  resources    Resource[]
+  contentItems ContentItem[]
+  assessments  Assessment[]
+  enrollments  Enrollment[]
+
+  @@index([tenantId])
+  @@map("subjects")
+}
+
+model Enrollment {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  courseId     String?   @map("course_id")
+  subjectId   String?   @map("subject_id")
+  status      String    @default("ACTIVE")
+  enrolledAt  DateTime  @default(now()) @map("enrolled_at")
+  completedAt DateTime? @map("completed_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course  Course?  @relation(fields: [courseId], references: [id])
+  subject Subject? @relation(fields: [subjectId], references: [id])
+
+  @@unique([userId, courseId, subjectId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+// ─── STUDY & LEARNING ──────────────────────────────────────
+
+model Topic {
+  id        String   @id @default(uuid())
+  subjectId String   @map("subject_id")
+  name      String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  questions Question[]
+  resources Resource[]
+
+  @@index([subjectId])
+  @@map("topics")
+}
+
+model StudyPlan {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String
+  date        DateTime
+  subjectName String   @map("subject_name")
+  duration    Int
+  isCompleted Boolean  @default(false) @map("is_completed")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@map("study_plans")
+}
+
+model Note {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String
+  content     String
+  subjectName String?  @map("subject_name")
+  tags        String[] @default([])
+  isFavorite  Boolean  @default(false) @map("is_favorite")
+  isDraft     Boolean  @default(true) @map("is_draft")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notes")
+}
+
+// ─── CONTENT LIBRARY ────────────────────────────────────────
+
+model ContentItem {
+  id           String        @id @default(uuid())
+  tenantId     String        @map("tenant_id")
+  createdById  String        @map("created_by_id")
+  subjectId    String?       @map("subject_id")
+  title        String
+  description  String?
+  type         ContentType
+  status       ContentStatus @default(DRAFT)
+  metadata     Json?
+  tags         String[]      @default([])
+  isPublic     Boolean       @default(false) @map("is_public")
+  reviewedBy   String?       @map("reviewed_by")
+  reviewedAt   DateTime?     @map("reviewed_at")
+  reviewNote   String?       @map("review_note")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  deletedAt    DateTime?     @map("deleted_at")
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy   User               @relation("ContentCreator", fields: [createdById], references: [id])
+  subject     Subject?           @relation(fields: [subjectId], references: [id])
+  files       ContentFile[]
+  permissions ContentPermission[]
+
+  @@index([tenantId])
+  @@index([type])
+  @@index([status])
+  @@index([createdById])
+  @@map("content_items")
+}
+
+model ContentFile {
+  id            String   @id @default(uuid())
+  contentItemId String   @map("content_item_id")
+  fileName      String   @map("file_name")
+  fileUrl       String   @map("file_url")
+  fileSize      Int      @map("file_size")
+  mimeType      String   @map("mime_type")
+  order         Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId])
+  @@map("content_files")
+}
+
+model ContentPermission {
+  id            String    @id @default(uuid())
+  contentItemId String    @map("content_item_id")
+  role          UserRole?
+  userId        String?   @map("user_id")
+  departmentId  String?   @map("department_id")
+  canView       Boolean   @default(true) @map("can_view")
+  canDownload   Boolean   @default(false) @map("can_download")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId])
+  @@map("content_permissions")
+}
+
+// ─── QUIZ & ASSESSMENTS ─────────────────────────────────────
+
+model Quiz {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  subjectId    String   @map("subject_id")
+  duration     Int
+  totalMarks   Int      @map("total_marks")
+  passingMarks Int      @map("passing_marks")
+  isPublished  Boolean  @default(false) @map("is_published")
+  createdBy    String   @map("created_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  subject   Subject       @relation(fields: [subjectId], references: [id])
+  questions Question[]
+  attempts  QuizAttempt[]
+
+  @@index([subjectId])
+  @@map("quizzes")
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  quizId        String?  @map("quiz_id")
+  topicId       String?  @map("topic_id")
+  text          String
+  type          String
+  options       Json?
+  correctAnswer String?  @map("correct_answer")
+  explanation   String?
+  difficulty    String   @default("MEDIUM")
+  marks         Int      @default(1)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  quiz    Quiz?        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  topic   Topic?       @relation(fields: [topicId], references: [id])
+  answers QuizAnswer[]
+
+  @@index([quizId])
+  @@index([topicId])
+  @@map("questions")
+}
+
+model QuizAttempt {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  quizId      String    @map("quiz_id")
+  score       Int?
+  totalMarks  Int       @map("total_marks")
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  timeTaken   Int?      @map("time_taken")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers QuizAnswer[]
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id         String   @id @default(uuid())
+  attemptId  String   @map("attempt_id")
+  questionId String   @map("question_id")
+  answer     String
+  isCorrect  Boolean  @map("is_correct")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id])
+
+  @@index([attemptId])
+  @@map("quiz_answers")
+}
+
+model Assessment {
+  id           String         @id @default(uuid())
+  tenantId     String         @map("tenant_id")
+  createdById  String         @map("created_by_id")
+  subjectId    String?        @map("subject_id")
+  title        String
+  description  String?
+  type         AssessmentType
+  duration     Int?
+  totalMarks   Int            @map("total_marks")
+  passingMarks Int?           @map("passing_marks")
+  instructions String?
+  isPublished  Boolean        @default(false) @map("is_published")
+  startDate    DateTime?      @map("start_date")
+  endDate      DateTime?      @map("end_date")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User                @relation("AssessmentCreator", fields: [createdById], references: [id])
+  subject   Subject?            @relation(fields: [subjectId], references: [id])
+  attempts  AssessmentAttempt[]
+
+  @@index([tenantId])
+  @@index([subjectId])
+  @@map("assessments")
+}
+
+model AssessmentAttempt {
+  id           String    @id @default(uuid())
+  assessmentId String    @map("assessment_id")
+  userId       String    @map("user_id")
+  score        Int?
+  answers      Json?
+  startedAt    DateTime  @default(now()) @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@index([userId])
+  @@map("assessment_attempts")
+}
+
+// ─── RESOURCES (legacy support) ─────────────────────────────
+
+model Resource {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  type        String
+  content     String?
+  fileUrl     String?  @map("file_url")
+  subjectId   String?  @map("subject_id")
+  topicId     String?  @map("topic_id")
+  tags        String[] @default([])
+  isPublished Boolean  @default(false) @map("is_published")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  subject      Subject?        @relation(fields: [subjectId], references: [id])
+  topic        Topic?          @relation(fields: [topicId], references: [id])
+  savedByUsers SavedResource[]
+
+  @@index([subjectId])
+  @@index([type])
+  @@map("resources")
+}
+
+model SavedResource {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  resourceId String   @map("resource_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@map("saved_resources")
+}
+
+// ─── UPLOADS ────────────────────────────────────────────────
+
+model Upload {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  fileName  String   @map("file_name")
+  fileUrl   String   @map("file_url")
+  fileSize  Int      @map("file_size")
+  mimeType  String   @map("mime_type")
+  purpose   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("uploads")
+}
+
+// ─── NOTIFICATIONS ──────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String?  @map("tenant_id")
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false) @map("is_read")
+  data      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+// ─── SUBSCRIPTIONS & BILLING ────────────────────────────────
+
+model Plan {
+  id              String       @id @default(uuid())
+  name            String
+  slug            String       @unique
+  description     String?
+  category        PlanCategory @default(INSTITUTION)
+  price           Float
+  yearlyPrice     Float?       @map("yearly_price")
+  currency        String       @default("INR")
+  interval        PlanInterval
+  maxUsers        Int          @default(50) @map("max_users")
+  maxStorage      BigInt       @default(1073741824) @map("max_storage")
+  maxAiCredits    Int          @default(100) @map("max_ai_credits")
+  features        Json?
+  brandingTier    BrandingTier @default(BASIC) @map("branding_tier")
+  trialDays       Int          @default(0) @map("trial_days")
+  sortOrder       Int          @default(0) @map("sort_order")
+  isActive        Boolean      @default(true) @map("is_active")
+  isPopular       Boolean      @default(false) @map("is_popular")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("plans")
+}
+
+model Subscription {
+  id                  String             @id @default(uuid())
+  tenantId            String?            @map("tenant_id")
+  userId              String?            @map("user_id")
+  planId              String             @map("plan_id")
+  status              SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart  DateTime           @map("current_period_start")
+  currentPeriodEnd    DateTime           @map("current_period_end")
+  trialEndsAt         DateTime?          @map("trial_ends_at")
+  cancelledAt         DateTime?          @map("cancelled_at")
+  cancelReason        String?            @map("cancel_reason")
+  paymentProvider     PaymentProvider?   @map("payment_provider")
+  externalId          String?            @map("external_id")
+  seatsUsed           Int                @default(0) @map("seats_used")
+  storageUsedMb       Int                @default(0) @map("storage_used_mb")
+  aiCreditsUsed       Int                @default(0) @map("ai_credits_used")
+  autoRenew           Boolean            @default(true) @map("auto_renew")
+  lastAlertSentAt     DateTime?          @map("last_alert_sent_at")
+  lastAlertType       String?            @map("last_alert_type")
+  metadata            Json?
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User?     @relation("UserSubscription", fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  invoices Invoice[]
+  payments Payment[]
+  alerts   SubscriptionAlert[]
+
+  @@unique([tenantId])
+  @@unique([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id                String        @id @default(uuid())
+  subscriptionId    String        @map("subscription_id")
+  tenantId          String?       @map("tenant_id")
+  userId            String?       @map("user_id")
+  invoiceNumber     String        @unique @map("invoice_number")
+  amount            Float
+  tax               Float         @default(0)
+  taxRate           Float         @default(18) @map("tax_rate")
+  totalAmount       Float         @map("total_amount")
+  currency          String        @default("INR")
+  status            InvoiceStatus @default(PENDING)
+  billingName       String?       @map("billing_name")
+  billingAddress    String?       @map("billing_address")
+  billingGstin      String?       @map("billing_gstin")
+  billingEmail      String?       @map("billing_email")
+  description       String?
+  couponId          String?       @map("coupon_id")
+  discountAmount    Float         @default(0) @map("discount_amount")
+  paidAt            DateTime?     @map("paid_at")
+  dueDate           DateTime?     @map("due_date")
+  pdfUrl            String?       @map("pdf_url")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  coupon       Coupon?      @relation(fields: [couponId], references: [id])
+  payments     Payment[]
+
+  @@index([subscriptionId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model Payment {
+  id               String          @id @default(uuid())
+  subscriptionId   String          @map("subscription_id")
+  invoiceId        String?         @map("invoice_id")
+  amount           Float
+  currency         String          @default("INR")
+  provider         PaymentProvider
+  providerPaymentId String?        @map("provider_payment_id")
+  providerOrderId  String?         @map("provider_order_id")
+  status           String          @default("PENDING")
+  method           String?
+  failureReason    String?         @map("failure_reason")
+  metadata         Json?
+  paidAt           DateTime?       @map("paid_at")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  invoice      Invoice?     @relation(fields: [invoiceId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([invoiceId])
+  @@index([provider])
+  @@index([status])
+  @@map("payments")
+}
+
+model SubscriptionAlert {
+  id             String    @id @default(uuid())
+  subscriptionId String    @map("subscription_id")
+  type           AlertType
+  title          String
+  message        String
+  sentAt         DateTime  @default(now()) @map("sent_at")
+  readAt         DateTime? @map("read_at")
+  actionUrl      String?   @map("action_url")
+  metadata       Json?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([type])
+  @@map("subscription_alerts")
+}
+
+model Coupon {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  description     String?
+  discountType    String    @default("PERCENTAGE") @map("discount_type")
+  discountValue   Float     @map("discount_value")
+  maxUses         Int?      @map("max_uses")
+  usedCount       Int       @default(0) @map("used_count")
+  minAmount       Float?    @map("min_amount")
+  applicablePlans String[]  @default([]) @map("applicable_plans")
+  validFrom       DateTime  @map("valid_from")
+  validUntil      DateTime  @map("valid_until")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  invoices Invoice[]
+  referralRewards ReferralReward[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("coupons")
+}
+
+model Referral {
+  id            String    @id @default(uuid())
+  referrerId    String    @map("referrer_id")
+  referralCode  String    @unique @map("referral_code")
+  referredEmail String?   @map("referred_email")
+  referredId    String?   @map("referred_id")
+  status        String    @default("PENDING")
+  convertedAt   DateTime? @map("converted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  rewards ReferralReward[]
+
+  @@index([referrerId])
+  @@index([referralCode])
+  @@map("referrals")
+}
+
+model ReferralReward {
+  id          String   @id @default(uuid())
+  referralId  String   @map("referral_id")
+  couponId    String?  @map("coupon_id")
+  rewardType  String   @map("reward_type")
+  rewardValue Float    @map("reward_value")
+  claimedAt   DateTime @default(now()) @map("claimed_at")
+
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  coupon   Coupon?  @relation(fields: [couponId], references: [id])
+
+  @@index([referralId])
+  @@map("referral_rewards")
+}
+
+model TenantBranding {
+  id                String       @id @default(uuid())
+  tenantId          String       @unique @map("tenant_id")
+  tier              BrandingTier @default(BASIC)
+  logoUrl           String?      @map("logo_url")
+  faviconUrl        String?      @map("favicon_url")
+  primaryColor      String?      @map("primary_color")
+  secondaryColor    String?      @map("secondary_color")
+  accentColor       String?      @map("accent_color")
+  customCss         String?      @map("custom_css")
+  loginPageHtml     String?      @map("login_page_html")
+  emailHeaderHtml   String?      @map("email_header_html")
+  certificateLogo   String?      @map("certificate_logo")
+  subdomain         String?      @unique
+  whiteLabel        Boolean      @default(false) @map("white_label")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  @@map("tenant_branding")
+}
+
+// ─── LEGAL / POLICY ─────────────────────────────────────────
+
+model PolicyAcceptance {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  policyType String   @map("policy_type")
+  version    String
+  acceptedAt DateTime @default(now()) @map("accepted_at")
+  ipAddress  String?  @map("ip_address")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, policyType, version])
+  @@index([userId])
+  @@map("policy_acceptances")
+}
+
+// ─── SUPPORT ────────────────────────────────────────────────
+
+model SupportTicket {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  subject     String
+  description String
+  category    String?
+  priority    String    @default("MEDIUM")
+  status      String    @default("OPEN")
+  resolvedAt  DateTime? @map("resolved_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+// ─── FEATURE FLAGS ──────────────────────────────────────────
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isEnabled   Boolean  @default(false) @map("is_enabled")
+  tenantIds   String[] @default([]) @map("tenant_ids")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("feature_flags")
+}
+
+// ─── ANALYTICS ──────────────────────────────────────────────
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  tenantId   String?  @map("tenant_id")
+  userId     String?  @map("user_id")
+  event      String
+  resource   String?
+  resourceId String?  @map("resource_id")
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([event])
+  @@index([createdAt])
+  @@map("analytics_events")
+}
+
+model AnalyticsSnapshot {
+  id        String   @id @default(uuid())
+  tenantId  String?  @map("tenant_id")
+  type      String
+  date      DateTime
+  metrics   Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([tenantId, type, date])
+  @@index([tenantId])
+  @@index([date])
+  @@map("analytics_snapshots")
+}
+
+model AnalyticsGoal {
+  id           String    @id @default(uuid())
+  tenantId     String?   @map("tenant_id")
+  userId       String?   @map("user_id")
+  title        String
+  description  String?
+  targetValue  Float     @map("target_value")
+  currentValue Float     @default(0) @map("current_value")
+  unit         String?
+  startDate    DateTime  @map("start_date")
+  endDate      DateTime  @map("end_date")
+  status       String    @default("IN_PROGRESS")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  tenant   Tenant?                 @relation(fields: [tenantId], references: [id])
+  user     User?                   @relation(fields: [userId], references: [id])
+  progress AnalyticsGoalProgress[]
+
+  @@index([tenantId])
+  @@index([userId])
+  @@map("analytics_goals")
+}
+
+model AnalyticsGoalProgress {
+  id        String   @id @default(uuid())
+  goalId    String   @map("goal_id")
+  value     Float
+  date      DateTime
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  goal AnalyticsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@map("analytics_goal_progress")
+}
+
+model AnalyticsReport {
+  id        String    @id @default(uuid())
+  tenantId  String?   @map("tenant_id")
+  name      String
+  type      String
+  config    Json
+  schedule  String?
+  lastRunAt DateTime? @map("last_run_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  tenant  Tenant?           @relation(fields: [tenantId], references: [id])
+  exports AnalyticsExport[]
+
+  @@index([tenantId])
+  @@map("analytics_reports")
+}
+
+model AnalyticsExport {
+  id        String   @id @default(uuid())
+  reportId  String   @map("report_id")
+  format    String
+  fileUrl   String?  @map("file_url")
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  report AnalyticsReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@map("analytics_exports")
+}
+
+// ─── ADD-ON MODULES ─────────────────────────────────────────
+
+model AddOnModule {
+  id              String         @id @default(uuid())
+  slug            AddOnModuleSlug @unique
+  name            String
+  description     String?
+  monthlyPrice    Float          @map("monthly_price")
+  yearlyPrice     Float          @map("yearly_price")
+  currency        String         @default("INR")
+  features        Json?
+  isActive        Boolean        @default(true) @map("is_active")
+  trialDays       Int            @default(0) @map("trial_days")
+  sortOrder       Int            @default(0) @map("sort_order")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  tenantAddOns TenantAddOn[]
+
+  @@map("addon_modules")
+}
+
+model TenantAddOn {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  addOnId         String    @map("addon_id")
+  isActive        Boolean   @default(true) @map("is_active")
+  activatedAt     DateTime  @default(now()) @map("activated_at")
+  expiresAt       DateTime? @map("expires_at")
+  trialEndsAt     DateTime? @map("trial_ends_at")
+  monthlyPrice    Float?    @map("monthly_price")
+  billingInterval String    @default("MONTHLY") @map("billing_interval")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  addOn  AddOnModule @relation(fields: [addOnId], references: [id])
+
+  @@unique([tenantId, addOnId])
+  @@index([tenantId])
+  @@map("tenant_addons")
+}
+
+// ─── AI CHAT ────────────────────────────────────────────────
+
+model AiChat {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String   @default("New Chat")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiChatMessage[]
+
+  @@index([userId])
+  @@map("ai_chats")
+}
+
+model AiChatMessage {
+  id        String   @id @default(uuid())
+  chatId    String   @map("chat_id")
+  role      String   // "user" | "assistant"
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  chat AiChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId])
+  @@map("ai_chat_messages")
+}
+
+// ─── DIRECT STUDENT ID COUNTER ──────────────────────────────
+
+model IdCounter {
+  id        String @id @default(uuid())
+  name      String @unique
+  lastValue Int    @default(0) @map("last_value")
+
+  @@map("id_counters")
+}

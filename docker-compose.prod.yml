@@ -1,0 +1,113 @@
+services:
+  edu-db:
+    image: postgres:16-alpine
+    container_name: edu-postgres
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5435:5432"
+    environment:
+      POSTGRES_DB: srp_edu
+      POSTGRES_USER: edu_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - srp-edu-postgres-data:/var/lib/postgresql/data
+    networks:
+      - srp-edu-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edu_user -d srp_edu"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    shm_size: 64mb
+    command: >
+      postgres
+        -c shared_buffers=64MB
+        -c work_mem=4MB
+        -c maintenance_work_mem=32MB
+        -c effective_cache_size=128MB
+        -c max_connections=50
+        -c random_page_cost=1.1
+        -c log_min_duration_statement=1000
+
+  edu-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: edu-backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5050:5000"
+    depends_on:
+      edu-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://edu_user:${DB_PASSWORD}@edu-db:5432/srp_edu
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      APP_URL: https://edu.srpailabs.com
+      FRONTEND_URL: https://edu.srpailabs.com
+      LOG_LEVEL: warn
+    env_file:
+      - ./backend/.env.production
+    networks:
+      - srp-edu-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 192M
+
+  edu-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://edu.srpailabs.com/api/v1
+    container_name: edu-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3020:3000"
+    depends_on:
+      edu-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: https://edu.srpailabs.com/api/v1
+    networks:
+      - srp-edu-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+networks:
+  srp-edu-network:
+    name: srp-edu-network
+    driver: bridge
+
+volumes:
+  srp-edu-postgres-data:
+    name: srp-edu-postgres-data

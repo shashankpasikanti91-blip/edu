@@ -1,0 +1,34 @@
+# ─── Environment & Secrets ───────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.cert
+
+# ─── Dependencies ────────────────────────────────────────────
+node_modules/
+
+# ─── Build outputs ───────────────────────────────────────────
+dist/
+.next/
+out/
+
+# ─── Logs & uploads ─────────────────────────────────────────
+logs/
+*.log
+uploads/
+
+# ─── OS / IDE ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ─── Docker volumes / data ───────────────────────────────────
+postgres_data/
+redis_data/
+
+# ─── Coverage ────────────────────────────────────────────────
+coverage/
