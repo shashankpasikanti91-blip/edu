@@ -36,13 +36,10 @@ export default function ContactPage() {
         toast.success('Message sent! We\'ll get back to you within 24 hours.');
         setForm({ name: '', email: '', reason: '', subject: '', message: '' });
       } else {
-        toast.success('Message sent! We\'ll get back to you within 24 hours.');
-        setForm({ name: '', email: '', reason: '', subject: '', message: '' });
+        toast.error('Failed to send message. Please try emailing us directly at support@srpailabs.com');
       }
     } catch {
-      // Graceful fallback — still show confirmation since email-based contact works
-      toast.success('Message sent! We\'ll get back to you within 24 hours.');
-      setForm({ name: '', email: '', reason: '', subject: '', message: '' });
+      toast.error('Network error. Please try emailing us directly at support@srpailabs.com');
     } finally {
       setSubmitting(false);
     }

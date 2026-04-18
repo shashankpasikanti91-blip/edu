@@ -21,10 +21,10 @@ function useScrollReveal() {
 
 /* ──────────────────────────── Stat counter ──────────────────────────── */
 const stats = [
-  { value: '50K+', label: 'Students Learning' },
-  { value: '200+', label: 'Institutions' },
-  { value: '15+', label: 'Academic Streams' },
-  { value: '99.9%', label: 'Uptime' },
+  { value: '8+', label: 'Academic Streams' },
+  { value: '64', label: 'Data Models' },
+  { value: '7', label: 'User Roles' },
+  { value: '40+', label: 'Platform Features' },
 ];
 
 /* ───────────────────── Academic streams data ───────────────────────── */
@@ -329,7 +329,7 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-r from-brand-600 via-violet-600 to-brand-600 relative overflow-hidden">
         <div className="relative max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Ready to Transform Learning?</h2>
-          <p className="text-lg text-white/80 mb-8">Join thousands of students and institutions already using SRP Education AI.</p>
+          <p className="text-lg text-white/80 mb-8">Start your learning journey with AI-powered education tools built for students and institutions.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup" className="px-8 py-4 rounded-full bg-white text-brand-700 font-bold text-lg hover:bg-gray-100 transition-colors shadow-xl">
               Start Free Trial

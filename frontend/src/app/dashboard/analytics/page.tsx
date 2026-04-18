@@ -130,17 +130,18 @@ function PlatformAnalytics() {
         <>
           {/* KPI Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KPITile icon={Building2} label="Total Tenants" value={stats.totalTenants} sub={`${stats.activeTenants} active`} color="brand" trend={12} />
-            <KPITile icon={Users} label="Total Users" value={stats.totalUsers} sub={`${stats.activeUsers} active`} color="emerald" trend={8} />
-            <KPITile icon={FileText} label="Content Items" value={stats.totalContent} sub="All types" color="amber" trend={15} />
-            <KPITile icon={Target} label="Assessments" value={stats.totalAssessments} sub={`${stats.recentSignups} new (30d)`} color="violet" trend={22} />
+            <KPITile icon={Building2} label="Total Tenants" value={stats.totalTenants} sub={`${stats.activeTenants} active`} color="brand" />
+            <KPITile icon={Users} label="Total Users" value={stats.totalUsers} sub={`${stats.activeUsers} active`} color="emerald" />
+            <KPITile icon={FileText} label="Content Items" value={stats.totalContent} sub="All types" color="amber" />
+            <KPITile icon={Target} label="Assessments" value={stats.totalAssessments} sub={`${stats.recentSignups} new (30d)`} color="violet" />
           </div>
 
           {/* Growth Chart + Role Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <ChartCard title="User Growth Trend" subtitle="Monthly signups over time" className="lg:col-span-2" icon={TrendingUp}>
+              {growth.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={growth.length > 0 ? growth : generateMockGrowth()}>
+                <AreaChart data={growth}>
                   <defs>
                     <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
@@ -151,9 +152,12 @@ function PlatformAnalytics() {
                   <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="count" stroke="#4f46e5" strokeWidth={2.5} fill="url(#growthGrad)" dot={{ r: 4, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} />
+                  <Area type="monotone" dataKey="users" stroke="#4f46e5" strokeWidth={2.5} fill="url(#growthGrad)" dot={{ r: 4, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} />
                 </AreaChart>
               </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[280px] text-gray-400 text-sm">No growth data available yet</div>
+              )}
             </ChartCard>
 
             <ChartCard title="Users by Role" subtitle="Distribution" icon={BarChart3}>
@@ -240,8 +244,8 @@ function TenantAnalytics({ tenantId }: { tenantId: string }) {
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPITile icon={Users} label="Students" value={stats.totalStudents} color="brand" trend={8} />
-        <KPITile icon={GraduationCap} label="Teachers" value={stats.totalTeachers} color="emerald" trend={3} />
+        <KPITile icon={Users} label="Students" value={stats.totalStudents} color="brand" />
+        <KPITile icon={GraduationCap} label="Teachers" value={stats.totalTeachers} color="emerald" />
         <KPITile icon={BookOpen} label="Courses" value={stats.totalCourses} color="amber" sub={`${stats.enrollmentCount} enrollments`} />
         <KPITile icon={FileText} label="Content" value={stats.totalContent} color="violet" sub={`${stats.assessmentCount} assessments`} />
       </div>
@@ -249,8 +253,9 @@ function TenantAnalytics({ tenantId }: { tenantId: string }) {
       {/* Growth + Department Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ChartCard title="Enrollment Growth" subtitle="Monthly new registrations" className="lg:col-span-2" icon={TrendingUp}>
+          {growth.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={growth.length > 0 ? growth : generateMockGrowth()}>
+            <AreaChart data={growth}>
               <defs>
                 <linearGradient id="enrollGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
@@ -261,9 +266,12 @@ function TenantAnalytics({ tenantId }: { tenantId: string }) {
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2.5} fill="url(#enrollGrad)" dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} />
+              <Area type="monotone" dataKey="users" stroke="#10b981" strokeWidth={2.5} fill="url(#enrollGrad)" dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} />
             </AreaChart>
           </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[280px] text-gray-400 text-sm">No enrollment data available yet</div>
+          )}
         </ChartCard>
 
         <ChartCard title="Subject Performance" subtitle="Avg. scores across subjects" icon={Target}>
@@ -312,7 +320,12 @@ function TenantAnalytics({ tenantId }: { tenantId: string }) {
    ═══════════════════════════════════════════════════════════ */
 function TeacherAnalytics({ userId, tenantId }: { userId: string; tenantId: string }) {
   const [loading, setLoading] = useState(true);
-  const [teacherStats, setTeacherStats] = useState<any>(null);
+  const [teacherStats, setTeacherStats] = useState<{
+    studentCount?: number;
+    contentCount?: number;
+    assessmentCount?: number;
+    recentContent?: Array<{ id: string; title: string; type: string; status: string; createdAt: string }>;
+  } | null>(null);
   const [period, setPeriod] = useState('12m');
 
   useEffect(() => {
@@ -343,7 +356,7 @@ function TeacherAnalytics({ userId, tenantId }: { userId: string; tenantId: stri
       <div className="grid grid-cols-1 gap-6">
         <ChartCard title="Recent Content" subtitle="Your latest created materials" icon={FileText}>
           <div className="space-y-3 py-2 max-h-[300px] overflow-y-auto">
-            {teacherStats?.recentContent?.length > 0 ? teacherStats.recentContent.map((item: any) => (
+            {teacherStats?.recentContent?.length && teacherStats.recentContent.length > 0 ? teacherStats.recentContent.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50/80">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
@@ -589,12 +602,12 @@ function ChartCard({ title, subtitle, icon: Icon, children, className }: {
   );
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ color: string; name?: string; dataKey?: string; value: number | string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg p-3 text-xs">
       {label && <p className="font-semibold text-gray-900 mb-1">{label}</p>}
-      {payload.map((p: any, i: number) => (
+      {payload.map((p, i: number) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
           <span className="text-gray-600">{p.name || p.dataKey}:</span>
@@ -656,9 +669,6 @@ function NoDataState({ message }: { message: string }) {
   );
 }
 
-function generateMockGrowth(): GrowthData[] {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return months.map((m, i) => ({ month: m, count: 15 + Math.floor(Math.random() * 40) + i * 3 }));
-}
+/* End of analytics components */
 
 

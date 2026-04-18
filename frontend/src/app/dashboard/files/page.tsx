@@ -114,9 +114,9 @@ export default function FilesPage() {
       showToast('success', 'File uploaded successfully');
       setPage(1);
       await fetchFiles();
-    } catch (err: any) {
-      const msg = err?.response?.data?.error?.message || 'Upload failed';
-      showToast('error', msg);
+    } catch (err: unknown) {
+      const axiosMsg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      showToast('error', axiosMsg || 'Upload failed');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

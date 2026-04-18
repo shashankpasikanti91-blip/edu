@@ -61,8 +61,10 @@ export default function BrandingPage() {
       const { data } = await api.put('/branding', form);
       setBranding(data.data.branding);
       toast.success('Branding settings saved');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save branding');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save branding';
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(axiosMsg || message);
     } finally {
       setSaving(false);
     }
@@ -86,8 +88,9 @@ export default function BrandingPage() {
       });
       setBranding(data.data.branding);
       toast.success('Logo uploaded successfully');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to upload logo');
+    } catch (err: unknown) {
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(axiosMsg || 'Failed to upload logo');
     }
   };
 
