@@ -156,7 +156,6 @@ app.get('/api/v1/health', (_req, res) => {
     message: 'SRP Education AI API is running',
     data: {
       version: '1.0.0',
-      environment: env.NODE_ENV,
       timestamp: new Date().toISOString(),
     },
   });

@@ -8,6 +8,8 @@ declare module 'lucide-react' {
   export const ArrowLeft: LucideIcon;
   export const ArrowRight: LucideIcon;
   export const ArrowUpRight: LucideIcon;
+  export const ArrowDown: LucideIcon;
+  export const ArrowDownRight: LucideIcon;
   export const Award: LucideIcon;
   export const BarChart3: LucideIcon;
   export const BarChart2: LucideIcon;

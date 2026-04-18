@@ -28,7 +28,7 @@ export function authenticate(
     }
 
     const token = authHeader.slice(7);
-    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET, { algorithms: ['HS256'] }) as JwtPayload;
 
     req.user = {
       id: decoded.sub,
@@ -72,7 +72,7 @@ export async function authenticateAndVerifySession(
     }
 
     const token = authHeader.slice(7);
-    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET, { algorithms: ['HS256'] }) as JwtPayload;
 
     // Verify session is still active
     const session = await prisma.session.findUnique({

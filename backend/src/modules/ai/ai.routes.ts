@@ -1,12 +1,27 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { authenticate } from '../../middleware/auth';
+import { aiRateLimiter } from '../../middleware/rateLimiter';
+import { validate } from '../../middleware/validate';
 import { aiController } from './ai.controller';
 import { asyncHandler } from '../../shared/utils/asyncHandler';
 
+const aiMessageSchema = z.object({ message: z.string().min(1).max(10000) });
+const aiGenerateSchema = z.object({
+  topic: z.string().min(1).max(500).optional(),
+  subject: z.string().min(1).max(200).optional(),
+  prompt: z.string().min(1).max(10000).optional(),
+  title: z.string().min(1).max(500).optional(),
+  count: z.number().int().min(1).max(50).optional(),
+  difficulty: z.string().max(50).optional(),
+  type: z.string().max(50).optional(),
+}).passthrough();
+
 const router = Router();
 
-// All AI routes require authentication
+// All AI routes require authentication + rate limiting
 router.use(authenticate);
+router.use(aiRateLimiter);
 
 // Chat CRUD
 router.post('/chats', asyncHandler(async (req, res) => aiController.createChat(req as any, res)));

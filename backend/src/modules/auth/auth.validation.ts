@@ -25,7 +25,7 @@ export const signupSchema = z.object({
     .max(100)
     .trim(),
   role: z
-    .enum(['STUDENT', 'PARENT', 'TEACHER', 'DEPARTMENT_ADMIN', 'INSTITUTION_ADMIN', 'INSTITUTION_OWNER'])
+    .enum(['STUDENT', 'PARENT'])
     .default('STUDENT'),
   tenantId: z.string().uuid().optional(),
   // B2C student optional fields
