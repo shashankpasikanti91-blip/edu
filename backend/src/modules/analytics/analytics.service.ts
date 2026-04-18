@@ -272,11 +272,11 @@ export class AnalyticsService {
     const result = [];
     for (const dept of departments) {
       // Get avg quiz score for students in this department
-      const studentIds = await prisma.departmentStudent.findMany({
+      const studentProfiles = await prisma.studentProfile.findMany({
         where: { departmentId: dept.id },
         select: { userId: true },
       });
-      const ids = studentIds.map(s => s.userId);
+      const ids = studentProfiles.map((s: { userId: string }) => s.userId);
 
       let avgScore = 0;
       if (ids.length > 0) {
