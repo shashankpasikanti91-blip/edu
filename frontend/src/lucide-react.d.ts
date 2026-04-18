@@ -41,6 +41,7 @@ declare module 'lucide-react' {
   export const Download: LucideIcon;
   export const Droplets: LucideIcon;
   export const Edit3: LucideIcon;
+  export const ExternalLink: LucideIcon;
   export const Eye: LucideIcon;
   export const EyeOff: LucideIcon;
   export const File: LucideIcon;
@@ -55,6 +56,7 @@ declare module 'lucide-react' {
   export const HeadphonesIcon: LucideIcon;
   export const Heart: LucideIcon;
   export const Image: LucideIcon;
+  export const ImageIcon: LucideIcon;
   export const IndianRupee: LucideIcon;
   export const Layers: LucideIcon;
   export const Languages: LucideIcon;
@@ -62,6 +64,7 @@ declare module 'lucide-react' {
   export const Library: LucideIcon;
   export const Lightbulb: LucideIcon;
   export const LineChart: LucideIcon;
+  export const ListChecks: LucideIcon;
   export const Loader2: LucideIcon;
   export const Lock: LucideIcon;
   export const LogOut: LucideIcon;
@@ -99,6 +102,7 @@ declare module 'lucide-react' {
   export const Stethoscope: LucideIcon;
   export const Star: LucideIcon;
   export const Sun: LucideIcon;
+  export const Table2: LucideIcon;
   export const Tag: LucideIcon;
   export const Target: LucideIcon;
   export const Trash2: LucideIcon;

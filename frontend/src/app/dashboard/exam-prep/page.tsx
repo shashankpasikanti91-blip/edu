@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileQuestion, BookOpen, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, FileQuestion, BookOpen, Clock, CheckCircle, Copy, Check, Download, RefreshCw, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
@@ -87,6 +87,9 @@ export default function ExamPrepPage() {
   const [count, setCount] = useState(10);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
+
+  const [genError, setGenError] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Whether to show the course selector (only for levels with courses)
   const showCourseSelector = ['DIPLOMA', 'UG', 'PG', 'DOCTORAL', 'PROFESSIONAL', 'COMPETITIVE_EXAM', 'SKILL_VOCATIONAL'].includes(level);
@@ -260,6 +263,7 @@ export default function ExamPrepPage() {
 
     setIsGenerating(true);
     setGeneratedContent(null);
+    setGenError(false);
 
     try {
       const { data } = await api.post('/ai/generate/questions', {
@@ -278,10 +282,35 @@ export default function ExamPrepPage() {
 
       setGeneratedContent(data.data.questions);
     } catch {
+      setGenError(true);
       toast.error('Failed to generate questions. Please try again.');
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleCopy = async () => {
+    if (!generatedContent) return;
+    try {
+      await navigator.clipboard.writeText(generatedContent);
+      setCopied(true);
+      toast.success('Copied to clipboard');
+      setTimeout(() => setCopied(false), 2000);
+    } catch { toast.error('Failed to copy'); }
+  };
+
+  const handleExport = () => {
+    if (!generatedContent) return;
+    const blob = new Blob([generatedContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `exam-prep-${subject}-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Exported as text file');
   };
 
   // ─── Render ─────────────────────────────────────────────
@@ -444,13 +473,43 @@ export default function ExamPrepPage() {
           </button>
         </div>
 
+        {/* Generation Error State */}
+        {genError && !isGenerating && !generatedContent && (
+          <div className="card mb-8 text-center py-10 border-red-200 bg-red-50/30">
+            <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-red-700 mb-1">Generation Failed</h3>
+            <p className="text-sm text-red-500 mb-4">Could not generate questions. Please try again.</p>
+            <button onClick={generateQuestions} className="btn-primary inline-flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" /> Retry
+            </button>
+          </div>
+        )}
+
         {/* Generated Content */}
         {generatedContent && (
           <div className="card mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-brand-600" />
-              Generated Questions
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-brand-600" />
+                Generated Questions
+              </h2>
+              <div className="flex items-center gap-2">
+                <button onClick={handleCopy} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors" title="Copy to clipboard">
+                  {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                </button>
+                <button onClick={handleExport} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors" title="Export as text">
+                  <Download className="w-4 h-4" />
+                </button>
+                <button onClick={generateQuestions} disabled={isGenerating} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors" title="Regenerate">
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-xs text-amber-700">
+                <strong>Note:</strong> AI-generated questions are for practice purposes. Verify accuracy for official use.
+              </p>
+            </div>
             <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700">
               {renderMarkdownContent(generatedContent)}
             </div>

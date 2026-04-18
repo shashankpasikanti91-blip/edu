@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Library, BookOpen, FileText, Search, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Library, BookOpen, FileText, Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -46,9 +47,8 @@ export default function ResourcesPage() {
     fetchResources();
   }, [typeFilter]);
 
-  const fetchResources = async (q = '') => {
+  const fetchResources = async (q = '', page = 1) => {
     if (isB2C) {
-      // B2C students don't have tenant-scoped content
       setIsLoading(false);
       return;
     }
@@ -58,6 +58,7 @@ export default function ResourcesPage() {
       if (q) params.set('search', q);
       if (typeFilter) params.set('type', typeFilter);
       params.set('status', 'APPROVED');
+      params.set('page', String(page));
       const { data } = await api.get(`/content?${params.toString()}`);
       setResources(data.data);
       setMeta(data.meta);
@@ -139,9 +140,13 @@ export default function ResourcesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {resources.map((res) => (
-            <div key={res.id} className="card hover:shadow-elevated transition-shadow">
+            <Link
+              key={res.id}
+              href={`/dashboard/resources/${res.id}`}
+              className="card hover:shadow-elevated transition-shadow cursor-pointer group block"
+            >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-brand-200 transition-colors">
                   {res.type === 'QUESTION_BANK' ? (
                     <BookOpen className="w-5 h-5 text-brand-600" />
                   ) : (
@@ -149,7 +154,7 @@ export default function ResourcesPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{res.title}</h3>
+                  <h3 className="font-semibold text-gray-900 truncate group-hover:text-brand-700 transition-colors">{res.title}</h3>
                   {res.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{res.description}</p>}
                   <div className="flex items-center gap-3 mt-3 flex-wrap">
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
@@ -169,17 +174,31 @@ export default function ResourcesPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
 
       {/* Pagination */}
       {meta && meta.totalPages > 1 && (
-        <div className="flex justify-center mt-8">
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <button
+            onClick={() => { if (meta.page > 1) fetchResources(search, meta.page - 1); }}
+            disabled={meta.page <= 1}
+            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600" />
+          </button>
           <p className="text-sm text-gray-500">
             Page {meta.page} of {meta.totalPages}
           </p>
+          <button
+            onClick={() => { if (meta.page < meta.totalPages) fetchResources(search, meta.page + 1); }}
+            disabled={meta.page >= meta.totalPages}
+            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
         </div>
       )}
     </div>

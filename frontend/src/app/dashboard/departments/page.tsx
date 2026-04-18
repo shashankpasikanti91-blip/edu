@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Loader2, Users, BookOpen, X, Check, Pencil, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Loader2, Users, BookOpen, X, Check, Pencil, Trash2, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
 
@@ -85,18 +86,26 @@ export default function DepartmentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {departments.map(dept => (
-            <div key={dept.id} className="card hover:shadow-elevated transition-shadow">
+            <Link key={dept.id} href={`/dashboard/departments/${dept.id}`} className="card hover:shadow-elevated transition-shadow cursor-pointer group block">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center group-hover:bg-brand-200 transition-colors">
                     <BookOpen className="w-5 h-5 text-brand-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{dept.name}</h3>
-                    {dept.code && <p className="text-xs text-gray-400">{dept.code}</p>}
+                    <h3 className="font-semibold text-gray-900 group-hover:text-brand-700 transition-colors">{dept.name}</h3>
+                    {dept.code && (
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigator.clipboard.writeText(dept.code!); toast.success('Code copied'); }}
+                        className="inline-flex items-center gap-1 text-[11px] font-mono text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded hover:bg-brand-100 transition-colors mt-0.5"
+                        title="Click to copy code"
+                      >
+                        {dept.code} <Copy className="w-2.5 h-2.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
-                <button onClick={() => handleEdit(dept)} className="p-1.5 rounded-lg hover:bg-gray-100">
+                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleEdit(dept); }} className="p-1.5 rounded-lg hover:bg-gray-100">
                   <Pencil className="w-4 h-4 text-gray-400" />
                 </button>
               </div>
@@ -105,7 +114,7 @@ export default function DepartmentsPage() {
                 <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {dept._count?.teachers || 0} Teachers</span>
                 <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {dept._count?.students || 0} Students</span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

@@ -2,9 +2,17 @@
 
 **AI-powered multi-tenant education platform for students, institutions, and teachers.**
 
-Built by SRP AI Labs — a Student Success & Institutional Intelligence Platform.
+Built by **SRP AI Labs** — Student Success & Institutional Intelligence Platform.
 
-**Live:** [https://edu.srpailabs.com](https://edu.srpailabs.com)
+| | |
+|---|---|
+| **Live URL** | [https://edu.srpailabs.com](https://edu.srpailabs.com) |
+| **VPS** | Hostinger — 5.223.67.236 |
+| **Deploy path** | `/var/www/srp-edu` |
+| **Backend port** | `5050` (internal `5000`) |
+| **Frontend port** | `3020` (internal `3000`) |
+| **DB port** | `5435` (localhost-only) |
+| **CI/CD** | GitHub Actions → SSH deploy on push to `main` |
 
 ---
 

@@ -1,6 +1,67 @@
 # SRP Education AI — Setup & Deployment Guide
 
-## Architecture Overview
+> **Live:** https://edu.srpailabs.com | **VPS:** 5.223.67.236 | **Path:** `/var/www/srp-edu`
+
+---
+
+## Table of Contents
+1. [Local Development](#local-development)
+2. [Architecture](#architecture)
+3. [Environment Variables](#environment-variables)
+4. [Frontend Routes](#frontend-routes)
+5. [API Routes](#api-routes)
+6. [Production Deployment](#production-deployment)
+7. [GitHub Actions CI/CD](#github-actions-cicd)
+8. [Nginx Configuration](#nginx-configuration)
+9. [Database Operations](#database-operations)
+10. [Monitoring & Logs](#monitoring--logs)
+
+---
+
+## Local Development
+
+### Prerequisites
+- Node.js 20+
+- PostgreSQL 16 (or Docker)
+- Git
+
+### Quick Start
+
+```bash
+# Clone
+git clone https://github.com/YOUR_ORG/srp-education-ai.git
+cd srp-education-ai
+
+# Backend
+cd backend
+cp .env.example .env
+# Edit .env: set DATABASE_URL, JWT secrets (see Environment Variables section)
+npm install
+npx prisma generate
+npx prisma db push
+npx ts-node prisma/seed.ts
+npm run dev                   # http://localhost:5000
+
+# Frontend (new terminal)
+cd frontend
+cp .env.example .env.local    # NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+npm install
+npm run dev                   # http://localhost:3000
+```
+
+### Docker (Full Stack)
+
+```bash
+docker compose up --build -d
+docker compose exec backend npx prisma db push
+docker compose exec backend npx ts-node prisma/seed.ts
+```
+
+Services: `http://localhost:3000` (frontend) · `http://localhost:5000` (API) · `localhost:5433` (PostgreSQL)
+
+---
+
+## Architecture
 
 ```
 SRP Education AI/
@@ -350,6 +411,131 @@ After running the seed script:
 
 ---
 
+## Frontend Routes
+
+### Public Routes
+| Route | Page |
+|-------|------|
+| `/` | Landing page |
+| `/login` | Login |
+| `/signup` | Signup (student + institution modes) |
+| `/forgot-password` | Password reset request |
+| `/pricing` | Subscription plans & add-ons |
+| `/about` | About SRP AI Labs |
+| `/contact` | Contact form |
+| `/features` | Feature overview |
+| `/solutions` | B2C vs B2B solutions |
+| `/academics` | Academic resources overview |
+| `/terms` | Terms of Service |
+| `/privacy` | Privacy Policy |
+| `/acceptable-use` | Acceptable Use Policy |
+| `/content-policy` | Content Policy |
+
+### Dashboard Routes (Protected — `/dashboard/...`)
+| Route | Roles | Description |
+|-------|-------|-------------|
+| `/dashboard` | All | Role-based dashboard homepage |
+| `/dashboard/ai-assistant` | All | AI chat study assistant |
+| `/dashboard/exam-prep` | All | Quiz engine & exam prep |
+| `/dashboard/notes` | Student, Teacher | Notes CRUD |
+| `/dashboard/planner` | Student | Study plan manager |
+| `/dashboard/progress` | Student, Teacher | Progress tracking charts |
+| `/dashboard/resources` | All | Resource library |
+| `/dashboard/resources/[id]` | All | Resource detail & viewer |
+| `/dashboard/dictionary` | All | Academic dictionary |
+| `/dashboard/current-affairs` | All | Current affairs news |
+| `/dashboard/wellness` | All | Pomodoro timer & wellness |
+| `/dashboard/files` | All | File management |
+| `/dashboard/notifications` | All | Notification centre |
+| `/dashboard/settings` | All | Profile & security settings |
+| `/dashboard/billing` | Student, Owner | Subscription & billing |
+| `/dashboard/referrals` | Student | Referral program |
+| `/dashboard/academic-profile` | Student | Academic profile setup |
+| `/dashboard/analytics` | Admin | Platform analytics |
+| `/dashboard/branding` | Admin | Tenant branding config |
+| `/dashboard/addons` | Admin | Add-on module management |
+| `/dashboard/manage-users` | Admin | Create & manage institution users |
+| `/dashboard/departments` | Admin | Department CRUD |
+| `/dashboard/departments/[id]` | Admin | Department detail & staff list |
+| `/dashboard/tenants` | SuperAdmin | Tenant management (all institutions) |
+| `/dashboard/admin` | SuperAdmin | Admin overview & controls |
+| `/dashboard/onboarding` | Owner | Institution setup wizard |
+
+---
+
+## API Routes
+
+Base URL (production): **`https://edu.srpailabs.com/api/v1`**
+
+### Authentication
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/auth/signup` | No | Register student or institution |
+| POST | `/auth/login` | No | Login, returns access + refresh tokens |
+| POST | `/auth/refresh-token` | No | Exchange refresh token |
+| POST | `/auth/forgot-password` | No | Send reset email |
+| POST | `/auth/reset-password` | No | Reset via token |
+| POST | `/auth/verify-email` | No | Verify email |
+| POST | `/auth/logout` | Yes | Revoke current session |
+| POST | `/auth/logout-all` | Yes | Revoke all sessions |
+| GET | `/auth/sessions` | Yes | List active sessions |
+| GET | `/auth/me` | Yes | Get current user |
+
+### Institution Management
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/institution/users` | Admin | List users (with ID search) |
+| POST | `/institution/users` | Admin | Create institution user |
+| PATCH | `/institution/users/:id` | Admin | Update user |
+| POST | `/institution/users/:id/deactivate` | Admin | Deactivate user |
+| POST | `/institution/users/:id/activate` | Admin | Activate user |
+| POST | `/institution/users/:id/reset-password` | Admin | Reset password |
+| POST | `/institution/users/bulk` | Admin | Bulk import from CSV |
+
+### Other Modules
+| Module | Base Path | Description |
+|--------|-----------|-------------|
+| Users | `/users` | Profile & dashboard |
+| Students | `/students` | B2C notes, plans, progress, referrals |
+| AI | `/ai` | Chat sessions & quick queries |
+| Subscriptions | `/subscriptions` | Plans, billing, upgrades |
+| Add-Ons | `/addons` | Module marketplace |
+| Tenants | `/tenants` | Institution CRUD (SuperAdmin) |
+| Analytics | `/analytics` | Platform & tenant metrics |
+| Content | `/content` | Resource library |
+| Branding | `/branding` | Logo, colors, subdomain |
+| Notifications | `/notifications` | In-app notifications |
+| Payments | `/payments` | Razorpay & Stripe |
+| Uploads | `/uploads` | File upload & download |
+| Audit | `/audit` | Audit log queries |
+| Taxonomy | `/taxonomy` | Boards, streams, subjects |
+| Health | `/health` | Health check |
+
+---
+
+## GitHub Actions CI/CD
+
+Workflow file: `.github/workflows/deploy.yml`
+
+**Triggers:** Push to `main` branch or manual `workflow_dispatch`
+
+**Steps:**
+1. Build frontend (Next.js) — fails fast on type errors
+2. Build backend (TypeScript `tsc --noEmit`) — fails fast on type errors
+3. SSH into VPS → `git pull` → `docker compose build` → `docker compose up -d` → `prisma migrate deploy`
+
+**Required GitHub Secrets:**
+| Secret | Value |
+|--------|-------|
+| `VPS_HOST` | `5.223.67.236` |
+| `VPS_USER` | `root` (or deploy user) |
+| `VPS_SSH_KEY` | Private SSH key (contents of `~/.ssh/id_rsa`) |
+| `VPS_PORT` | `22` (optional) |
+
+**Add secrets:** GitHub repo → Settings → Secrets and variables → Actions → New repository secret
+
+---
+
 ## Production Deployment
 
 ### Server: Hostinger VPS
@@ -383,22 +569,30 @@ cd /path/to/SRP-Education-AI
 git pull origin main
 
 # 4. Create production env file (first time only)
-cp .env.prod.example .env.prod
-# Edit with production DATABASE_URL, JWT secrets, API keys
+cp .env.example .env.prod
+# Edit with your real DB_PASSWORD, JWT secrets, API keys
 
 # 5. Build and start containers
 docker compose -f docker-compose.prod.yml up --build -d
 
 # 6. Run database migrations (first deploy or schema changes)
-docker compose -f docker-compose.prod.yml exec edu-backend npx prisma db push
+docker exec edu-backend npx prisma migrate deploy
 
 # 7. Seed initial data (first deploy only)
-docker compose -f docker-compose.prod.yml exec edu-backend npx ts-node prisma/seed.ts
+docker exec edu-backend node dist/prisma/seed.js
 
 # 8. Verify health
 curl http://localhost:5050/api/v1/health
 curl http://localhost:3020
 ```
+
+### ID Tracking (New)
+All entities have visible, copyable IDs:
+- **B2C Students:** `directStudentId` shown in sidebar (format: `IND-STU-000001`)
+- **Institution Users:** ID column in Manage Users table — click to copy
+- **Departments:** Code badge on department card — click to copy
+- **Tenants:** Slug + UUID short in tenants table — click to copy
+- **Search:** Manage Users search queries by ID, roll number, employee ID, name, or email
 
 ### Nginx Setup
 
@@ -407,13 +601,14 @@ curl http://localhost:3020
 sudo cp nginx/edu.srpailabs.com.conf /etc/nginx/sites-available/edu.srpailabs.com
 sudo ln -sf /etc/nginx/sites-available/edu.srpailabs.com /etc/nginx/sites-enabled/
 
-# Place Cloudflare origin certificates
-sudo mkdir -p /etc/ssl/cloudflare
-# Copy cert.pem and key.pem to /etc/ssl/cloudflare/
+# SSL — Cloudflare Origin certificates
+sudo mkdir -p /etc/nginx/ssl/edu.srpailabs.com
+sudo cp cert.pem /etc/nginx/ssl/edu.srpailabs.com/cert.pem
+sudo cp key.pem  /etc/nginx/ssl/edu.srpailabs.com/key.pem
+sudo chmod 600 /etc/nginx/ssl/edu.srpailabs.com/key.pem
 
 # Test and reload
-sudo nginx -t
-sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### Container Management
@@ -433,21 +628,66 @@ docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml up --build -d edu-backend
 
 # Database shell
-docker compose -f docker-compose.prod.yml exec edu-db psql -U postgres -d srp_education_ai
+docker exec -it edu-postgres psql -U edu_user -d srp_edu
 ```
 
-### Production Ports (127.0.0.1 only)
+### Production Ports (127.0.0.1 only — Nginx proxies these)
 
-| Service | Internal | External |
-|---------|----------|----------|
+| Container | Internal Port | Host Port |
+|-----------|---------------|-----------|
 | edu-db | 5432 | 5435 |
 | edu-backend | 5000 | 5050 |
 | edu-frontend | 3000 | 3020 |
 
 ### Resource Limits
 
-| Service | Memory |
-|---------|--------|
-| edu-db | 256 MB |
-| edu-backend | 384 MB |
-| edu-frontend | 256 MB |
+| Service | Memory Limit | Reserved |
+|---------|-------------|----------|
+| edu-db | 256 MB | 128 MB |
+| edu-backend | 384 MB | 192 MB |
+| edu-frontend | 256 MB | 128 MB |
+
+---
+
+## Monitoring & Logs
+
+```bash
+# Real-time logs
+docker compose -f docker-compose.prod.yml logs -f
+
+# Backend logs only
+docker compose -f docker-compose.prod.yml logs -f edu-backend
+
+# Check container stats
+docker stats edu-backend edu-frontend edu-postgres
+
+# Nginx access logs
+sudo tail -f /var/log/nginx/access.log
+
+# Check health endpoint
+curl -s https://edu.srpailabs.com/api/v1/health | python3 -m json.tool
+```
+
+### Default Credentials (change immediately after first deploy)
+
+| Account | Email | Password |
+|---------|-------|----------|
+| Super Admin | `admin@srpeducation.ai` | `Admin@12345` |
+| Demo Institution Owner | `owner@demoschool.edu` | `Owner@12345` |
+
+---
+
+## Nginx Configuration
+
+File: `nginx/edu.srpailabs.com.conf`
+
+Key locations:
+- `/api/*` → proxied to `http://127.0.0.1:5050` (backend)
+- `/uploads/*` → proxied to `http://127.0.0.1:5050` (static files)
+- `/*` → proxied to `http://127.0.0.1:3020` (Next.js frontend)
+
+Rate limits:
+- General API: `30 req/s` with burst 60
+- Auth endpoints: `30 req/min` with burst 20
+
+Security headers set: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS`

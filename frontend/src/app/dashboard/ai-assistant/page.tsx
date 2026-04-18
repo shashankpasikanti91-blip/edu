@@ -4,13 +4,22 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Send, Plus, Trash2, Loader2, Brain, Sparkles,
   BookOpen, GraduationCap, FileQuestion, Languages,
-  Globe, ClipboardList, Lightbulb,
+  Globe, ClipboardList, Lightbulb, Table2, Lightbulb as LightbulbIcon,
+  BarChart3, ListChecks,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import type { AiChat, AiChatMessage } from '@/types';
 import { renderMarkdownContent } from '@/lib/mathRenderer';
+
+const ANSWER_MODES = [
+  { value: '', label: 'Default', icon: Sparkles },
+  { value: 'table_compare', label: 'Table Compare', icon: Table2 },
+  { value: 'memory_trick', label: 'Memory Tricks', icon: LightbulbIcon },
+  { value: 'exam_answer', label: 'Exam Answer', icon: ListChecks },
+  { value: 'diagram_summary', label: 'Diagram Summary', icon: BarChart3 },
+];
 
 export default function AiAssistantPage() {
   const { user } = useAuthStore();
@@ -20,10 +29,11 @@ export default function AiAssistantPage() {
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isLoadingChats, setIsLoadingChats] = useState(true);
+  const [answerMode, setAnswerMode] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [educationContext, setEducationContext] = useState<{ level?: string; grade?: string }>({});
 
-  // Load student education context for adaptive AI
   useEffect(() => {
     if (user?.accountType === 'B2C_STUDENT') {
       api.get('/students/academic-profile').then(({ data }) => {
@@ -64,6 +74,7 @@ export default function AiAssistantPage() {
       setChats((prev) => [{ id: newChat.id, title: newChat.title, lastMessage: null, updatedAt: newChat.createdAt }, ...prev]);
       setActiveChat(newChat.id);
       setMessages([]);
+      inputRef.current?.focus();
     } catch {
       toast.error('Failed to create chat');
     }
@@ -93,8 +104,16 @@ export default function AiAssistantPage() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || isSending) return;
+  const sendMessage = useCallback(async (messageOverride?: string) => {
+    const messageText = messageOverride ?? input.trim();
+    if (!messageText || isSending) return;
+
+    // Build message with answer mode prefix if selected
+    let fullMessage = messageText;
+    if (answerMode) {
+      const modeLabel = ANSWER_MODES.find(m => m.value === answerMode)?.label || '';
+      fullMessage = `[Format: ${modeLabel}] ${messageText}`;
+    }
 
     // Auto-create chat if none is active
     let chatId = activeChat;
@@ -113,32 +132,37 @@ export default function AiAssistantPage() {
     const userMessage: AiChatMessage = {
       id: `temp-${Date.now()}`,
       role: 'user',
-      content: input,
+      content: messageText,
       createdAt: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    const currentInput = input;
     setInput('');
     setIsSending(true);
 
     try {
       const { data } = await api.post(`/ai/chats/${chatId}/messages`, {
-        message: currentInput,
+        message: fullMessage,
         educationLevel: educationContext.level,
         grade: educationContext.grade,
       });
 
       setMessages((prev) => [...prev, data.data]);
-      fetchChats(); // Refresh chat list for updated titles
+      // Refresh chat list for updated titles
+      fetchChats();
     } catch {
       toast.error('AI is temporarily unavailable. Please try again.');
-      // Remove the user message if AI failed
       setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
-      setInput(currentInput);
+      setInput(messageText);
     } finally {
       setIsSending(false);
     }
+  }, [input, isSending, activeChat, answerMode, educationContext]);
+
+  // Quick action handler: sets input AND sends immediately
+  const handleQuickAction = (prompt: string) => {
+    setInput(prompt);
+    sendMessage(prompt);
   };
 
   return (
@@ -191,40 +215,40 @@ export default function AiAssistantPage() {
       <div className="flex-1 bg-white rounded-2xl border border-gray-100 flex flex-col">
         {!activeChat && messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
+            <div className="text-center max-w-2xl mx-auto px-4">
               <div className="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-8 h-8 text-brand-600" />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">AI Study Assistant</h2>
-              <p className="text-gray-500 max-w-md">
+              <p className="text-gray-500 max-w-md mx-auto mb-6">
                 Ask me anything about your studies — concepts, doubts, exam tips, revision help, or career guidance.
               </p>
 
               {/* Quick Study Tools */}
-              <div className="grid grid-cols-2 gap-3 mt-6 max-w-lg mx-auto text-left">
+              <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto text-left">
                 <button
-                  onClick={() => { setInput('Generate 10 MCQ questions for Class 10 Social Science - World War 2 with answers and explanations'); }}
+                  onClick={() => handleQuickAction('Generate 10 MCQ questions for Class 10 Social Science - World War 2 with answers and explanations')}
                   className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-brand-50 hover:border-brand-200 transition-colors"
                 >
                   <FileQuestion className="w-5 h-5 text-brand-600 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Generate Q&amp;A</span>
                 </button>
                 <button
-                  onClick={() => { setInput('Explain Integration by Parts with step-by-step examples for B.Tech Maths 1'); }}
+                  onClick={() => handleQuickAction('Explain Integration by Parts with step-by-step examples for B.Tech Maths 1')}
                   className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-green-50 hover:border-green-200 transition-colors"
                 >
                   <Lightbulb className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Explain Topic</span>
                 </button>
                 <button
-                  onClick={() => { setInput('Generate IELTS Writing Task 2 essay practice on technology and education with model answer'); }}
+                  onClick={() => handleQuickAction('Generate IELTS Writing Task 2 essay practice on technology and education with model answer')}
                   className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-amber-50 hover:border-amber-200 transition-colors"
                 >
                   <GraduationCap className="w-5 h-5 text-amber-600 flex-shrink-0" />
                   <span className="text-sm text-gray-700">IELTS Practice</span>
                 </button>
                 <button
-                  onClick={() => { setInput('Give me 10 current affairs questions for UPSC preparation with answers'); }}
+                  onClick={() => handleQuickAction('Give me 10 current affairs questions for UPSC preparation with answers')}
                   className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-purple-50 hover:border-purple-200 transition-colors"
                 >
                   <Globe className="w-5 h-5 text-purple-600 flex-shrink-0" />
@@ -242,7 +266,7 @@ export default function AiAssistantPage() {
                 ].map((q) => (
                   <button
                     key={q}
-                    onClick={() => { setInput(q); }}
+                    onClick={() => handleQuickAction(q)}
                     className="px-4 py-2 text-sm rounded-full border border-gray-200 text-gray-600 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-700 transition-colors"
                   >
                     {q}
@@ -265,14 +289,24 @@ export default function AiAssistantPage() {
                       : 'bg-gray-50 text-gray-900 rounded-bl-md border border-gray-100'
                   }`}
                 >
-                  {msg.role === 'assistant' ? renderMarkdownContent(msg.content) : msg.content}
+                  {msg.role === 'assistant' ? (
+                    <div className={`prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 ${
+                      answerMode === 'table_compare' ? 'ai-format-table' :
+                      answerMode === 'memory_trick' ? 'ai-format-memory' :
+                      answerMode === 'exam_answer' ? 'ai-format-exam' :
+                      answerMode === 'diagram_summary' ? 'ai-format-diagram' : ''
+                    }`}>
+                      {renderMarkdownContent(msg.content)}
+                    </div>
+                  ) : msg.content}
                 </div>
               </div>
             ))}
             {isSending && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md">
-                  <Loader2 className="w-5 h-5 animate-spin text-brand-600" />
+                <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
+                  <span className="text-sm text-gray-500">Thinking...</span>
                 </div>
               </div>
             )}
@@ -280,10 +314,28 @@ export default function AiAssistantPage() {
           </div>
         )}
 
-        {/* Input */}
+        {/* Input Area */}
         <div className="p-4 border-t border-gray-100">
+          {/* Answer Mode Selector */}
+          <div className="flex gap-1.5 mb-2 overflow-x-auto pb-1">
+            {ANSWER_MODES.map((mode) => (
+              <button
+                key={mode.value}
+                onClick={() => setAnswerMode(answerMode === mode.value ? '' : mode.value)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border whitespace-nowrap transition-colors ${
+                  answerMode === mode.value
+                    ? 'bg-brand-50 border-brand-200 text-brand-700'
+                    : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                <mode.icon className="w-3 h-3" />
+                {mode.label}
+              </button>
+            ))}
+          </div>
           <div className="flex gap-3">
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -293,7 +345,7 @@ export default function AiAssistantPage() {
               disabled={isSending}
             />
             <button
-              onClick={sendMessage}
+              onClick={() => sendMessage()}
               disabled={isSending || !input.trim()}
               className="btn-primary px-4"
             >

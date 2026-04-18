@@ -25,4 +25,7 @@ router.post('/onboarding/complete', requireTenantAdmin(), InstitutionController.
 // Get academic context (available to all tenant users)
 router.get('/academic-context', InstitutionController.getAcademicContext);
 
+// Get single department detail (available to all tenant users)
+router.get('/departments/:departmentId', InstitutionController.getDepartmentById);
+
 export const institutionRoutes = router;

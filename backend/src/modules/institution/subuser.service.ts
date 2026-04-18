@@ -114,6 +114,10 @@ export class SubUserService {
         { firstName: { contains: params.search, mode: 'insensitive' } },
         { lastName: { contains: params.search, mode: 'insensitive' } },
         { email: { contains: params.search, mode: 'insensitive' } },
+        { directStudentId: { contains: params.search, mode: 'insensitive' } },
+        { studentProfile: { studentId: { contains: params.search, mode: 'insensitive' } } },
+        { studentProfile: { rollNumber: { contains: params.search, mode: 'insensitive' } } },
+        { teacherProfile: { employeeId: { contains: params.search, mode: 'insensitive' } } },
       ];
     }
 
@@ -132,13 +136,14 @@ export class SubUserService {
           status: true,
           emailVerified: true,
           phone: true,
+          directStudentId: true,
           lastLoginAt: true,
           createdAt: true,
           studentProfile: {
-            select: { departmentId: true, grade: true, section: true, rollNumber: true },
+            select: { studentId: true, departmentId: true, grade: true, section: true, rollNumber: true },
           },
           teacherProfile: {
-            select: { departmentId: true, designation: true, specialization: true },
+            select: { employeeId: true, departmentId: true, designation: true, specialization: true },
           },
         },
       }),

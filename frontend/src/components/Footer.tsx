@@ -20,6 +20,8 @@ const footerLinks = {
     { label: 'Contact', href: '/contact' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
+    { label: 'Acceptable Use', href: '/acceptable-use' },
+    { label: 'Content Policy', href: '/content-policy' },
   ],
   Support: [
     { label: 'Contact Us', href: '/contact' },
@@ -90,6 +92,12 @@ export default function Footer() {
             </Link>
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms of Service
+            </Link>
+            <Link href="/acceptable-use" className="hover:text-white transition-colors">
+              Acceptable Use
+            </Link>
+            <Link href="/content-policy" className="hover:text-white transition-colors">
+              Content Policy
             </Link>
             <Link href="/contact" className="hover:text-white transition-colors">
               Support

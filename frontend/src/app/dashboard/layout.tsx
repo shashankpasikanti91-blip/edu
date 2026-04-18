@@ -238,6 +238,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {user?.firstName || ''} {user?.lastName || ''}
               </p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              {user?.directStudentId && (
+                <p className="text-[10px] font-mono text-brand-500 truncate">{user.directStudentId}</p>
+              )}
             </div>
           </div>
           <button

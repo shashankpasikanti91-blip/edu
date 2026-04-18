@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   Users, Plus, Search, Loader2, MoreVertical,
   UserPlus, Shield, Mail, Phone, Check, X,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Copy
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
@@ -152,6 +152,19 @@ export default function ManageUsersPage() {
     return <span className="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700">{status}</span>;
   };
 
+  const getUserTrackingId = (u: SubUser): string => {
+    if (u.role === 'STUDENT' && u.studentProfile?.studentId) return u.studentProfile.studentId;
+    if (u.role === 'STUDENT' && u.studentProfile?.rollNumber) return u.studentProfile.rollNumber;
+    if (u.directStudentId) return u.directStudentId;
+    if (['TEACHER', 'HOD'].includes(u.role) && u.teacherProfile?.employeeId) return u.teacherProfile.employeeId;
+    return u.id.slice(0, 8).toUpperCase();
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('ID copied to clipboard');
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -178,7 +191,7 @@ export default function ManageUsersPage() {
               type="text"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search by name or email..."
+              placeholder="Search by name, email, or ID..."
               className="input-field pl-10"
             />
           </div>
@@ -219,6 +232,7 @@ export default function ManageUsersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">ID</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Name</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
@@ -230,6 +244,16 @@ export default function ManageUsersPage() {
               <tbody>
                 {users.map(u => (
                   <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => copyToClipboard(getUserTrackingId(u))}
+                        className="inline-flex items-center gap-1 text-xs font-mono text-brand-600 bg-brand-50 px-2 py-1 rounded-lg hover:bg-brand-100 transition-colors"
+                        title="Click to copy ID"
+                      >
+                        {getUserTrackingId(u)}
+                        <Copy className="w-3 h-3 text-brand-400" />
+                      </button>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{u.firstName} {u.lastName}</div>
                       {u.phone && <div className="text-xs text-gray-400">{u.phone}</div>}

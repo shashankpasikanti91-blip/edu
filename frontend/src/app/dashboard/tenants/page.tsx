@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Building2, Users, Search, Loader2, CheckCircle2, XCircle, Clock, Plus } from 'lucide-react';
+import { Building2, Users, Search, Loader2, CheckCircle2, XCircle, Clock, Plus, Copy } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -97,7 +97,7 @@ export default function TenantsPage() {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search institutions..."
+            placeholder="Search by name or slug..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -118,6 +118,7 @@ export default function TenantsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="text-left py-3 px-4 font-medium text-gray-600">ID / Slug</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-600">Institution</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-600">Type</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
@@ -132,6 +133,17 @@ export default function TenantsPage() {
                 const StatusIcon = statusStyle.icon;
                 return (
                   <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(t.slug); toast.success('Slug copied'); }}
+                        className="inline-flex items-center gap-1 text-xs font-mono text-brand-600 bg-brand-50 px-2 py-1 rounded-lg hover:bg-brand-100 transition-colors"
+                        title="Click to copy slug"
+                      >
+                        {t.slug}
+                        <Copy className="w-3 h-3 text-brand-400" />
+                      </button>
+                      <p className="text-[10px] text-gray-400 font-mono mt-0.5">{t.id.slice(0, 8)}</p>
+                    </td>
                     <td className="py-3 px-4">
                       <p className="font-medium text-gray-900">{t.name}</p>
                       <p className="text-xs text-gray-400">{t.slug}{t.city ? ` • ${t.city}` : ''}</p>

@@ -264,4 +264,46 @@ export class InstitutionService {
 
     return { profile, departments, courses, subjects };
   }
+
+  /**
+   * Get a single department with its related users, courses, and subjects.
+   */
+  static async getDepartmentById(tenantId: string, departmentId: string) {
+    const department = await prisma.department.findFirst({
+      where: { id: departmentId, tenantId },
+      include: {
+        teachers: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true, email: true, role: true, status: true } },
+          },
+        },
+        students: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true, email: true, status: true } },
+          },
+        },
+        courses: {
+          where: { isActive: true },
+          select: { id: true, name: true, code: true, isActive: true },
+        },
+        subjects: {
+          where: { isActive: true },
+          select: { id: true, name: true, code: true },
+        },
+      },
+    });
+
+    if (!department) throw new NotFoundError('Department not found');
+
+    // Fetch head user separately if headId is set (headId is a plain FK with no Prisma relation)
+    let head = null;
+    if (department.headId) {
+      head = await prisma.user.findUnique({
+        where: { id: department.headId },
+        select: { id: true, firstName: true, lastName: true, email: true, role: true },
+      });
+    }
+
+    return { ...department, head };
+  }
 }

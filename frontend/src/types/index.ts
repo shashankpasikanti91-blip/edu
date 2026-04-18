@@ -96,15 +96,18 @@ export interface SubUser {
   status: string;
   phone: string | null;
   emailVerified: boolean;
+  directStudentId: string | null;
   lastLoginAt: string | null;
   createdAt: string;
   studentProfile?: {
+    studentId: string | null;
     departmentId: string | null;
     grade: string | null;
     section: string | null;
     rollNumber: string | null;
   };
   teacherProfile?: {
+    employeeId: string | null;
     departmentId: string | null;
     designation: string | null;
     specialization: string | null;

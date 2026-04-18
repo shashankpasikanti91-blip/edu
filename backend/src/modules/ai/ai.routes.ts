@@ -15,7 +15,7 @@ const aiGenerateSchema = z.object({
   count: z.number().int().min(1).max(50).optional(),
   difficulty: z.string().max(50).optional(),
   type: z.string().max(50).optional(),
-}).passthrough();
+}).strip();
 
 const router = Router();
 

@@ -52,4 +52,15 @@ export class InstitutionController {
     const context = await InstitutionService.getAcademicContext(tenantId);
     res.json({ success: true, data: context });
   });
+
+  /**
+   * GET /api/v1/institution/departments/:departmentId
+   * Get a single department with its members, courses, and subjects.
+   */
+  static getDepartmentById = asyncHandler(async (req: Request, res: Response) => {
+    const tenantId = (req as any).user.tenantId;
+    const { departmentId } = req.params;
+    const department = await InstitutionService.getDepartmentById(tenantId, departmentId);
+    res.json({ success: true, data: department });
+  });
 }
