@@ -312,14 +312,16 @@ async function main() {
   console.log('Demo analytics data created');
 
   // ANALYTICS GOALS
+  const goalStart = new Date(); goalStart.setMonth(goalStart.getMonth() - 1);
+  const goalEnd = new Date(); goalEnd.setMonth(goalEnd.getMonth() + 2);
   const goals = [
-    { type: 'QUIZ_COUNT', targetValue: 50, currentValue: 32, unit: 'quizzes' },
-    { type: 'STUDY_HOURS', targetValue: 200, currentValue: 142, unit: 'hours' },
-    { type: 'AVG_SCORE', targetValue: 80, currentValue: 73, unit: '%' },
-    { type: 'NOTE_COUNT', targetValue: 30, currentValue: 24, unit: 'notes' },
+    { title: 'Complete 50 Quizzes', targetValue: 50, currentValue: 32, unit: 'quizzes' },
+    { title: 'Study 200 Hours', targetValue: 200, currentValue: 142, unit: 'hours' },
+    { title: 'Achieve 80% Average', targetValue: 80, currentValue: 73, unit: '%' },
+    { title: 'Create 30 Notes', targetValue: 30, currentValue: 24, unit: 'notes' },
   ];
   for (const g of goals) {
-    await prisma.analyticsGoal.create({ data: { userId: demoStudent.id, type: g.type, targetValue: g.targetValue, currentValue: g.currentValue, unit: g.unit, status: g.currentValue >= g.targetValue ? 'ACHIEVED' : 'IN_PROGRESS' } });
+    await prisma.analyticsGoal.create({ data: { userId: demoStudent.id, title: g.title, targetValue: g.targetValue, currentValue: g.currentValue, unit: g.unit, startDate: goalStart, endDate: goalEnd, status: g.currentValue >= g.targetValue ? 'ACHIEVED' : 'IN_PROGRESS' } });
   }
   console.log('Demo analytics goals created');
 
