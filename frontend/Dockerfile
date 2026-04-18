@@ -5,7 +5,8 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 ARG NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-RUN npm run build
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build && rm -rf .next/cache
 
 FROM node:20-alpine AS runner
 WORKDIR /app
