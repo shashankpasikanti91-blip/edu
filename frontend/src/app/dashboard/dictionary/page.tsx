@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, BookOpen, Loader2, ArrowLeft, Globe, Volume2 } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
+import { renderMarkdownContent } from '@/lib/mathRenderer';
 
 const LANGUAGES = [
   { value: '', label: 'English' },
@@ -38,11 +40,28 @@ function saveRecentWord(word: string) {
 }
 
 export default function DictionaryPage() {
+  const { user } = useAuthStore();
   const [word, setWord] = useState('');
   const [translateTo, setTranslateTo] = useState('');
   const [result, setResult] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [recentWords, setRecentWords] = useState<string[]>(getRecentWords);
+  const [educationContext, setEducationContext] = useState<{ level?: string; grade?: string }>({});
+
+  // Load student education context for adaptive AI
+  useEffect(() => {
+    if (user?.accountType === 'B2C_STUDENT') {
+      api.get('/students/academic-profile').then(({ data }) => {
+        const profile = data.data;
+        if (profile) {
+          setEducationContext({
+            level: profile.academicLevel || undefined,
+            grade: profile.classYear || profile.grade || undefined,
+          });
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   const lookupWord = async (searchWord?: string) => {
     const targetWord = (searchWord || word).trim();
@@ -55,6 +74,8 @@ export default function DictionaryPage() {
       const { data } = await api.post('/ai/dictionary', {
         word: targetWord,
         translateTo: translateTo || undefined,
+        educationLevel: educationContext.level,
+        grade: educationContext.grade,
       });
 
       setResult(data.data.definition);
@@ -153,23 +174,8 @@ export default function DictionaryPage() {
         {/* Result */}
         {result && !isLoading && (
           <div className="card">
-            <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap leading-relaxed">
-              {result.split('\n').map((line, i) => {
-                if (line.startsWith('# ') || line.startsWith('## ')) {
-                  return <h2 key={i} className="text-xl font-bold text-gray-900 mt-4 mb-2">{line.replace(/^#+\s*/, '')}</h2>;
-                }
-                if (line.startsWith('### ') || line.startsWith('#### ')) {
-                  return <h3 key={i} className="text-lg font-semibold text-gray-800 mt-3 mb-1">{line.replace(/^#+\s*/, '')}</h3>;
-                }
-                if (line.startsWith('- ') || line.startsWith('* ')) {
-                  return <p key={i} className="ml-4 text-gray-700">• {line.replace(/^[-*]\s*/, '').replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
-                }
-                if (line.match(/^\d+\./)) {
-                  return <p key={i} className="ml-4 text-gray-700">{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
-                }
-                if (line.trim() === '') return <br key={i} />;
-                return <p key={i} className="text-gray-700">{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
-              })}
+            <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed">
+              {renderMarkdownContent(result)}
             </div>
           </div>
         )}

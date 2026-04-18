@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Globe, Loader2, ArrowLeft, Newspaper, BookOpen, GraduationCap, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
+import { renderMarkdownContent } from '@/lib/mathRenderer';
 
 const CATEGORIES = [
   { value: '', label: 'All Categories' },
@@ -30,11 +32,28 @@ const EXAM_TYPES = [
 ];
 
 export default function CurrentAffairsPage() {
+  const { user } = useAuthStore();
   const [category, setCategory] = useState('');
   const [examType, setExamType] = useState('');
   const [topic, setTopic] = useState('');
   const [result, setResult] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [educationContext, setEducationContext] = useState<{ level?: string; grade?: string }>({});
+
+  // Load student education context for adaptive AI
+  useEffect(() => {
+    if (user?.accountType === 'B2C_STUDENT') {
+      api.get('/students/academic-profile').then(({ data }) => {
+        const profile = data.data;
+        if (profile) {
+          setEducationContext({
+            level: profile.academicLevel || undefined,
+            grade: profile.classYear || profile.grade || undefined,
+          });
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   const generate = async () => {
     setIsLoading(true);
@@ -46,6 +65,8 @@ export default function CurrentAffairsPage() {
         examType: examType || undefined,
         topic: topic.trim() || undefined,
         count: 10,
+        educationLevel: educationContext.level,
+        grade: educationContext.grade,
       });
 
       setResult(data.data.content);
@@ -158,29 +179,8 @@ export default function CurrentAffairsPage() {
         {/* Result */}
         {result && !isLoading && (
           <div className="card">
-            <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap leading-relaxed">
-              {result.split('\n').map((line, i) => {
-                if (line.startsWith('# ') || line.startsWith('## ')) {
-                  return <h2 key={i} className="text-xl font-bold text-gray-900 mt-4 mb-2">{line.replace(/^#+\s*/, '')}</h2>;
-                }
-                if (line.startsWith('### ') || line.startsWith('#### ')) {
-                  return <h3 key={i} className="text-lg font-semibold text-gray-800 mt-3 mb-1">{line.replace(/^#+\s*/, '')}</h3>;
-                }
-                if (line.startsWith('**') && line.endsWith('**')) {
-                  return <p key={i} className="font-semibold text-gray-900 mt-2">{line.replace(/\*\*/g, '')}</p>;
-                }
-                if (line.startsWith('- ') || line.startsWith('* ')) {
-                  return <p key={i} className="ml-4 text-gray-700">• {line.replace(/^[-*]\s*/, '').replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
-                }
-                if (line.match(/^\d+\./)) {
-                  return <p key={i} className="ml-4 text-gray-700">{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
-                }
-                if (line.match(/^---+$/)) {
-                  return <hr key={i} className="my-3 border-gray-200" />;
-                }
-                if (line.trim() === '') return <br key={i} />;
-                return <p key={i} className="text-gray-700">{line.replace(/\*\*(.*?)\*\*/g, '$1')}</p>;
-              })}
+            <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed">
+              {renderMarkdownContent(result)}
             </div>
           </div>
         )}

@@ -10,176 +10,7 @@ import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import type { AiChat, AiChatMessage } from '@/types';
-import { processLatex } from '@/lib/mathRenderer';
-
-// Simple markdown renderer for AI responses
-function renderMarkdown(text: string) {
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let inCodeBlock = false;
-  let codeContent: string[] = [];
-
-  lines.forEach((line, i) => {
-    // Code blocks
-    if (line.startsWith('```')) {
-      if (inCodeBlock) {
-        elements.push(
-          <pre key={`code-${i}`} className="bg-gray-900 text-green-300 rounded-lg p-4 my-2 text-sm overflow-x-auto font-mono">
-            <code>{codeContent.join('\n')}</code>
-          </pre>
-        );
-        codeContent = [];
-        inCodeBlock = false;
-      } else {
-        inCodeBlock = true;
-      }
-      return;
-    }
-
-    if (inCodeBlock) {
-      codeContent.push(line);
-      return;
-    }
-
-    // Headings
-    if (line.startsWith('## ')) {
-      elements.push(<h2 key={i} className="text-lg font-bold text-gray-900 mt-4 mb-2">{formatInline(line.slice(3))}</h2>);
-      return;
-    }
-    if (line.startsWith('### ')) {
-      elements.push(<h3 key={i} className="text-base font-semibold text-gray-800 mt-3 mb-1">{formatInline(line.slice(4))}</h3>);
-      return;
-    }
-    if (line.startsWith('#### ')) {
-      elements.push(<h4 key={i} className="text-sm font-semibold text-gray-700 mt-2 mb-1">{formatInline(line.slice(5))}</h4>);
-      return;
-    }
-    if (line.startsWith('# ')) {
-      elements.push(<h1 key={i} className="text-xl font-bold text-gray-900 mt-4 mb-2">{formatInline(line.slice(2))}</h1>);
-      return;
-    }
-
-    // Horizontal rule
-    if (line.match(/^---+$/) || line.match(/^\*\*\*+$/)) {
-      elements.push(<hr key={i} className="my-3 border-gray-200" />);
-      return;
-    }
-
-    // Bullet list
-    if (line.match(/^[\s]*[-*]\s/)) {
-      const indent = line.match(/^(\s*)/)?.[1]?.length || 0;
-      const content = line.replace(/^[\s]*[-*]\s/, '');
-      elements.push(
-        <div key={i} className="flex gap-2 my-0.5" style={{ paddingLeft: `${Math.min(indent, 8) * 4}px` }}>
-          <span className="text-brand-500 mt-1 flex-shrink-0">•</span>
-          <span className="text-gray-700">{formatInline(content)}</span>
-        </div>
-      );
-      return;
-    }
-
-    // Numbered list
-    if (line.match(/^\s*\d+\.\s/)) {
-      const match = line.match(/^(\s*)(\d+)\.\s(.*)/);
-      if (match) {
-        const indent = match[1].length;
-        elements.push(
-          <div key={i} className="flex gap-2 my-0.5" style={{ paddingLeft: `${Math.min(indent, 8) * 4}px` }}>
-            <span className="text-brand-600 font-medium flex-shrink-0">{match[2]}.</span>
-            <span className="text-gray-700">{formatInline(match[3])}</span>
-          </div>
-        );
-        return;
-      }
-    }
-
-    // Empty line
-    if (line.trim() === '') {
-      elements.push(<div key={i} className="h-2" />);
-      return;
-    }
-
-    // Regular paragraph
-    elements.push(<p key={i} className="text-gray-700 my-0.5">{formatInline(line)}</p>);
-  });
-
-  return <div className="space-y-0.5">{elements}</div>;
-}
-
-function formatInline(text: string): React.ReactNode {
-  // Bold + Italic + Math
-  const parts: React.ReactNode[] = [];
-  let remaining = text;
-  let key = 0;
-
-  while (remaining.length > 0) {
-    // Bold
-    const boldMatch = remaining.match(/\*\*(.*?)\*\*/);
-    // Inline code
-    const codeMatch = remaining.match(/`([^`]+)`/);
-    // Inline math $...$
-    const mathMatch = remaining.match(/(?<!\$)\$(?!\$)((?:[^$\\]|\\.)+?)\$(?!\$)/);
-    // Display math $$...$$
-    const displayMathMatch = remaining.match(/\$\$([\s\S]*?)\$\$/);
-
-    type InlineMatch = { index: number; length: number; node: React.ReactNode };
-    const candidates: InlineMatch[] = [];
-
-    if (boldMatch && boldMatch.index !== undefined) {
-      candidates.push({
-        index: boldMatch.index,
-        length: boldMatch[0].length,
-        node: <strong key={`b-${key++}`} className="font-semibold text-gray-900">{boldMatch[1]}</strong>,
-      });
-    }
-
-    if (codeMatch && codeMatch.index !== undefined) {
-      candidates.push({
-        index: codeMatch.index,
-        length: codeMatch[0].length,
-        node: <code key={`c-${key++}`} className="bg-gray-100 text-rose-600 px-1.5 py-0.5 rounded text-sm font-mono">{codeMatch[1]}</code>,
-      });
-    }
-
-    if (displayMathMatch && displayMathMatch.index !== undefined) {
-      const mathNodes = processLatex(displayMathMatch[0]);
-      candidates.push({
-        index: displayMathMatch.index,
-        length: displayMathMatch[0].length,
-        node: <span key={`dm-${key++}`}>{mathNodes}</span>,
-      });
-    } else if (mathMatch && mathMatch.index !== undefined) {
-      const mathNodes = processLatex(mathMatch[0]);
-      candidates.push({
-        index: mathMatch.index,
-        length: mathMatch[0].length,
-        node: <span key={`m-${key++}`}>{mathNodes}</span>,
-      });
-    }
-
-    const firstMatch = candidates.length > 0
-      ? candidates.reduce((a, b) => a.index <= b.index ? a : b)
-      : null;
-
-    if (firstMatch) {
-      if (firstMatch.index > 0) {
-        const before = remaining.slice(0, firstMatch.index);
-        // Process bare LaTeX commands in plain text segments
-        const processed = processLatex(before);
-        parts.push(<span key={`t-${key++}`}>{processed}</span>);
-      }
-      parts.push(firstMatch.node);
-      remaining = remaining.slice(firstMatch.index + firstMatch.length);
-    } else {
-      // Process any remaining bare LaTeX commands
-      const processed = processLatex(remaining);
-      parts.push(<span key={`t-${key++}`}>{processed}</span>);
-      break;
-    }
-  }
-
-  return <>{parts}</>;
-}
+import { renderMarkdownContent } from '@/lib/mathRenderer';
 
 export default function AiAssistantPage() {
   const { user } = useAuthStore();
@@ -190,6 +21,22 @@ export default function AiAssistantPage() {
   const [isSending, setIsSending] = useState(false);
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [educationContext, setEducationContext] = useState<{ level?: string; grade?: string }>({});
+
+  // Load student education context for adaptive AI
+  useEffect(() => {
+    if (user?.accountType === 'B2C_STUDENT') {
+      api.get('/students/academic-profile').then(({ data }) => {
+        const profile = data.data;
+        if (profile) {
+          setEducationContext({
+            level: profile.academicLevel || undefined,
+            grade: profile.classYear || profile.grade || undefined,
+          });
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchChats();
@@ -278,6 +125,8 @@ export default function AiAssistantPage() {
     try {
       const { data } = await api.post(`/ai/chats/${chatId}/messages`, {
         message: currentInput,
+        educationLevel: educationContext.level,
+        grade: educationContext.grade,
       });
 
       setMessages((prev) => [...prev, data.data]);
@@ -416,7 +265,7 @@ export default function AiAssistantPage() {
                       : 'bg-gray-50 text-gray-900 rounded-bl-md border border-gray-100'
                   }`}
                 >
-                  {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
+                  {msg.role === 'assistant' ? renderMarkdownContent(msg.content) : msg.content}
                 </div>
               </div>
             ))}

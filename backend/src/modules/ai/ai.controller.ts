@@ -19,9 +19,11 @@ class AiController {
   async sendMessage(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
     const { chatId } = req.params;
-    const { message } = req.body;
+    const { message, educationLevel, grade } = req.body;
 
-    const response = await aiService.sendMessage(userId, chatId, message);
+    const response = await aiService.sendMessage(userId, chatId, message, 
+      (educationLevel || grade) ? { level: educationLevel, grade } : undefined
+    );
 
     res.status(200).json({
       success: true,
@@ -132,13 +134,13 @@ class AiController {
 
   async dictionaryLookup(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    const { word, language, translateTo } = req.body;
+    const { word, language, translateTo, educationLevel, grade } = req.body;
 
     if (!word) {
       return res.status(400).json({ success: false, message: 'Word is required' });
     }
 
-    const result = await aiService.dictionaryLookup(userId, { word, language, translateTo });
+    const result = await aiService.dictionaryLookup(userId, { word, language, translateTo, educationLevel, grade });
 
     res.status(200).json({
       success: true,
@@ -149,7 +151,7 @@ class AiController {
 
   async generateCurrentAffairs(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    const { topic, category, examType, count, language } = req.body;
+    const { topic, category, examType, count, language, educationLevel, grade } = req.body;
 
     const result = await aiService.generateCurrentAffairs(userId, {
       topic,
@@ -157,6 +159,8 @@ class AiController {
       examType,
       count,
       language,
+      educationLevel,
+      grade,
     });
 
     res.status(200).json({
@@ -168,7 +172,7 @@ class AiController {
 
   async explainTopic(req: AuthenticatedRequest, res: Response) {
     const userId = req.user!.id;
-    const { subject, topic, grade, board, depth, language } = req.body;
+    const { subject, topic, grade, board, depth, language, educationLevel } = req.body;
 
     if (!subject || !topic) {
       return res.status(400).json({ success: false, message: 'Subject and topic are required' });
@@ -181,6 +185,7 @@ class AiController {
       board,
       depth,
       language,
+      educationLevel,
     });
 
     res.status(200).json({

@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, FileQuestion, BookOpen, Clock, CheckCircle } from '
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
-import { processLatex } from '@/lib/mathRenderer';
+import { renderMarkdownContent } from '@/lib/mathRenderer';
 import type { TaxonomyOption, SubjectEntry } from '@/types';
 
 // ─── Local types ────────────────────────────────────────────
@@ -451,10 +451,9 @@ export default function ExamPrepPage() {
               <BookOpen className="w-5 h-5 text-brand-600" />
               Generated Questions
             </h2>
-            <div
-              className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700"
-              dangerouslySetInnerHTML={{ __html: processLatex(generatedContent) }}
-            />
+            <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700">
+              {renderMarkdownContent(generatedContent)}
+            </div>
           </div>
         )}
 
