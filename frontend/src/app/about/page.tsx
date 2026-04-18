@@ -1,40 +1,31 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import {
-  Sparkles, Target, Heart, Shield, Users, Globe, Award,
-  ArrowRight, CheckCircle, Zap, BarChart3, Brain,
-  GraduationCap, Building2, BookOpen, Menu, X, Mail, Phone,
+  Target, Heart, Shield, Users, Globe, Award,
+  ArrowRight, Brain, BarChart3, Zap,
+  GraduationCap, Building2, BookOpen,
 } from 'lucide-react';
-
-const navLinks = [
-  { label: 'Features', href: '/#features' },
-  { label: 'Solutions', href: '/#solutions' },
-  { label: 'Analytics', href: '/#analytics' },
-  { label: 'Academics', href: '/#academics' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
-];
 
 const values = [
   { icon: Target, title: 'Mission-Driven', text: 'Making quality education accessible to every student, regardless of background or geography.' },
   { icon: Heart, title: 'Student-First', text: 'Every feature we build starts with student well-being and learning outcomes in mind.' },
-  { icon: Shield, title: 'Trust & Privacy', text: 'Enterprise-grade security, transparent data practices, and no fake analytics — ever.' },
+  { icon: Shield, title: 'Trust & Privacy', text: 'Enterprise-grade security, transparent data practices, and honest analytics — always.' },
   { icon: Globe, title: 'Multi-Language', text: 'Supporting regional languages so no student is left behind in their learning journey.' },
   { icon: Users, title: 'Community', text: 'Connecting students, parents, teachers, and institutions on one unified platform.' },
   { icon: Award, title: 'Excellence', text: 'AI-powered tools that deliver measurable, auditable learning outcomes.' },
 ];
 
 const milestones = [
-  { year: '2024', title: 'Founded', desc: 'SRP AI Labs established with a mission to democratize AI-powered education.' },
-  { year: '2024', title: 'Platform Launch', desc: 'Multi-tenant SaaS platform launched with AI tutoring and institutional management.' },
-  { year: '2025', title: 'Growing', desc: 'Onboarding institutions and students, continuously improving based on real feedback.' },
-  { year: '2025', title: 'Innovation', desc: 'Building analytics dashboards, adaptive learning paths, and career preparation tools.' },
+  { year: '2025', title: 'Founded', desc: 'SRP AI Labs established with a mission to democratize AI-powered education across India.' },
+  { year: '2025', title: 'Platform Development', desc: 'Multi-tenant SaaS platform built with AI tutoring, exam prep, analytics, and institutional management.' },
+  { year: '2026', title: 'Launch & Early Access', desc: 'Platform launched for early adopters — onboarding students and institutions, iterating on feedback.' },
+  { year: '2026', title: 'Expanding Capabilities', desc: 'Analytics dashboards, adaptive learning paths, career preparation tools, and add-on modules in active development.' },
 ];
 
-const teamValues = [
+const teamHighlights = [
   { stat: 'AI-First', label: 'Approach' },
   { stat: 'Multi-Board', label: 'Support' },
   { stat: 'Secure', label: 'By Design' },
@@ -42,60 +33,9 @@ const teamValues = [
 ];
 
 export default function AboutPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-violet-600 flex items-center justify-center shadow-md">
-                <GraduationCap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold tracking-tight">
-                SRP <span className="gradient-text">Education AI</span>
-              </span>
-            </Link>
-
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link key={link.label} href={link.href} className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${link.label === 'About' ? 'text-brand-600' : 'text-gray-600 hover:text-brand-600'}`}>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            <div className="hidden lg:flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-brand-600 transition-colors">Log in</Link>
-              <Link href="/signup" className="btn-primary text-sm !py-2 !px-5">
-                Get Started Free <ArrowRight className="w-4 h-4 ml-1 inline" />
-              </Link>
-            </div>
-
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200/60 bg-white/95 backdrop-blur-xl">
-            <div className="px-4 py-4 space-y-1">
-              {navLinks.map((link) => (
-                <Link key={link.label} href={link.href} className="block px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
-                  {link.label}
-                </Link>
-              ))}
-              <div className="pt-3 border-t border-gray-100 space-y-2">
-                <Link href="/login" className="block text-center py-2.5 text-sm font-medium text-gray-700">Log in</Link>
-                <Link href="/signup" className="block text-center btn-primary text-sm">Get Started Free</Link>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar activePage="About" />
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 overflow-hidden">
@@ -108,22 +48,22 @@ export default function AboutPage() {
             About SRP AI Labs
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
-            Empowering education
+            Building education tools
             <br />
-            <span className="gradient-text">with intelligent technology</span>
+            <span className="gradient-text">that institutions can trust</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            We&apos;re building India&apos;s most trusted AI-powered education platform — helping
-            students learn smarter, institutions operate better, and teachers teach more effectively.
+            We&apos;re building an AI-powered education platform that helps
+            students learn effectively, institutions operate better, and teachers teach with data-driven insights.
           </p>
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Highlights */}
       <section className="py-16 border-y border-gray-100 bg-surface-secondary">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {teamValues.map((s) => (
+            {teamHighlights.map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-3xl md:text-4xl font-extrabold gradient-text mb-1">{s.stat}</div>
                 <div className="text-sm text-gray-500 font-medium">{s.label}</div>
@@ -150,13 +90,13 @@ export default function AboutPage() {
               </p>
               <p className="text-gray-600 leading-relaxed mb-8">
                 Our multi-tenant platform serves diverse institutions — from small coaching centers to large universities — providing
-                each with a fully branded, customizable experience powered by the same enterprise-grade AI engine.
+                each with a fully branded, customizable experience powered by the same AI engine.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { icon: Brain, text: 'AI-first approach' },
                   { icon: Shield, text: 'Privacy by design' },
-                  { icon: BarChart3, text: 'Real analytics only' },
+                  { icon: BarChart3, text: 'Honest analytics only' },
                   { icon: Zap, text: 'Always improving' },
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-2">
@@ -169,7 +109,6 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Visual */}
             <div className="relative">
               <div className="absolute -inset-4 bg-gradient-to-r from-brand-100 to-violet-100 rounded-3xl blur-xl opacity-50" />
               <div className="relative bg-white rounded-2xl shadow-elevated p-8 border border-gray-100">
@@ -265,12 +204,12 @@ export default function AboutPage() {
             Built with modern, scalable technology
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Our platform uses cutting-edge AI models, cloud infrastructure, and security best practices to deliver
-            reliable, fast, and intelligent learning experiences at scale.
+            Our platform uses advanced AI models, cloud infrastructure, and security best practices to deliver
+            reliable, fast, and intelligent learning experiences.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'AI Engine', value: 'GPT-4 Class Models' },
+              { label: 'AI Engine', value: 'Advanced LLMs' },
               { label: 'Security', value: 'E2E Encryption' },
               { label: 'Architecture', value: 'Multi-Tenant SaaS' },
               { label: 'Compliance', value: 'Audit-Ready' },
@@ -293,7 +232,7 @@ export default function AboutPage() {
 
             <div className="relative">
               <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-                Ready to join us?
+                Ready to get started?
               </h2>
               <p className="text-brand-100 text-lg mb-10 max-w-2xl mx-auto">
                 Whether you&apos;re a student, teacher, or institution — there&apos;s a place for you on SRP Education AI.
@@ -312,72 +251,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center">
-                  <GraduationCap className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-white font-bold text-sm">SRP Education AI</span>
-              </Link>
-              <p className="text-sm text-gray-500 mb-4">AI-powered education platform for students and institutions across every academic stream.</p>
-              <div className="flex items-center gap-3">
-                <a href="mailto:support@srpailabs.com" className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <Mail className="w-4 h-4" />
-                </a>
-                <a href="tel:+919876543210" className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <Phone className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-white text-sm font-semibold mb-4">Product</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/#features" className="text-gray-500 hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="text-gray-500 hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/#analytics" className="text-gray-500 hover:text-white transition-colors">Analytics</Link></li>
-                <li><Link href="/#academics" className="text-gray-500 hover:text-white transition-colors">Exam Prep</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white text-sm font-semibold mb-4">Solutions</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/#solutions" className="text-gray-500 hover:text-white transition-colors">For Students</Link></li>
-                <li><Link href="/#solutions" className="text-gray-500 hover:text-white transition-colors">For Institutions</Link></li>
-                <li><Link href="/#solutions" className="text-gray-500 hover:text-white transition-colors">For Teachers</Link></li>
-                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Enterprise</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white text-sm font-semibold mb-4">Company</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/about" className="text-gray-500 hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/privacy" className="text-gray-500 hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="text-gray-500 hover:text-white transition-colors">Terms of Service</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white text-sm font-semibold mb-4">Support</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Help Center</Link></li>
-                <li><a href="mailto:support@srpailabs.com" className="text-gray-500 hover:text-white transition-colors">support@srpailabs.com</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-gray-600">&copy; {new Date().getFullYear()} SRP AI Labs. All rights reserved.</p>
-            <div className="flex items-center gap-6 text-xs text-gray-600">
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="/contact" className="hover:text-white transition-colors">Support</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

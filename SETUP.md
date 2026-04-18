@@ -6,7 +6,7 @@
 SRP Education AI/
 ├── backend/                    # Express + TypeScript REST API (port 5000)
 │   ├── prisma/
-│   │   ├── schema.prisma       # 55-table PostgreSQL schema
+│   │   ├── schema.prisma       # 64-model PostgreSQL schema
 │   │   └── seed.ts             # Seeds plans, add-ons, subjects, admin user
 │   ├── src/
 │   │   ├── app.ts              # Express app, middleware, route mounting
@@ -27,6 +27,8 @@ SRP Education AI/
 │   │       ├── notification/   # In-app notifications
 │   │       ├── branding/       # Tenant branding (logo, colors, subdomain)
 │   │       ├── payment/        # Razorpay & Stripe payment processing
+│   │       ├── institution/    # Institution management + sub-users
+│   │       ├── taxonomy/       # Academic boards, streams, subjects
 │   │       └── upload/         # Secure file uploads
 │   ├── Dockerfile
 │   └── package.json
@@ -58,14 +60,26 @@ SRP Education AI/
 │   │   │       ├── addons/             # Add-on management
 │   │   │       ├── branding/           # Tenant branding
 │   │   │       ├── settings/           # Profile settings
-│   │   │       └── tenants/            # Super admin tenant management
+│   │   │       ├── tenants/            # Super admin tenant management
+│   │   │       ├── admin/              # Admin controls
+│   │   │       ├── manage-users/       # User management
+│   │   │       ├── departments/        # Departments
+│   │   │       ├── files/              # File management
+│   │   │       ├── academic-profile/   # Academic profile
+│   │   │       ├── current-affairs/    # Current affairs
+│   │   │       ├── dictionary/         # Dictionary
+│   │   │       └── onboarding/         # Institution setup wizard
 │   │   ├── lib/api.ts          # Axios client with token refresh
 │   │   ├── store/authStore.ts  # Zustand auth state
 │   │   └── types/index.ts      # TypeScript interfaces
 │   ├── Dockerfile
 │   └── package.json
-├── docker-compose.yml          # PostgreSQL + Backend + Frontend
-└── readme.md                   # Product specification
+├── docker-compose.yml          # Development stack
+├── docker-compose.prod.yml     # Production stack
+├── nginx/
+│   └── edu.srpailabs.com.conf  # Nginx reverse proxy config
+├── SETUP.md                    # This file
+└── readme.md                   # Project documentation
 ```
 
 ## Tech Stack
@@ -76,7 +90,7 @@ SRP Education AI/
 | State       | Zustand                                        |
 | Forms       | React Hook Form + Zod validation               |
 | Backend     | Express.js, TypeScript                         |
-| Database    | PostgreSQL 16 + Prisma ORM (55 tables)         |
+| Database    | PostgreSQL 16 + Prisma ORM (64 models, 22 enums) |
 | Auth        | JWT (access 15m + refresh 7d), Argon2id        |
 | AI          | OpenRouter API (GPT-4.1 primary, GPT-4o fallback) |
 | Payments    | Razorpay + Stripe (mock in dev)                |
@@ -333,3 +347,107 @@ After running the seed script:
 | `STRIPE_SECRET_KEY`      | Stripe secret key (for payments)               | No       |
 | `NEXT_PUBLIC_API_URL`    | Backend API URL for frontend                   | Yes      |
 | `NEXT_PUBLIC_APP_NAME`   | Application display name                       | No       |
+
+---
+
+## Production Deployment
+
+### Server: Hostinger VPS
+
+| | |
+|---|---|
+| IP | `5.223.67.236` |
+| Domain | `edu.srpailabs.com` |
+| SSL | Cloudflare Origin Certificates |
+| Docker | `docker-compose.prod.yml` |
+
+### Architecture
+
+```
+Internet → Cloudflare (SSL/CDN) → Nginx (5.223.67.236)
+                                     ├── /api/*     → edu-backend :5050
+                                     ├── /uploads/* → edu-backend :5050
+                                     └── /*         → edu-frontend :3020
+```
+
+### Deploy Steps
+
+```bash
+# 1. SSH into VPS
+ssh root@5.223.67.236
+
+# 2. Navigate to project
+cd /path/to/SRP-Education-AI
+
+# 3. Pull latest code
+git pull origin main
+
+# 4. Create production env file (first time only)
+cp .env.prod.example .env.prod
+# Edit with production DATABASE_URL, JWT secrets, API keys
+
+# 5. Build and start containers
+docker compose -f docker-compose.prod.yml up --build -d
+
+# 6. Run database migrations (first deploy or schema changes)
+docker compose -f docker-compose.prod.yml exec edu-backend npx prisma db push
+
+# 7. Seed initial data (first deploy only)
+docker compose -f docker-compose.prod.yml exec edu-backend npx ts-node prisma/seed.ts
+
+# 8. Verify health
+curl http://localhost:5050/api/v1/health
+curl http://localhost:3020
+```
+
+### Nginx Setup
+
+```bash
+# Copy config
+sudo cp nginx/edu.srpailabs.com.conf /etc/nginx/sites-available/edu.srpailabs.com
+sudo ln -sf /etc/nginx/sites-available/edu.srpailabs.com /etc/nginx/sites-enabled/
+
+# Place Cloudflare origin certificates
+sudo mkdir -p /etc/ssl/cloudflare
+# Copy cert.pem and key.pem to /etc/ssl/cloudflare/
+
+# Test and reload
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Container Management
+
+```bash
+# View logs
+docker compose -f docker-compose.prod.yml logs -f edu-backend
+docker compose -f docker-compose.prod.yml logs -f edu-frontend
+
+# Restart a service
+docker compose -f docker-compose.prod.yml restart edu-backend
+
+# Stop everything
+docker compose -f docker-compose.prod.yml down
+
+# Rebuild single service
+docker compose -f docker-compose.prod.yml up --build -d edu-backend
+
+# Database shell
+docker compose -f docker-compose.prod.yml exec edu-db psql -U postgres -d srp_education_ai
+```
+
+### Production Ports (127.0.0.1 only)
+
+| Service | Internal | External |
+|---------|----------|----------|
+| edu-db | 5432 | 5435 |
+| edu-backend | 5000 | 5050 |
+| edu-frontend | 3000 | 3020 |
+
+### Resource Limits
+
+| Service | Memory |
+|---------|--------|
+| edu-db | 256 MB |
+| edu-backend | 384 MB |
+| edu-frontend | 256 MB |

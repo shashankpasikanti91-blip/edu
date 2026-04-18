@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import {
   ArrowRight,
   BarChart3,
@@ -20,54 +21,38 @@ import {
   Library,
   LineChart,
   Lock,
-  Mail,
-  Menu,
-  Phone,
-  PieChart,
   Rocket,
   School,
   Shield,
   ShieldCheck,
   Sparkles,
-  Star,
   Stethoscope,
   Target,
   TrendingUp,
   Trophy,
   Users,
-  X,
   Zap,
 } from 'lucide-react';
 
 /* ---- DATA ---- */
 
-const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Analytics', href: '#analytics' },
-  { label: 'Academics', href: '#academics' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
-];
-
 const capabilities = [
-  { icon: Brain, title: 'AI Study Assistant', desc: 'Context-aware tutoring powered by advanced AI models. Get instant explanations, step-by-step solutions, and personalized guidance.' },
-  { icon: Target, title: 'Smart Exam Prep', desc: 'Adaptive question banks with difficulty scaling. Practice with real exam patterns across NEET, JEE, GATE, CA, and more.' },
-  { icon: BarChart3, title: 'Learning Analytics', desc: 'Deep performance insights with topic-wise breakdowns, time tracking, and predictive scoring to optimize study outcomes.' },
-  { icon: Calendar, title: 'AI Study Planner', desc: 'Personalized study schedules that adapt to your pace, deadlines, and weak areas -- powered by learning science.' },
-  { icon: FileText, title: 'Notes & Resources', desc: 'Upload, organize, and AI-summarize study materials. Smart search across your entire knowledge base instantly.' },
-  { icon: Users, title: 'Multi-Tenant Platform', desc: 'White-label ready for institutions. Custom branding, sub-user management, and centralized admin controls.' },
-  { icon: Shield, title: 'Enterprise Security', desc: 'Role-based access, audit logging, data encryption at rest and in transit. SOC 2 aligned practices.' },
-  { icon: Globe, title: 'Multi-Language Support', desc: 'Study in your preferred language with seamless translation and cross-language content delivery.' },
-  { icon: Layers, title: 'Add-on Marketplace', desc: 'Extend with specialized modules -- advanced analytics, premium content packs, extra AI credits, and more.' },
-  { icon: Rocket, title: 'Real-time Collaboration', desc: 'Teachers can assign content, track progress, create assessments, and communicate -- all in one platform.' },
+  { icon: Brain, title: 'AI Study Assistant', desc: 'Context-aware tutoring powered by advanced AI models. Get explanations, step-by-step solutions, and personalized guidance across subjects.' },
+  { icon: Target, title: 'Adaptive Exam Prep', desc: 'Practice with question banks that scale in difficulty. Covers NEET, JEE, GATE, CA, NExT, and other major exam patterns.' },
+  { icon: BarChart3, title: 'Learning Analytics', desc: 'Topic-wise performance breakdowns, study time tracking, and progress insights to help students focus where it matters.' },
+  { icon: Calendar, title: 'AI Study Planner', desc: 'Personalized study schedules that adapt to your pace, deadlines, and focus areas — grounded in learning science.' },
+  { icon: FileText, title: 'Notes & Resources', desc: 'Upload, organize, and search your study materials. AI-powered summaries help you review faster.' },
+  { icon: Users, title: 'Multi-Tenant Platform', desc: 'White-label ready for institutions. Custom branding, user management, and centralized admin controls built in.' },
+  { icon: Shield, title: 'Secure by Design', desc: 'Role-based access control, audit logging, encrypted data at rest and in transit. Built for institutional trust.' },
+  { icon: Globe, title: 'Multi-Language Support', desc: 'Study in your preferred language with content delivery across regional languages.' },
+  { icon: Layers, title: 'Modular Add-ons', desc: 'Extend with attendance tracking, billing, parent portal, transport management, and more — activate what you need.' },
+  { icon: Rocket, title: 'Teacher & Admin Tools', desc: 'Teachers can assign content, create assessments, and track class progress. Admins manage everything from one dashboard.' },
 ];
 
 const studentBenefits = [
   'AI-powered personalized study plans',
   'Exam prep for NEET, JEE, GATE, CA, NExT & more',
-  'Smart flashcards & adaptive quizzes',
+  'Adaptive quizzes with difficulty scaling',
   'Performance analytics with weak-area detection',
   'Multi-language content support',
   'Upload & AI-summarize your notes',
@@ -79,21 +64,7 @@ const institutionBenefits = [
   'Role-based access control (RBAC)',
   'Institution-wide analytics dashboard',
   'Bulk user onboarding & management',
-  'Custom content publishing & delivery',
-];
-
-const analyticsFeatures = [
-  { label: 'Student Performance', value: '94%', sub: 'accuracy tracking', icon: TrendingUp, color: 'from-brand-500 to-violet-500' },
-  { label: 'Topic Mastery', value: '847', sub: 'topics analyzed', icon: PieChart, color: 'from-cyan-500 to-brand-500' },
-  { label: 'Study Hours', value: '12.4K', sub: 'hours this month', icon: Clock, color: 'from-emerald-500 to-cyan-500' },
-  { label: 'Active Learners', value: '2,340', sub: 'across institutions', icon: Users, color: 'from-violet-500 to-rose-500' },
-];
-
-const analyticsPanelRows = [
-  { subject: 'Physics -- Mechanics', score: 87, trend: '+12%', bar: 'w-[87%]' },
-  { subject: 'Chemistry -- Organic', score: 72, trend: '+8%', bar: 'w-[72%]' },
-  { subject: 'Mathematics -- Calculus', score: 94, trend: '+5%', bar: 'w-[94%]' },
-  { subject: 'Biology -- Genetics', score: 68, trend: '+15%', bar: 'w-[68%]' },
+  'Modular add-ons for attendance, billing & more',
 ];
 
 const academicStreams = [
@@ -107,53 +78,12 @@ const academicStreams = [
   { icon: Globe, title: 'Global Curricula', desc: 'IB, Cambridge, AP, SAT, GRE' },
 ];
 
-const trustStats = [
-  { value: '50+', label: 'Institutions' },
-  { value: '25,000+', label: 'Active Learners' },
-  { value: '1.2M+', label: 'Questions Practiced' },
-  { value: '98%', label: 'Uptime SLA' },
+const platformHighlights = [
+  { label: 'Multi-Tenant', sub: 'Architecture', icon: Building2, color: 'from-brand-500 to-violet-500' },
+  { label: 'Role-Based', sub: 'Access Control', icon: Shield, color: 'from-cyan-500 to-brand-500' },
+  { label: 'Real-Time', sub: 'Analytics Engine', icon: BarChart3, color: 'from-emerald-500 to-cyan-500' },
+  { label: 'Curriculum-Aware', sub: 'AI Models', icon: Brain, color: 'from-violet-500 to-rose-500' },
 ];
-
-const testimonials = [
-  { name: 'Dr. Priya Sharma', role: 'Dean, ABC Medical College', text: 'SRP Education AI transformed how our students prepare for NExT. The analytics give us visibility we never had before.', avatar: 'PS' },
-  { name: 'Rahul Verma', role: 'JEE Advanced -- AIR 342', text: 'The AI study planner and adaptive exam prep helped me focus on exactly what I needed. Game changer for my preparation.', avatar: 'RV' },
-  { name: 'Prof. Anita Desai', role: 'HOD, Engineering Dept', text: 'White-label deployment was seamless. Our institution now has its own branded platform with full analytics.', avatar: 'AD' },
-];
-
-const footerLinks: Record<string, { label: string; href: string }[]> = {
-  Product: [
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Analytics', href: '#analytics' },
-    { label: 'Exam Prep', href: '#academics' },
-    { label: 'AI Assistant', href: '#features' },
-    { label: 'Study Planner', href: '#features' },
-  ],
-  Solutions: [
-    { label: 'For Students', href: '#solutions' },
-    { label: 'For Institutions', href: '#solutions' },
-    { label: 'For Teachers', href: '#solutions' },
-    { label: 'Enterprise', href: '#enterprise' },
-    { label: 'White Label', href: '#enterprise' },
-    { label: 'API Access', href: '/contact' },
-  ],
-  Resources: [
-    { label: 'Documentation', href: '/about' },
-    { label: 'Blog', href: '/about' },
-    { label: 'Help Center', href: '/contact' },
-    { label: 'Status Page', href: '/contact' },
-    { label: 'Community', href: '/about' },
-    { label: 'Changelog', href: '/about' },
-  ],
-  Company: [
-    { label: 'About Us', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-    { label: 'Careers', href: '/about' },
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Security', href: '/about' },
-  ],
-};
 
 /* ---- COMPONENTS ---- */
 
@@ -172,61 +102,9 @@ function SectionBadge({ children }: { children: React.ReactNode }) {
 /* ---- PAGE ---- */
 
 export default function HomePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
-
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-violet-600 flex items-center justify-center shadow-md">
-                <GraduationCap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold tracking-tight">
-                SRP <span className="gradient-text">Education AI</span>
-              </span>
-            </Link>
-
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link key={link.label} href={link.href} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-brand-600 rounded-lg transition-colors">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            <div className="hidden lg:flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-brand-600 transition-colors">Log in</Link>
-              <Link href="/signup" className="btn-primary text-sm !py-2 !px-5">
-                Get Started Free <ArrowRight className="w-4 h-4 ml-1 inline" />
-              </Link>
-            </div>
-
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200/60 bg-white/95 backdrop-blur-xl">
-            <div className="px-4 py-4 space-y-1">
-              {navLinks.map((link) => (
-                <Link key={link.label} href={link.href} className="block px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
-                  {link.label}
-                </Link>
-              ))}
-              <div className="pt-3 border-t border-gray-100 space-y-2">
-                <Link href="/login" className="block text-center py-2.5 text-sm font-medium text-gray-700">Log in</Link>
-                <Link href="/signup" className="block text-center btn-primary text-sm">Get Started Free</Link>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar />
 
       {/* HERO */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
@@ -242,14 +120,14 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 animate-fade-in">
-              Transform Learning with{' '}
-              <span className="gradient-text">Intelligent</span>{' '}
-              Study Tools &amp;{' '}
-              <span className="gradient-text">Deep Analytics</span>
+              Study Smarter with{' '}
+              <span className="gradient-text">AI-Powered</span>{' '}
+              Tools &amp;{' '}
+              <span className="gradient-text">Real Analytics</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in">
-              Personalized AI tutoring, adaptive exam preparation, and institution-grade analytics --
+              Personalized AI tutoring, adaptive exam preparation, and institution-grade analytics —
               built for students, teachers, and educational institutions across every academic stream.
             </p>
 
@@ -257,8 +135,8 @@ export default function HomePage() {
               <Link href="/signup" className="btn-primary text-base !py-3.5 !px-8 shadow-glow">
                 Start Learning Free <ArrowRight className="w-5 h-5 ml-2 inline" />
               </Link>
-              <Link href="#solutions" className="btn-secondary text-base !py-3.5 !px-8">
-                <Building2 className="w-5 h-5 mr-2 inline" /> For Institutions
+              <Link href="/contact" className="btn-secondary text-base !py-3.5 !px-8">
+                <Building2 className="w-5 h-5 mr-2 inline" /> Request Institution Demo
               </Link>
             </div>
           </div>
@@ -280,17 +158,20 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Dashboard Preview</span>
+                </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   {[
-                    { label: 'Active Students', val: '2,340', change: '+12%', color: 'from-brand-500 to-brand-600' },
-                    { label: 'Avg. Score', val: '78.4%', change: '+5.2%', color: 'from-emerald-500 to-emerald-600' },
-                    { label: 'Study Hours', val: '12.4K', change: '+18%', color: 'from-violet-500 to-violet-600' },
-                    { label: 'Pass Rate', val: '94.2%', change: '+3.1%', color: 'from-cyan-500 to-cyan-600' },
+                    { label: 'Active Students', val: '—', change: 'Live data', color: 'from-brand-500 to-brand-600' },
+                    { label: 'Avg. Score', val: '—', change: 'Per subject', color: 'from-emerald-500 to-emerald-600' },
+                    { label: 'Study Hours', val: '—', change: 'Tracked', color: 'from-violet-500 to-violet-600' },
+                    { label: 'Pass Rate', val: '—', change: 'Analytics', color: 'from-cyan-500 to-cyan-600' },
                   ].map((s, i) => (
                     <div key={i} className="bg-gray-800/80 rounded-xl p-4 border border-gray-700/50">
                       <p className="text-gray-400 text-xs mb-1">{s.label}</p>
                       <p className="text-white text-xl font-bold">{s.val}</p>
-                      <p className="text-emerald-400 text-xs mt-1">{s.change} this month</p>
+                      <p className="text-gray-500 text-xs mt-1">{s.change}</p>
                     </div>
                   ))}
                 </div>
@@ -337,14 +218,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TRUST BAR */}
+      {/* PLATFORM HIGHLIGHTS */}
       <section className="py-12 bg-gray-50 border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {trustStats.map((stat, i) => (
-              <div key={i}>
-                <p className="text-3xl sm:text-4xl font-extrabold gradient-text">{stat.value}</p>
-                <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+            {platformHighlights.map((item, i) => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center mb-1`}>
+                  <item.icon className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-lg font-bold text-gray-900">{item.label}</p>
+                <p className="text-sm text-gray-500">{item.sub}</p>
               </div>
             ))}
           </div>
@@ -357,12 +241,12 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <SectionBadge><Zap className="w-4 h-4" /> Platform Capabilities</SectionBadge>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
-              Everything You Need to{' '}
-              <span className="gradient-text">Excel Academically</span>
+              Built for Real{' '}
+              <span className="gradient-text">Academic Outcomes</span>
             </h2>
             <p className="text-gray-600 text-lg">
-              A complete AI-powered education suite -- from personalized tutoring and adaptive exams to
-              institution-grade analytics and white-label deployment.
+              An AI-powered education suite covering personalized tutoring, adaptive exams,
+              analytics, and white-label institutional deployment.
             </p>
           </div>
 
@@ -389,7 +273,7 @@ export default function HomePage() {
               </div>
             </div>
             <Link href="/signup" className="btn-primary whitespace-nowrap !py-3 !px-6">
-              Explore All Features <ArrowRight className="w-4 h-4 ml-1 inline" />
+              Get Started <ArrowRight className="w-4 h-4 ml-1 inline" />
             </Link>
           </div>
         </div>
@@ -405,7 +289,7 @@ export default function HomePage() {
               <span className="gradient-text">Two Powerful Experiences.</span>
             </h2>
             <p className="text-gray-600 text-lg">
-              Whether you&apos;re an individual learner or managing thousands of students --
+              Whether you&apos;re an individual learner or managing an institution —
               SRP Education AI adapts to your needs.
             </p>
           </div>
@@ -440,7 +324,7 @@ export default function HomePage() {
                   <Building2 className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2">For Institutions</h3>
-                <p className="text-gray-600 mb-6">Enterprise-grade platform for colleges, coaching centers, and educational organizations.</p>
+                <p className="text-gray-600 mb-6">A full-featured platform for colleges, coaching centers, and educational organizations of any size.</p>
                 <ul className="space-y-3 mb-8">
                   {institutionBenefits.map((b, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm">
@@ -449,7 +333,7 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/signup" className="inline-flex items-center text-sm font-semibold py-2.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-md hover:shadow-lg transition-all">
+                <Link href="/contact" className="inline-flex items-center text-sm font-semibold py-2.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-md hover:shadow-lg transition-all">
                   Request Demo <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </div>
@@ -458,8 +342,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ANALYTICS */}
-      <section id="analytics" className="py-20 lg:py-28 bg-gray-900 text-white relative overflow-hidden">
+      {/* ANALYTICS CAPABILITIES */}
+      <section className="py-20 lg:py-28 bg-gray-900 text-white relative overflow-hidden">
         <GradientBlob className="w-[500px] h-[500px] bg-brand-500 -top-40 -right-40 opacity-10" />
         <GradientBlob className="w-[400px] h-[400px] bg-violet-500 -bottom-20 left-0 opacity-10" />
 
@@ -472,46 +356,42 @@ export default function HomePage() {
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
               Data-Driven Learning with{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-violet-400">
-                BI-Grade Analytics
+                Actionable Analytics
               </span>
             </h2>
             <p className="text-gray-400 text-lg">
-              Track every metric that matters. From individual student performance to institution-wide insights --
-              powered by real-time data visualization.
+              Track the metrics that matter — from individual student performance to institution-wide insights.
+              Built on real data, not vanity numbers.
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            {analyticsFeatures.map((feat, i) => (
+            {platformHighlights.map((feat, i) => (
               <div key={i} className="bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5">
                 <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${feat.color} flex items-center justify-center mb-3`}>
                   <feat.icon className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-2xl font-bold">{feat.value}</p>
+                <p className="text-lg font-bold">{feat.label}</p>
                 <p className="text-gray-400 text-sm">{feat.sub}</p>
-                <p className="text-gray-500 text-xs mt-1">{feat.label}</p>
               </div>
             ))}
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
             <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-white font-semibold">Subject-Wise Performance</h3>
-                <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400">Live</span>
-              </div>
+              <h3 className="text-white font-semibold mb-6">What You Can Track</h3>
               <div className="space-y-4">
-                {analyticsPanelRows.map((row, i) => (
-                  <div key={i}>
-                    <div className="flex items-center justify-between text-sm mb-1.5">
-                      <span className="text-gray-300">{row.subject}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-white font-medium">{row.score}%</span>
-                        <span className="text-emerald-400 text-xs">{row.trend}</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full bg-gradient-to-r from-brand-500 to-violet-500 ${row.bar}`} />
+                {[
+                  { subject: 'Subject-wise quiz scores', desc: 'Track accuracy per topic and identify weak areas' },
+                  { subject: 'Study time per session', desc: 'Measure daily and weekly study habits' },
+                  { subject: 'Exam readiness index', desc: 'Progress toward target exam scores' },
+                  { subject: 'Institution-wide reports', desc: 'Aggregate performance across departments' },
+                ].map((row, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-brand-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-white text-sm font-medium">{row.subject}</p>
+                      <p className="text-gray-500 text-xs">{row.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -519,17 +399,17 @@ export default function HomePage() {
             </div>
 
             <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-              <h3 className="text-white font-semibold mb-6">Study Engagement Overview</h3>
+              <h3 className="text-white font-semibold mb-6">Analytics Capabilities</h3>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: 'Avg. Session', value: '47 min', icon: Clock },
-                  { label: 'Questions/Day', value: '156', icon: Target },
-                  { label: 'Streak Days', value: '23', icon: Zap },
-                  { label: 'Topics Covered', value: '142', icon: BookOpen },
+                  { label: 'Session Tracking', value: 'Per user', icon: Clock },
+                  { label: 'Quiz Analytics', value: 'Per question', icon: Target },
+                  { label: 'Goal Tracking', value: 'Custom goals', icon: Zap },
+                  { label: 'Topic Coverage', value: 'Full taxonomy', icon: BookOpen },
                 ].map((item, i) => (
                   <div key={i} className="bg-gray-900/60 rounded-lg p-4 border border-gray-700/30">
                     <item.icon className="w-5 h-5 text-brand-400 mb-2" />
-                    <p className="text-xl font-bold text-white">{item.value}</p>
+                    <p className="text-sm font-medium text-white">{item.value}</p>
                     <p className="text-gray-500 text-xs">{item.label}</p>
                   </div>
                 ))}
@@ -537,8 +417,8 @@ export default function HomePage() {
               <div className="mt-6 pt-4 border-t border-gray-700/50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Weekly Progress</p>
-                    <p className="text-white text-lg font-bold">+24% improvement</p>
+                    <p className="text-gray-400 text-sm">Export &amp; Reporting</p>
+                    <p className="text-white text-sm font-medium">PDF, CSV, and scheduled reports</p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-emerald-400" />
                 </div>
@@ -548,34 +428,34 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Link href="/signup" className="inline-flex items-center gap-2 text-sm font-semibold py-3 px-6 rounded-xl bg-white text-gray-900 hover:bg-gray-100 transition-colors shadow-lg">
-              <BarChart3 className="w-4 h-4" /> Explore Analytics Dashboard <ArrowRight className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" /> Try the Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ENTERPRISE */}
+      {/* ENTERPRISE / WHITE-LABEL */}
       <section id="enterprise" className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <SectionBadge><Building2 className="w-4 h-4" /> Enterprise Ready</SectionBadge>
+              <SectionBadge><Building2 className="w-4 h-4" /> Institution Ready</SectionBadge>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-6">
                 White-Label Platform for{' '}
                 <span className="gradient-text">Educational Institutions</span>
               </h2>
               <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                Deploy your own branded education platform in days, not months. Full customization,
-                dedicated infrastructure, and enterprise-grade security -- all managed for you.
+                Deploy your own branded education platform with full customization,
+                multi-user management, and analytics — configured for your institution.
               </p>
               <div className="space-y-4 mb-8">
                 {[
                   { icon: ShieldCheck, text: 'Custom branding, logos, and color themes' },
                   { icon: Lock, text: 'Role-based access control with audit logging' },
-                  { icon: Globe, text: 'Custom domain with SSL certificate' },
-                  { icon: Users, text: 'Centralized management for students, teachers, and staff' },
+                  { icon: Globe, text: 'Custom subdomain or domain support' },
+                  { icon: Users, text: 'Manage students, teachers, and staff centrally' },
                   { icon: BarChart3, text: 'Institution-wide analytics and reporting' },
-                  { icon: Layers, text: 'Modular add-ons for custom needs' },
+                  { icon: Layers, text: 'Modular add-ons: attendance, billing, transport & more' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
@@ -597,16 +477,16 @@ export default function HomePage() {
                     <Building2 className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">ABC Medical College</p>
-                    <p className="text-gray-400 text-xs">Enterprise Dashboard</p>
+                    <p className="text-white font-semibold text-sm">Your Institution Name</p>
+                    <p className="text-gray-400 text-xs">White-Label Dashboard</p>
                   </div>
-                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Active</span>
+                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">Preview</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   {[
-                    { label: 'Students', value: '4,200' },
-                    { label: 'Teachers', value: '185' },
-                    { label: 'Courses', value: '42' },
+                    { label: 'Students', value: '—' },
+                    { label: 'Teachers', value: '—' },
+                    { label: 'Courses', value: '—' },
                   ].map((s, i) => (
                     <div key={i} className="bg-gray-800 rounded-lg p-3 text-center border border-gray-700/30">
                       <p className="text-white text-lg font-bold">{s.value}</p>
@@ -617,9 +497,9 @@ export default function HomePage() {
                 <div className="bg-gray-800 rounded-lg p-4 border border-gray-700/30">
                   <p className="text-gray-400 text-xs mb-3">Department Performance</p>
                   {[
-                    { name: 'MBBS I', pct: 92 },
-                    { name: 'MBBS II', pct: 86 },
-                    { name: 'MBBS III', pct: 78 },
+                    { name: 'Department A', pct: 92 },
+                    { name: 'Department B', pct: 86 },
+                    { name: 'Department C', pct: 78 },
                   ].map((d, i) => (
                     <div key={i} className="mb-2 last:mb-0">
                       <div className="flex justify-between text-xs mb-1">
@@ -632,6 +512,7 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
+                <p className="text-center text-gray-600 text-xs mt-4">Sample layout — your data populates automatically</p>
               </div>
               <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-gradient-to-br from-brand-500 to-violet-500 opacity-20 blur-2xl" />
             </div>
@@ -649,8 +530,8 @@ export default function HomePage() {
               <span className="gradient-text">Every Exam. One Platform.</span>
             </h2>
             <p className="text-gray-600 text-lg">
-              From school boards to competitive exams, medical entrance to university semesters --
-              our taxonomy covers 50+ exam types across India and global curricula.
+              From school boards to competitive exams, medical entrance to university semesters —
+              our taxonomy covers major exam types across India and global curricula.
             </p>
           </div>
 
@@ -668,34 +549,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* WHY TRUST US */}
       <section className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <SectionBadge><Star className="w-4 h-4" /> Trusted by Educators</SectionBadge>
+            <SectionBadge><Shield className="w-4 h-4" /> Built for Trust</SectionBadge>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
-              What Our <span className="gradient-text">Community Says</span>
+              Why Institutions &amp; Students{' '}
+              <span className="gradient-text">Choose Us</span>
             </h2>
+            <p className="text-gray-600 text-lg">
+              We focus on what matters — reliable technology, real analytics, and transparent operations.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {[
+              {
+                title: 'Honest Analytics',
+                desc: 'Every number in your dashboard comes from real student activity. No generated vanity stats or inflated progress reports.',
+                icon: BarChart3,
+              },
+              {
+                title: 'Multi-Tenant Security',
+                desc: 'Each institution\'s data is isolated. Role-based access, audit logging, and encryption ensure data integrity.',
+                icon: Lock,
+              },
+              {
+                title: 'Curriculum-Aware AI',
+                desc: 'Our AI models understand Indian exam patterns — NEET, JEE, GATE, and more. Not generic chatbot responses.',
+                icon: Brain,
+              },
+            ].map((item, i) => (
               <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  ))}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-50 to-violet-50 border border-brand-100 flex items-center justify-center mb-4">
+                  <item.icon className="w-6 h-6 text-brand-600" />
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center text-white text-sm font-bold">
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">{t.name}</p>
-                    <p className="text-gray-500 text-xs">{t.role}</p>
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -708,15 +599,15 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <SectionBadge><Rocket className="w-4 h-4" /> Getting Started</SectionBadge>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
-              Up and Running in <span className="gradient-text">3 Simple Steps</span>
+              Get Started in <span className="gradient-text">3 Simple Steps</span>
             </h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
-              { step: '01', title: 'Create Your Account', desc: 'Sign up for free as a student or register your institution. No credit card required.' },
-              { step: '02', title: 'Choose Your Path', desc: 'Select your exam, stream, or academic goal. Our AI customizes everything for you.' },
-              { step: '03', title: 'Learn & Track Progress', desc: 'Study with AI assistance, practice with smart exams, and track your growth with analytics.' },
+              { step: '01', title: 'Create Your Account', desc: 'Sign up free as a student, or register your institution. No credit card required.' },
+              { step: '02', title: 'Set Your Academic Goal', desc: 'Select your exam, stream, or academic focus. The platform configures itself around your context.' },
+              { step: '03', title: 'Learn & Track Progress', desc: 'Study with AI tools, practice with adaptive exams, and monitor your growth through analytics.' },
             ].map((s, i) => (
               <div key={i} className="text-center">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center mx-auto mb-5 shadow-glow">
@@ -741,11 +632,10 @@ export default function HomePage() {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-6">
-            Ready to Transform Your Learning Experience?
+            Ready to Get Started?
           </h2>
           <p className="text-brand-100 text-lg max-w-2xl mx-auto mb-10">
-            Join thousands of students and institutions already using SRP Education AI
-            to achieve better academic outcomes with less effort.
+            Create your free account and explore the platform — or request a demo for your institution.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup" className="inline-flex items-center gap-2 py-3.5 px-8 rounded-xl bg-white text-brand-700 font-semibold text-base hover:bg-gray-50 shadow-xl transition-all">
@@ -757,65 +647,14 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center justify-center gap-6 mt-10 text-brand-100 text-sm">
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Free forever plan</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> No credit card</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Setup in 2 minutes</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Free plan available</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> No credit card required</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Setup in minutes</span>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-400 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-violet-500 flex items-center justify-center">
-                  <GraduationCap className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-white font-bold text-sm">SRP Education AI</span>
-              </Link>
-              <p className="text-sm text-gray-500 mb-4">
-                AI-powered education platform for students and institutions across every academic stream.
-              </p>
-              <div className="flex items-center gap-3">
-                <a href="mailto:support@srpailabs.com" className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <Mail className="w-4 h-4" />
-                </a>
-                <a href="tel:+919876543210" className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <Phone className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-
-            {Object.entries(footerLinks).map(([title, links]) => (
-              <div key={title}>
-                <h4 className="text-white text-sm font-semibold mb-4">{title}</h4>
-                <ul className="space-y-2.5">
-                  {links.map((link, i) => (
-                    <li key={i}>
-                      <Link href={link.href} className="text-sm text-gray-500 hover:text-white transition-colors">
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-gray-600">
-              &copy; {new Date().getFullYear()} SRP AI Labs. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6 text-xs text-gray-600">
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="/contact" className="hover:text-white transition-colors">Support</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

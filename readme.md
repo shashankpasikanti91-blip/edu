@@ -1,5 +1,449 @@
 # SRP Education AI
 
+**AI-powered multi-tenant education platform for students, institutions, and teachers.**
+
+Built by SRP AI Labs — a Student Success & Institutional Intelligence Platform.
+
+**Live:** [https://edu.srpailabs.com](https://edu.srpailabs.com)
+
+---
+
+## Overview
+
+SRP Education AI is a production-grade SaaS platform that serves two parallel business models:
+
+- **B2B (Institution Model):** Schools, colleges, coaching centers, and universities onboard as isolated tenants with full management dashboards, branding, analytics, and add-on modules.
+- **B2C (Direct Student Model):** Individual students sign up directly for a personal AI-powered study dashboard with auto-generated student IDs, referral codes, and optional institution linking.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS |
+| State Management | Zustand |
+| Forms | React Hook Form + Zod validation |
+| Backend | Express.js, TypeScript |
+| Database | PostgreSQL 16 + Prisma ORM (64 models, 22 enums) |
+| Authentication | JWT (access 15min + refresh 7d), Argon2id password hashing |
+| AI Engine | OpenRouter API (GPT-4.1 primary, GPT-4o fallback) |
+| Payments | Razorpay (India) + Stripe (International) |
+| Email | Nodemailer (SMTP) |
+| Security | Helmet, CORS, HPP, rate limiting, tenant isolation |
+| Deployment | Docker multi-stage builds, Nginx reverse proxy, Cloudflare SSL |
+| Hosting | Hostinger VPS (5.223.67.236) |
+
+---
+
+## Project Structure
+
+```
+SRP Education AI/
+├── backend/                        # Express + TypeScript REST API
+│   ├── Dockerfile                  # Multi-stage Node 20 Alpine build
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── prisma/
+│   │   ├── schema.prisma           # 64-model PostgreSQL schema
+│   │   └── seed.ts                 # Seeds plans, add-ons, subjects, admin
+│   └── src/
+│       ├── app.ts                  # Express app, middleware, routes
+│       ├── server.ts               # HTTP server entry point
+│       ├── config/
+│       │   ├── database.ts         # Prisma client singleton
+│       │   └── env.ts              # Environment config
+│       ├── middleware/
+│       │   ├── auth.ts             # JWT verification
+│       │   ├── rbac.ts             # Role-based access control
+│       │   ├── tenant.ts           # Tenant isolation
+│       │   ├── validate.ts         # Zod request validation
+│       │   ├── rateLimiter.ts      # Rate limiting
+│       │   └── errorHandler.ts     # Global error handler
+│       ├── modules/                # 16 feature modules
+│       │   ├── auth/               # Signup, login, JWT, sessions, reset
+│       │   ├── user/               # Profile, dashboard stats
+│       │   ├── tenant/             # Multi-tenant CRUD
+│       │   ├── institution/        # Institution management + sub-users
+│       │   ├── student/            # B2C dashboard, notes, plans, referrals
+│       │   ├── content/            # Content library CRUD
+│       │   ├── subscription/       # Plans, billing, coupons, invoices
+│       │   ├── addon/              # Add-on modules for institutions
+│       │   ├── ai/                 # OpenRouter AI chat + quick queries
+│       │   ├── analytics/          # Platform & tenant analytics
+│       │   ├── audit/              # Audit log queries
+│       │   ├── notification/       # In-app notifications
+│       │   ├── branding/           # Tenant branding
+│       │   ├── payment/            # Razorpay & Stripe processing
+│       │   ├── taxonomy/           # Academic boards, streams, subjects
+│       │   └── upload/             # Secure file uploads
+│       └── shared/
+│           ├── constants/
+│           ├── errors/
+│           ├── services/
+│           ├── types/
+│           └── utils/
+├── frontend/                       # Next.js 14 + Tailwind CSS
+│   ├── Dockerfile                  # Multi-stage standalone build
+│   ├── package.json
+│   ├── next.config.js
+│   ├── tailwind.config.js
+│   └── src/
+│       ├── components/
+│       │   ├── Navbar.tsx           # Shared navigation
+│       │   └── Footer.tsx           # Shared footer
+│       ├── lib/
+│       │   ├── api.ts              # Axios client with token refresh
+│       │   ├── utils.ts            # Utility functions
+│       │   └── mathRenderer.tsx    # KaTeX math rendering
+│       ├── store/
+│       │   └── authStore.ts        # Zustand auth state
+│       ├── types/
+│       │   └── index.ts            # TypeScript interfaces
+│       └── app/
+│           ├── layout.tsx          # Root layout
+│           ├── globals.css         # Global styles + Tailwind
+│           ├── page.tsx            # Landing page
+│           ├── login/              # Login
+│           ├── signup/             # Signup (student + institution)
+│           ├── forgot-password/    # Password reset
+│           ├── pricing/            # Plans, add-ons, comparison table
+│           ├── about/              # About page
+│           ├── contact/            # Contact form
+│           ├── terms/              # Terms of Service
+│           ├── privacy/            # Privacy Policy
+│           └── dashboard/          # Protected area (25 sub-routes)
+│               ├── layout.tsx      # Sidebar navigation
+│               ├── page.tsx        # Role-based dashboard
+│               ├── ai-assistant/   # AI chat
+│               ├── exam-prep/      # Quiz & exam prep
+│               ├── notes/          # Notes CRUD
+│               ├── planner/        # Study plans
+│               ├── progress/       # Progress tracking
+│               ├── resources/      # Resource library
+│               ├── referrals/      # Referral system
+│               ├── billing/        # Billing dashboard
+│               ├── notifications/  # Notifications
+│               ├── wellness/       # Pomodoro + wellness
+│               ├── analytics/      # Admin analytics
+│               ├── addons/         # Add-on management
+│               ├── branding/       # Tenant branding
+│               ├── settings/       # Profile settings
+│               ├── admin/          # Admin controls
+│               ├── tenants/        # Super admin tenant mgmt
+│               ├── manage-users/   # User management
+│               ├── departments/    # Departments
+│               ├── files/          # File management
+│               ├── academic-profile/
+│               ├── current-affairs/
+│               ├── dictionary/
+│               └── onboarding/     # Institution setup wizard
+├── nginx/
+│   └── edu.srpailabs.com.conf      # Nginx reverse proxy config
+├── docker-compose.yml              # Development stack
+├── docker-compose.prod.yml         # Production stack
+├── SETUP.md                        # Setup & deployment guide
+└── readme.md                       # This file
+```
+
+---
+
+## Features
+
+### Authentication & Security
+- Email/password signup and login with Argon2id hashing
+- JWT access tokens (15min) + rotating refresh tokens (7d)
+- Email verification and password reset flows
+- Session management with multi-device tracking
+- Account lockout after 5 failed attempts (30min lock)
+- Rate limiting: global (100 req/15min) + auth (20 req/15min)
+- Full audit logging with IP + user agent
+- Email enumeration prevention on password reset
+
+### Multi-Tenant Architecture
+- Strict tenant data isolation enforced via middleware
+- Tenant types: School, College, University, Coaching Institute, Training Center
+- Custom branding per tenant (logo, colors, subdomain)
+- Tenant-aware queries across all modules
+
+### Role-Based Access Control (7 Roles)
+| Role | Scope |
+|------|-------|
+| Super Admin | Platform-wide management |
+| Institution Owner | Full tenant management |
+| Institution Admin | Tenant administration |
+| Department Admin | Department-scoped |
+| Teacher | Class/subject-scoped |
+| Student | Self-scoped |
+| Parent | Linked student scope |
+
+### AI Study Assistant
+- Persistent chat sessions with full history
+- Quick single-shot queries
+- Educational system prompt with guardrails
+- Context-aware responses (last 20 messages)
+- Auto-generated chat titles
+- Model fallback (GPT-4.1 → GPT-4o)
+
+### Student Features (B2C)
+- Auto-generated student IDs (`IND-STU-000001`)
+- Personal referral codes
+- Notes, study plans, progress tracking
+- Quiz engine and exam prep
+- AI tutor access
+- Pomodoro timer and wellness tools
+- KaTeX math rendering in AI responses
+
+### Institution Features (B2B)
+- White-label branding (logo, colors, subdomain)
+- Student & teacher management
+- Department and course organization
+- Content library with approval workflow
+- Add-on module marketplace
+- Analytics dashboard
+- Institution onboarding wizard
+
+### Subscription & Payments
+
+**Student Plans:**
+
+| Plan | Price | Key Features |
+|------|-------|--------------|
+| Free | ₹0/mo | Basic AI, 3 quizzes/mo, 100MB notes |
+| Pro | ₹149/mo | Unlimited AI & quizzes, study planner, analytics |
+| Career Premium | ₹399/mo | Everything + IELTS/GRE prep, resume builder, placement tools |
+
+**Institution Plans:**
+
+| Plan | Price | Users |
+|------|-------|-------|
+| School Starter | ₹9,999/mo | Up to 300 |
+| Campus Growth | ₹24,999/mo | Up to 1,000 |
+| University Pro | ₹79,999/mo | Up to 5,000 |
+| Enterprise | Custom | Unlimited |
+
+**Add-On Modules (8):**
+
+| Module | Price |
+|--------|-------|
+| Attendance Tracker | ₹499/mo |
+| Billing & Finance | ₹999/mo |
+| Parent Portal | ₹299/mo |
+| Transport Manager | ₹399/mo |
+| Fee Reminder | ₹199/mo |
+| WhatsApp Integration | ₹599/mo |
+| LMS Module | ₹799/mo |
+| AI Analytics | ₹699/mo |
+
+Annual billing saves ~17% (2 months free).
+
+---
+
+## API Endpoints
+
+### Authentication
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| POST | `/api/v1/auth/signup` | No |
+| POST | `/api/v1/auth/login` | No |
+| POST | `/api/v1/auth/refresh-token` | No |
+| POST | `/api/v1/auth/forgot-password` | No |
+| POST | `/api/v1/auth/reset-password` | No |
+| POST | `/api/v1/auth/verify-email` | No |
+| POST | `/api/v1/auth/logout` | Yes |
+| POST | `/api/v1/auth/logout-all` | Yes |
+| GET | `/api/v1/auth/sessions` | Yes |
+| GET | `/api/v1/auth/me` | Yes |
+
+### Users & Students
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/users/profile` | Yes |
+| PATCH | `/api/v1/users/profile` | Yes |
+| GET | `/api/v1/users/dashboard` | Yes |
+| GET | `/api/v1/students/dashboard` | Yes |
+| GET/POST | `/api/v1/students/notes` | Yes |
+| GET/POST | `/api/v1/students/plans` | Yes |
+| GET | `/api/v1/students/referrals` | Yes |
+| POST | `/api/v1/students/referrals/invite` | Yes |
+
+### Subscriptions & Billing
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/subscriptions/plans` | Yes |
+| POST | `/api/v1/subscriptions` | Yes |
+| POST | `/api/v1/subscriptions/:id/renew` | Yes |
+| POST | `/api/v1/subscriptions/:id/upgrade` | Yes |
+| POST | `/api/v1/subscriptions/:id/cancel` | Yes |
+| GET | `/api/v1/subscriptions/billing/dashboard` | Yes |
+
+### AI Assistant
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/ai/chats` | Yes |
+| POST | `/api/v1/ai/chats` | Yes |
+| GET | `/api/v1/ai/chats/:id/messages` | Yes |
+| POST | `/api/v1/ai/chats/:id/messages` | Yes |
+| DELETE | `/api/v1/ai/chats/:id` | Yes |
+| POST | `/api/v1/ai/quick-query` | Yes |
+
+### Tenants & Analytics
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/tenants` | SuperAdmin |
+| POST | `/api/v1/tenants` | SuperAdmin |
+| GET | `/api/v1/tenants/:id` | Admin |
+| PATCH | `/api/v1/tenants/:id` | Admin |
+| GET | `/api/v1/analytics/platform` | SuperAdmin |
+| GET | `/api/v1/analytics/tenant/:id` | Admin |
+
+### Add-Ons
+| Method | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/addons/modules` | No |
+| GET | `/api/v1/addons/tenant` | Yes |
+| POST | `/api/v1/addons/tenant/activate` | Admin |
+| POST | `/api/v1/addons/tenant/deactivate` | Admin |
+
+### Other Modules
+| Module | Base Path |
+|--------|-----------|
+| Content | `/api/v1/content` |
+| Branding | `/api/v1/branding` |
+| Notifications | `/api/v1/notifications` |
+| Payments | `/api/v1/payments` |
+| Uploads | `/api/v1/uploads` |
+| Audit | `/api/v1/audit` |
+| Health | `/api/v1/health` |
+
+---
+
+## Database Schema
+
+**64 Prisma models** organized across:
+
+- **Auth & Users:** User, Session, VerificationToken, AuthProvider, Permission, UserPermission, AuditLog
+- **Profiles:** StudentProfile, TeacherProfile, ParentProfile, InstitutionProfile
+- **Academics:** Department, Course, Subject, Enrollment, Topic, AcademicBoard, AcademicStream, CourseCatalog, SubjectCatalog
+- **Content:** ContentItem, ContentFile, ContentPermission, Resource, SavedResource
+- **Assessment:** Quiz, Question, QuizAttempt, QuizAnswer, Assessment, AssessmentAttempt, ExamPrepSession
+- **Student Tools:** Note, StudyPlan, IndividualStudentAcademic
+- **Subscriptions:** Plan, Subscription, Invoice, Payment, SubscriptionAlert, Coupon
+- **Tenants:** Tenant, TenantSettings, TenantBranding, Branch
+- **Add-Ons:** AddOnModule, TenantAddOn
+- **AI:** AiChat, AiChatMessage
+- **Analytics:** AnalyticsEvent, AnalyticsSnapshot, AnalyticsGoal, AnalyticsGoalProgress, AnalyticsReport, AnalyticsExport
+- **Other:** Notification, Referral, ReferralReward, PolicyAcceptance, SupportTicket, FeatureFlag, Upload, IdCounter, RoleTemplate
+
+**22 Enums** including UserRole, AccountStatus, InstitutionType, TenantType, ContentType, PlanInterval, SubscriptionStatus, PaymentProvider, BrandingTier, and more.
+
+---
+
+## Security
+
+- **Password hashing:** Argon2id with memory-hard settings
+- **JWT:** Short-lived access tokens (15min) + rotating refresh tokens (7d)
+- **Rate limiting:** Global + auth-specific endpoint limits
+- **Account lockout:** 5 failed attempts → 30min lock
+- **Input validation:** Zod schemas on all endpoints
+- **HTTP security:** Helmet (CSP, HSTS, X-Frame-Options, etc.)
+- **CORS:** Restricted to frontend origin
+- **HPP:** HTTP parameter pollution protection
+- **Tenant isolation:** Middleware enforces data boundaries
+- **RBAC:** 7-role permission system
+- **Audit logging:** All auth events with IP + user agent
+- **Non-root Docker:** Both containers run as unprivileged users
+- **SSL/TLS:** Cloudflare origin certificates + Nginx TLS 1.2/1.3
+
+---
+
+## Deployment Architecture
+
+```
+Internet → Cloudflare (SSL/CDN) → Nginx (VPS 5.223.67.236)
+                                      ├── /api/*     → edu-backend (port 5050)
+                                      ├── /uploads/* → edu-backend (port 5050)
+                                      └── /*         → edu-frontend (port 3020)
+
+Docker Compose (docker-compose.prod.yml):
+  ├── edu-db        PostgreSQL 16 Alpine  (port 5435, 256MB limit)
+  ├── edu-backend   Node.js 20 Alpine     (port 5050, 384MB limit)
+  └── edu-frontend  Next.js standalone    (port 3020, 256MB limit)
+  └── Network: srp-edu-network (bridge)
+```
+
+---
+
+## Seeded Data
+
+| Data | Details |
+|------|---------|
+| Super Admin | `admin@srpeducation.ai` / `Admin@12345` |
+| Institution Owner | `owner@demoschool.edu` / `Owner@12345` |
+| Demo Tenant | Demo International School |
+| Student Plans | Free (₹0), Pro (₹149/mo), Premium (₹399/mo) |
+| Institution Plans | Starter, Growth, University, Enterprise |
+| Add-On Modules | 8 modules (Attendance, Billing, Parent Portal, Transport, Fee Reminder, WhatsApp, LMS, AI Analytics) |
+| Subjects | Mathematics, Physics, Chemistry, Biology, English, Computer Science |
+| Coupons | LAUNCH50 (50% off), SCHOOL20 (20% off) |
+
+> **Change default passwords immediately in production.**
+
+---
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | Yes |
+| `JWT_ACCESS_SECRET` | Access token signing secret (32+ chars) | Yes |
+| `JWT_REFRESH_SECRET` | Refresh token signing secret (32+ chars) | Yes |
+| `PORT` | Backend server port (default: 5000) | No |
+| `FRONTEND_URL` | Frontend URL for CORS | No |
+| `OPENROUTER_API_KEY` | OpenRouter API key for AI features | Yes |
+| `OPENROUTER_MODEL` | Primary AI model (default: openai/gpt-4.1) | No |
+| `SMTP_HOST` | Email SMTP host | No |
+| `SMTP_USER` | Email SMTP username | No |
+| `SMTP_PASS` | Email SMTP password | No |
+| `RAZORPAY_KEY_ID` | Razorpay key for payments | No |
+| `STRIPE_SECRET_KEY` | Stripe secret key for payments | No |
+| `NEXT_PUBLIC_API_URL` | Backend API URL for frontend | Yes |
+| `NEXT_PUBLIC_APP_NAME` | Application display name | No |
+
+---
+
+## Quick Start
+
+See **[SETUP.md](SETUP.md)** for full setup and deployment instructions.
+
+```bash
+# Local development
+docker compose up db -d
+cd backend && npm install && npx prisma generate && npx prisma db push && npx ts-node prisma/seed.ts && npm run dev
+# In another terminal:
+cd frontend && npm install && npm run dev
+
+# Production deployment
+docker compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml exec edu-backend npx prisma db push
+docker compose -f docker-compose.prod.yml exec edu-backend npx ts-node prisma/seed.ts
+```
+
+---
+
+## Repository
+
+| | |
+|---|---|
+| GitHub | `git@github.com:shashankpasikanti91-blip/edu.git` |
+| Domain | `edu.srpailabs.com` |
+| VPS | Hostinger `5.223.67.236` |
+
+---
+
+*SRP AI Labs — Building trusted AI-powered education technology.*
+# SRP Education AI
+
 > Build a production-grade, multi-tenant AI Education Platform for SRP AI Labs called **"SRP Education AI"**.
 
 ---

@@ -1,5 +1,9 @@
+'use client';
+
 import Link from 'next/link';
-import { Sparkles, ArrowLeft, FileText, Shield, Scale, AlertCircle } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { Sparkles, FileText, Scale, AlertCircle } from 'lucide-react';
 
 const sections = [
   {
@@ -134,20 +138,7 @@ Your continued use of the Platform after the effective date of revised Terms con
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100/50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-brand-600 to-violet-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">SRP Education AI</span>
-          </Link>
-          <Link href="/" className="btn-secondary text-sm inline-flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section className="relative pt-32 pb-12 overflow-hidden">
@@ -209,17 +200,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm">&copy; {new Date().getFullYear()} SRP AI Labs. All rights reserved.</p>
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
