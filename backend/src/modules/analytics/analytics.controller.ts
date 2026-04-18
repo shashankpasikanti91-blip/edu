@@ -74,4 +74,22 @@ export class AnalyticsController {
     const data = await AnalyticsService.getMonthlyGrowth(tenantId || undefined);
     res.json({ success: true, message: 'Monthly growth data retrieved', data });
   }
+
+  static async getDepartmentAnalytics(req: AuthenticatedRequest, res: Response) {
+    const tenantId = req.params.tenantId || req.tenantId;
+    if (!tenantId) {
+      return res.status(400).json({ success: false, message: 'Tenant ID required' });
+    }
+    const data = await AnalyticsService.getDepartmentAnalytics(tenantId);
+    res.json({ success: true, message: 'Department analytics retrieved', data });
+  }
+
+  static async getSubjectPerformance(req: AuthenticatedRequest, res: Response) {
+    const tenantId = req.params.tenantId || req.tenantId;
+    if (!tenantId) {
+      return res.status(400).json({ success: false, message: 'Tenant ID required' });
+    }
+    const data = await AnalyticsService.getSubjectPerformance(tenantId);
+    res.json({ success: true, message: 'Subject performance retrieved', data });
+  }
 }

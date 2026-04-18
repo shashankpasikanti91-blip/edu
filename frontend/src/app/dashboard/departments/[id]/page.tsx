@@ -25,7 +25,7 @@ interface DepartmentDetail {
   students: Array<{
     user: { id: string; firstName: string; lastName: string; email: string; status: string };
   }>;
-  courses: Array<{ id: string; name: string; code: string; isActive: boolean }>;
+  courses: Array<{ id: string; name: string; code: string; isActive: boolean; subjects?: Array<{ id: string; name: string; code: string }> }>;
   subjects: Array<{ id: string; name: string; code: string; category: string }>;
 }
 
@@ -43,7 +43,8 @@ export default function DepartmentDetailPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', code: '', description: '' });
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'teachers' | 'students' | 'courses'>('teachers');
+  const [activeTab, setActiveTab] = useState<'teachers' | 'students' | 'courses'>('courses');
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -272,14 +273,51 @@ export default function DepartmentDetailPage() {
               {department.courses.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Courses</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-3">
                     {department.courses.map((c) => (
-                      <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                        <BookOpen className="w-4 h-4 text-amber-600" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                          <p className="text-xs text-gray-400">{c.code}</p>
-                        </div>
+                      <div key={c.id} className="rounded-xl border border-gray-100 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedCourse(expandedCourse === c.id ? null : c.id)}
+                          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                              <BookOpen className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{c.name}</p>
+                              <p className="text-xs text-gray-400">{c.code}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${c.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {c.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                            <svg className={`w-4 h-4 text-gray-400 transition-transform ${expandedCourse === c.id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                          </div>
+                        </button>
+                        {expandedCourse === c.id && (
+                          <div className="p-4 border-t border-gray-100 bg-white">
+                            {c.subjects && c.subjects.length > 0 ? (
+                              <div>
+                                <p className="text-xs font-medium text-gray-500 mb-2">Subjects in this course</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {c.subjects.map((s) => (
+                                    <div key={s.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-brand-50 border border-brand-100">
+                                      <GraduationCap className="w-4 h-4 text-brand-600" />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                                        <p className="text-xs text-gray-400">{s.code}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-400 text-center py-4">No subjects assigned to this course yet</p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

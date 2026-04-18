@@ -14,6 +14,8 @@ router.get('/platform/growth', authenticate, requireSuperAdmin(), asyncHandler(A
 // Tenant-level analytics
 router.get('/tenant/:tenantId', authenticate, tenantGuard(), requireTenantAdmin(), asyncHandler(AnalyticsController.getTenantStats));
 router.get('/tenant/:tenantId/growth', authenticate, tenantGuard(), requireTenantAdmin(), asyncHandler(AnalyticsController.getMonthlyGrowth));
+router.get('/tenant/:tenantId/departments', authenticate, tenantGuard(), requireTenantAdmin(), asyncHandler(AnalyticsController.getDepartmentAnalytics));
+router.get('/tenant/:tenantId/subjects', authenticate, tenantGuard(), requireTenantAdmin(), asyncHandler(AnalyticsController.getSubjectPerformance));
 
 // Student progress
 router.get('/student/:userId?', authenticate, asyncHandler(AnalyticsController.getStudentProgress));

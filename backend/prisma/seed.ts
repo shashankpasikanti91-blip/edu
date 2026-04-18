@@ -410,6 +410,7 @@ async function main() {
           status: 'ACTIVE',
           currentPeriodStart: new Date(),
           currentPeriodEnd: oneYearFromNow,
+          autoRenew: true,
         },
       });
       console.log('Demo student Pro subscription created');

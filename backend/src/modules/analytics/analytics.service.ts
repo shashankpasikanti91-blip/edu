@@ -255,4 +255,83 @@ export class AnalyticsService {
 
     return results;
   }
+
+  /**
+   * Department-level analytics: students, teachers, avg quiz score per department
+   */
+  static async getDepartmentAnalytics(tenantId: string) {
+    const departments = await prisma.department.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        name: true,
+        _count: { select: { students: true, teachers: true, courses: true, subjects: true } },
+      },
+    });
+
+    const result = [];
+    for (const dept of departments) {
+      // Get avg quiz score for students in this department
+      const studentIds = await prisma.departmentStudent.findMany({
+        where: { departmentId: dept.id },
+        select: { userId: true },
+      });
+      const ids = studentIds.map(s => s.userId);
+
+      let avgScore = 0;
+      if (ids.length > 0) {
+        const agg = await prisma.quizAttempt.aggregate({
+          where: { userId: { in: ids } },
+          _avg: { score: true },
+        });
+        avgScore = Math.round(agg._avg.score || 0);
+      }
+
+      result.push({
+        name: dept.name,
+        students: dept._count.students,
+        teachers: dept._count.teachers,
+        courses: dept._count.courses,
+        score: avgScore,
+      });
+    }
+
+    return result;
+  }
+
+  /**
+   * Subject performance: avg quiz score per subject across the tenant
+   */
+  static async getSubjectPerformance(tenantId: string) {
+    const subjects = await prisma.subject.findMany({
+      where: { tenantId, isActive: true },
+      select: { id: true, name: true },
+    });
+
+    const result = [];
+    for (const subj of subjects) {
+      const quizzes = await prisma.quiz.findMany({
+        where: { subjectId: subj.id },
+        select: { id: true },
+      });
+      const quizIds = quizzes.map(q => q.id);
+
+      let score = 0;
+      if (quizIds.length > 0) {
+        const agg = await prisma.quizAttempt.aggregate({
+          where: { quizId: { in: quizIds } },
+          _avg: { score: true },
+        });
+        score = Math.round(agg._avg.score || 0);
+      }
+
+      result.push({
+        subject: subj.name,
+        score,
+        fullMark: 100,
+      });
+    }
+
+    return result;
+  }
 }

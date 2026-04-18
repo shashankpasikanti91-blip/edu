@@ -206,6 +206,8 @@ function PlatformAnalytics() {
 function TenantAnalytics({ tenantId }: { tenantId: string }) {
   const [stats, setStats] = useState<TenantStats | null>(null);
   const [growth, setGrowth] = useState<GrowthData[]>([]);
+  const [departmentData, setDepartmentData] = useState<Array<{ name: string; students: number; teachers: number; courses: number; score: number }>>([]);
+  const [performanceRadar, setPerformanceRadar] = useState<Array<{ subject: string; score: number; fullMark: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('12m');
 
@@ -213,35 +215,21 @@ function TenantAnalytics({ tenantId }: { tenantId: string }) {
     if (!tenantId) return;
     async function load() {
       try {
-        const [statsRes, growthRes] = await Promise.all([
+        const [statsRes, growthRes, deptRes, subjRes] = await Promise.all([
           api.get(`/analytics/tenant/${tenantId}`),
           api.get(`/analytics/tenant/${tenantId}/growth`),
+          api.get(`/analytics/tenant/${tenantId}/departments`).catch(() => ({ data: { data: [] } })),
+          api.get(`/analytics/tenant/${tenantId}/subjects`).catch(() => ({ data: { data: [] } })),
         ]);
         setStats(statsRes.data.data);
         setGrowth(growthRes.data.data || []);
+        setDepartmentData(deptRes.data.data || []);
+        setPerformanceRadar(subjRes.data.data || []);
       } catch { /* non-critical */ }
       finally { setLoading(false); }
     }
     load();
   }, [tenantId]);
-
-  // Simulated departmental data for richer visuals
-  const departmentData = [
-    { name: 'Science', students: 120, score: 74, teachers: 8 },
-    { name: 'Commerce', students: 95, score: 68, teachers: 6 },
-    { name: 'Arts', students: 60, score: 72, teachers: 5 },
-    { name: 'CS & IT', students: 85, score: 81, teachers: 7 },
-    { name: 'Languages', students: 45, score: 78, teachers: 4 },
-  ];
-
-  const performanceRadar = [
-    { subject: 'Mathematics', score: 72, fullMark: 100 },
-    { subject: 'Physics', score: 68, fullMark: 100 },
-    { subject: 'Chemistry', score: 75, fullMark: 100 },
-    { subject: 'Biology', score: 80, fullMark: 100 },
-    { subject: 'English', score: 85, fullMark: 100 },
-    { subject: 'CS', score: 78, fullMark: 100 },
-  ];
 
   if (loading) return <LoadingSpinner />;
   if (!stats) return <NoDataState message="No institution data available" />;
@@ -338,23 +326,6 @@ function TeacherAnalytics({ userId, tenantId }: { userId: string; tenantId: stri
     load();
   }, [userId]);
 
-  const classPerformance = [
-    { quiz: 'Quiz 1', avgScore: 72, classSize: 48 },
-    { quiz: 'Quiz 2', avgScore: 68, classSize: 48 },
-    { quiz: 'Midterm', avgScore: 75, classSize: 48 },
-    { quiz: 'Quiz 3', avgScore: 80, classSize: 45 },
-    { quiz: 'Quiz 4', avgScore: 65, classSize: 47 },
-    { quiz: 'Quiz 5', avgScore: 82, classSize: 48 },
-  ];
-
-  const topicMastery = [
-    { topic: 'Algebra', mastery: 85 },
-    { topic: 'Geometry', mastery: 72 },
-    { topic: 'Statistics', mastery: 60 },
-    { topic: 'Trigonometry', mastery: 48 },
-    { topic: 'Calculus', mastery: 55 },
-  ];
-
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -362,41 +333,27 @@ function TeacherAnalytics({ userId, tenantId }: { userId: string; tenantId: stri
       <DashboardHeader title="Teaching Analytics" subtitle="Class performance and student insights" period={period} onPeriodChange={setPeriod} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPITile icon={Users} label="My Students" value={teacherStats?.studentCount || 48} color="brand" />
-        <KPITile icon={BookOpen} label="Content Created" value={teacherStats?.contentCount || 12} color="emerald" trend={15} />
-        <KPITile icon={Target} label="Assessments" value={teacherStats?.assessmentCount || 8} color="amber" />
-        <KPITile icon={Award} label="Avg Class Score" value={74} color="violet" suffix="%" trend={5} />
+        <KPITile icon={Users} label="My Students" value={teacherStats?.studentCount || 0} color="brand" />
+        <KPITile icon={BookOpen} label="Content Created" value={teacherStats?.contentCount || 0} color="emerald" />
+        <KPITile icon={Target} label="Assessments" value={teacherStats?.assessmentCount || 0} color="amber" />
+        <KPITile icon={Award} label="Total Content" value={(teacherStats?.contentCount || 0) + (teacherStats?.assessmentCount || 0)} color="violet" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <ChartCard title="Assessment Performance" subtitle="Class average per assessment" className="lg:col-span-2" icon={BarChart3}>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={classPerformance}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="quiz" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} domain={[0, 100]} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="avgScore" stroke="#4f46e5" strokeWidth={2.5} dot={{ r: 5, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} name="Avg Score" />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Topic Mastery" subtitle="Class-level understanding" icon={Target}>
-          <div className="space-y-4 py-2">
-            {topicMastery.map((t) => (
-              <div key={t.topic}>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700">{t.topic}</span>
-                  <span className={`text-sm font-bold ${t.mastery >= 70 ? 'text-emerald-600' : t.mastery >= 50 ? 'text-amber-600' : 'text-red-600'}`}>{t.mastery}%</span>
+      {/* Recent Content */}
+      <div className="grid grid-cols-1 gap-6">
+        <ChartCard title="Recent Content" subtitle="Your latest created materials" icon={FileText}>
+          <div className="space-y-3 py-2 max-h-[300px] overflow-y-auto">
+            {teacherStats?.recentContent?.length > 0 ? teacherStats.recentContent.map((item: any) => (
+              <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50/80">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                  <p className="text-xs text-gray-500">{item.type.replace(/_/g, ' ')} &bull; {item.status}</p>
                 </div>
-                <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700" style={{
-                    width: `${t.mastery}%`,
-                    background: t.mastery >= 70 ? '#10b981' : t.mastery >= 50 ? '#f59e0b' : '#ef4444',
-                  }} />
-                </div>
+                <span className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</span>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-gray-400 text-center py-8">No content created yet. Start creating resources for your students!</p>
+            )}
           </div>
         </ChartCard>
       </div>
@@ -437,7 +394,7 @@ function StudentAnalytics({ userId }: { userId: string }) {
     if (!progress?.enrollments) return [];
     return progress.enrollments.map((e) => ({
       subject: e.subject?.name || e.course?.name || 'Unknown',
-      score: 50 + Math.floor(Math.random() * 40), // simulated until real per-subject scoring
+      score: progress.quizStats.averageScore || 0,
       fullMark: 100,
     }));
   }, [progress]);

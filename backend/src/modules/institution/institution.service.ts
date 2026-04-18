@@ -284,7 +284,7 @@ export class InstitutionService {
         },
         courses: {
           where: { isActive: true },
-          select: { id: true, name: true, code: true, isActive: true },
+          select: { id: true, name: true, code: true, isActive: true, subjects: { where: { isActive: true }, select: { id: true, name: true, code: true } } },
         },
         subjects: {
           where: { isActive: true },
