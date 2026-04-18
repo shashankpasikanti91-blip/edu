@@ -15,11 +15,13 @@ declare module 'lucide-react' {
   export const BarChart2: LucideIcon;
   export const Bell: LucideIcon;
   export const BookA: LucideIcon;
+  export const BookMarked: LucideIcon;
   export const BookOpen: LucideIcon;
   export const Brain: LucideIcon;
   export const Briefcase: LucideIcon;
   export const Building: LucideIcon;
   export const Building2: LucideIcon;
+  export const Calculator: LucideIcon;
   export const Calendar: LucideIcon;
   export const Camera: LucideIcon;
   export const Check: LucideIcon;

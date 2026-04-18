@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Globe, Loader2, ArrowLeft, Newspaper, RefreshCw, Clock, AlertTriangle, Copy, Check } from 'lucide-react';
+import { Globe, Loader2, ArrowLeft, Newspaper, RefreshCw, Clock, AlertTriangle, Copy, Check, Calendar, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
@@ -39,18 +39,91 @@ const OUTPUT_FORMATS = [
   { value: 'mini_quiz', label: 'Mini Quiz (MCQ)' },
 ];
 
-const QUICK_TOPICS = [
-  'Indian Constitution Amendments',
-  'Space Missions India (ISRO)',
-  'Union Budget highlights',
-  'International Organizations',
-  'Indian Economy & GDP',
-  'Government welfare schemes',
-  'Recent Supreme Court judgments',
-  'Nobel Prize winners',
-  'Indian History freedom struggle',
-  'World Geography important facts',
+const DATE_RANGES = [
+  { value: 'last_7_days', label: 'Last 7 Days' },
+  { value: 'last_30_days', label: 'Last 30 Days' },
+  { value: 'this_month', label: 'This Month' },
+  { value: 'custom', label: 'Custom Range' },
 ];
+
+const ANSWER_STANDARDS = [
+  { value: 'indian', label: 'Indian Standard' },
+  { value: 'international', label: 'International' },
+  { value: 'neutral', label: 'Neutral' },
+];
+
+const QUICK_TOPICS: Record<string, string[]> = {
+  '': [
+    'Latest government schemes and policies',
+    'Recent Supreme Court judgments',
+    'Union Budget key highlights',
+    'International summits and India participation',
+    'Latest ISRO missions',
+  ],
+  National: [
+    'Central government policy announcements',
+    'State elections and political developments',
+    'Infrastructure projects and development',
+    'Census and demographic changes',
+    'Recent amendments to Indian laws',
+  ],
+  International: [
+    'India bilateral relations updates',
+    'UN General Assembly resolutions',
+    'Geopolitical developments affecting India',
+    'International trade agreements',
+    'Climate change summits and India',
+  ],
+  Economy: [
+    'RBI monetary policy decisions',
+    'GDP growth and economic indicators',
+    'GST updates and tax reforms',
+    'Stock market milestones',
+    'Foreign Direct Investment trends',
+  ],
+  'Science & Technology': [
+    'ISRO and space technology updates',
+    'DRDO defence technology achievements',
+    'Digital India initiatives',
+    'Artificial Intelligence developments',
+    'Indian startups and innovation',
+  ],
+  Sports: [
+    'Indian cricket team recent performances',
+    'Olympics and Commonwealth Games',
+    'Indian athletes international achievements',
+    'IPL and domestic sports',
+    'Sports policy and Khelo India',
+  ],
+  'Awards & Honours': [
+    'Padma Awards recipients',
+    'Nobel Prize winners',
+    'Bharat Ratna and national honours',
+    'International awards to Indians',
+    'Sahitya Akademi and literary awards',
+  ],
+  'Government Schemes': [
+    'PM Kisan Samman Nidhi updates',
+    'Ayushman Bharat health scheme',
+    'Make in India progress',
+    'Swachh Bharat Mission updates',
+    'Digital India programme milestones',
+  ],
+  Environment: [
+    'Climate change policy India',
+    'National parks and wildlife protection',
+    'Pollution control measures',
+    'Renewable energy targets',
+    'International environmental agreements',
+  ],
+  Defence: [
+    'Indian defence procurement',
+    'Border security developments',
+    'Military exercises and cooperation',
+    'Indigenous defence manufacturing',
+    'Cyber security initiatives',
+  ],
+};
 
 export default function CurrentAffairsPage() {
   const { user } = useAuthStore();
@@ -58,9 +131,19 @@ export default function CurrentAffairsPage() {
   const [examType, setExamType] = useState('');
   const [topic, setTopic] = useState('');
   const [outputFormat, setOutputFormat] = useState('comprehensive');
+  const [dateRange, setDateRange] = useState('last_30_days');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [answerStandard, setAnswerStandard] = useState('indian');
   const [result, setResult] = useState<string | null>(null);
+  const [resultMeta, setResultMeta] = useState<{
+    dateRange?: string;
+    category?: string;
+    examType?: string;
+    freshnessWarnings?: string[];
+    generatedAt?: string;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
   const [hasError, setHasError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [educationContext, setEducationContext] = useState<{ level?: string; grade?: string }>({});
@@ -80,8 +163,15 @@ export default function CurrentAffairsPage() {
   }, [user]);
 
   const generate = useCallback(async (topicOverride?: string) => {
+    // Validate custom date range
+    if (dateRange === 'custom' && (!customStartDate || !customEndDate)) {
+      toast.error('Please select both start and end dates for custom range.');
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
+    setResultMeta(null);
     setHasError(false);
 
     const actualTopic = topicOverride ?? topic.trim();
@@ -92,20 +182,30 @@ export default function CurrentAffairsPage() {
         examType: examType || undefined,
         topic: actualTopic || undefined,
         outputFormat,
+        dateRange,
+        customStartDate: dateRange === 'custom' ? customStartDate : undefined,
+        customEndDate: dateRange === 'custom' ? customEndDate : undefined,
+        answerStandard,
         count: 10,
         educationLevel: educationContext.level,
         grade: educationContext.grade,
       });
 
       setResult(data.data.content);
-      setGeneratedAt(new Date());
+      setResultMeta({
+        dateRange: data.data.dateRange,
+        category: data.data.category,
+        examType: data.data.examType,
+        freshnessWarnings: data.data.freshnessWarnings,
+        generatedAt: data.data.generatedAt,
+      });
     } catch {
       setHasError(true);
       toast.error('Failed to generate content. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  }, [category, examType, topic, outputFormat, educationContext]);
+  }, [category, examType, topic, outputFormat, dateRange, customStartDate, customEndDate, answerStandard, educationContext]);
 
   const handleQuickTopic = (t: string) => {
     setTopic(t);
@@ -124,6 +224,8 @@ export default function CurrentAffairsPage() {
     }
   };
 
+  const activeQuickTopics = QUICK_TOPICS[category] || QUICK_TOPICS[''];
+
   return (
     <div>
       <div className="max-w-4xl mx-auto">
@@ -132,15 +234,20 @@ export default function CurrentAffairsPage() {
           <Link href="/dashboard" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Current Affairs &amp; GK</h1>
-            <p className="text-gray-500 mt-1">AI-generated current affairs Q&amp;A for exam preparation</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+              <Globe className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Current Affairs &amp; GK</h1>
+              <p className="text-gray-500 mt-0.5">Latest category-wise current affairs and GK for Indian exams.</p>
+            </div>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters Card */}
         <div className="card mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="input-field">
@@ -166,17 +273,58 @@ export default function CurrentAffairsPage() {
               </select>
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+              <select value={dateRange} onChange={(e) => setDateRange(e.target.value)} className="input-field">
+                {DATE_RANGES.map((d) => (
+                  <option key={d.value} value={d.value}>{d.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Answer Standard</label>
+              <select value={answerStandard} onChange={(e) => setAnswerStandard(e.target.value)} className="input-field">
+                {ANSWER_STANDARDS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Specific Topic (optional)</label>
               <input
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && generate()}
-                placeholder="e.g., Indian Budget 2025..."
+                placeholder="e.g., RBI monetary policy..."
                 className="input-field"
               />
             </div>
           </div>
+
+          {/* Custom Date Range Inputs */}
+          {dateRange === 'custom' && (
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+            </div>
+          )}
+
           <button
             onClick={() => generate()}
             disabled={isLoading}
@@ -187,16 +335,18 @@ export default function CurrentAffairsPage() {
           </button>
         </div>
 
-        {/* Quick Topics */}
+        {/* Quick Topics — category-relevant */}
         {!result && !isLoading && (
           <div className="card mb-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">Quick Topics — click to generate instantly</h3>
+            <h3 className="text-sm font-medium text-gray-500 mb-3">
+              Quick Topics{category ? ` — ${CATEGORIES.find(c => c.value === category)?.label}` : ''} — click to generate instantly
+            </h3>
             <div className="flex flex-wrap gap-2">
-              {QUICK_TOPICS.map((t) => (
+              {activeQuickTopics.map((t) => (
                 <button
                   key={t}
                   onClick={() => handleQuickTopic(t)}
-                  className="px-3 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-700 transition-colors"
+                  className="px-3 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 transition-colors"
                 >
                   {t}
                 </button>
@@ -208,13 +358,13 @@ export default function CurrentAffairsPage() {
         {/* Loading */}
         {isLoading && (
           <div className="card text-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-brand-600 mx-auto mb-3" />
+            <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-3" />
             <p className="text-gray-500">Generating current affairs content...</p>
             <p className="text-xs text-gray-400 mt-1">This may take a few seconds</p>
           </div>
         )}
 
-        {/* Error State with Retry */}
+        {/* Error State */}
         {hasError && !isLoading && !result && (
           <div className="card text-center py-12 border-red-200 bg-red-50/30">
             <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
@@ -231,12 +381,23 @@ export default function CurrentAffairsPage() {
           <div className="card">
             {/* Result Header */}
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="text-base font-semibold text-gray-900">Generated Content</h2>
-                {generatedAt && (
+                {resultMeta?.generatedAt && (
                   <span className="inline-flex items-center gap-1 text-xs text-gray-400">
                     <Clock className="w-3 h-3" />
-                    {generatedAt.toLocaleString()}
+                    {new Date(resultMeta.generatedAt).toLocaleString()}
+                  </span>
+                )}
+                {resultMeta?.dateRange && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                    <Calendar className="w-3 h-3" />
+                    {resultMeta.dateRange}
+                  </span>
+                )}
+                {resultMeta?.category && (
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                    {resultMeta.category}
                   </span>
                 )}
               </div>
@@ -249,6 +410,21 @@ export default function CurrentAffairsPage() {
                 </button>
               </div>
             </div>
+
+            {/* Freshness Warnings */}
+            {resultMeta?.freshnessWarnings && resultMeta.freshnessWarnings.length > 0 && (
+              <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-orange-700">Freshness Notice</p>
+                    {resultMeta.freshnessWarnings.map((w, i) => (
+                      <p key={i} className="text-xs text-orange-600 mt-0.5">{w}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* AI Disclaimer */}
             <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
@@ -266,10 +442,13 @@ export default function CurrentAffairsPage() {
         {/* Empty State */}
         {!result && !isLoading && !hasError && (
           <div className="card text-center py-12">
-            <Globe className="w-14 h-14 text-gray-300 mx-auto mb-4" />
+            <Globe className="w-14 h-14 text-purple-200 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-700 mb-2">Current Affairs &amp; General Knowledge</h3>
-            <p className="text-gray-500 text-sm max-w-md mx-auto">
-              Generate exam-focused current affairs Q&amp;A for UPSC, SSC, Banking, and other competitive exams. Select a category and click Generate.
+            <p className="text-gray-500 text-sm max-w-md mx-auto mb-3">
+              Generate exam-focused current affairs for UPSC, SSC, Banking, Railway, and other competitive exams.
+            </p>
+            <p className="text-gray-400 text-xs max-w-sm mx-auto">
+              Select a category, target exam, date range, and click Generate. Content defaults to Indian Standard with the last 30 days.
             </p>
           </div>
         )}

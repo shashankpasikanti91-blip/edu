@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
-  Send, Plus, Trash2, Loader2, Brain, Sparkles,
-  BookOpen, GraduationCap, FileQuestion, Languages,
-  Globe, ClipboardList, Lightbulb, Table2, Lightbulb as LightbulbIcon,
-  BarChart3, ListChecks,
+  Send, Plus, Trash2, Loader2, Brain,
+  BookOpen, FileQuestion,
+  Lightbulb, Table2, BarChart3, ListChecks,
+  Calculator, BookMarked, Copy, Check, Sparkles,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
@@ -13,13 +13,29 @@ import toast from 'react-hot-toast';
 import type { AiChat, AiChatMessage } from '@/types';
 import { renderMarkdownContent } from '@/lib/mathRenderer';
 
-const ANSWER_MODES = [
-  { value: '', label: 'Default', icon: Sparkles },
-  { value: 'table_compare', label: 'Table Compare', icon: Table2 },
-  { value: 'memory_trick', label: 'Memory Tricks', icon: LightbulbIcon },
+// Study Modes — maps to backend StudyMode enum
+const STUDY_MODES = [
+  { value: 'default', label: 'Default', icon: Sparkles },
+  { value: 'explain_topic', label: 'Explain Topic', icon: Lightbulb },
+  { value: 'solve_step_by_step', label: 'Solve Step by Step', icon: Calculator },
   { value: 'exam_answer', label: 'Exam Answer', icon: ListChecks },
+  { value: 'table_compare', label: 'Table Compare', icon: Table2 },
+  { value: 'memory_tricks', label: 'Memory Tricks', icon: BookMarked },
   { value: 'diagram_summary', label: 'Diagram Summary', icon: BarChart3 },
 ];
+
+const ANSWER_STANDARDS = [
+  { value: 'indian', label: 'Indian Standard' },
+  { value: 'international', label: 'International' },
+  { value: 'neutral', label: 'Neutral' },
+];
+
+const MODE_FORMAT_CLASS: Record<string, string> = {
+  table_compare: 'ai-format-table',
+  memory_tricks: 'ai-format-memory',
+  exam_answer: 'ai-format-exam',
+  diagram_summary: 'ai-format-diagram',
+};
 
 export default function AiAssistantPage() {
   const { user } = useAuthStore();
@@ -29,7 +45,9 @@ export default function AiAssistantPage() {
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isLoadingChats, setIsLoadingChats] = useState(true);
-  const [answerMode, setAnswerMode] = useState('');
+  const [studyMode, setStudyMode] = useState('default');
+  const [answerStandard, setAnswerStandard] = useState('indian');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [educationContext, setEducationContext] = useState<{ level?: string; grade?: string }>({});
@@ -108,13 +126,6 @@ export default function AiAssistantPage() {
     const messageText = messageOverride ?? input.trim();
     if (!messageText || isSending) return;
 
-    // Build message with answer mode prefix if selected
-    let fullMessage = messageText;
-    if (answerMode) {
-      const modeLabel = ANSWER_MODES.find(m => m.value === answerMode)?.label || '';
-      fullMessage = `[Format: ${modeLabel}] ${messageText}`;
-    }
-
     // Auto-create chat if none is active
     let chatId = activeChat;
     if (!chatId) {
@@ -142,13 +153,14 @@ export default function AiAssistantPage() {
 
     try {
       const { data } = await api.post(`/ai/chats/${chatId}/messages`, {
-        message: fullMessage,
+        message: messageText,
+        mode: studyMode !== 'default' ? studyMode : undefined,
+        answerStandard,
         educationLevel: educationContext.level,
         grade: educationContext.grade,
       });
 
       setMessages((prev) => [...prev, data.data]);
-      // Refresh chat list for updated titles
       fetchChats();
     } catch {
       toast.error('AI is temporarily unavailable. Please try again.');
@@ -157,12 +169,22 @@ export default function AiAssistantPage() {
     } finally {
       setIsSending(false);
     }
-  }, [input, isSending, activeChat, answerMode, educationContext]);
+  }, [input, isSending, activeChat, studyMode, answerStandard, educationContext]);
 
-  // Quick action handler: sets input AND sends immediately
-  const handleQuickAction = (prompt: string) => {
+  const handleQuickAction = (prompt: string, mode?: string) => {
+    if (mode) setStudyMode(mode);
     setInput(prompt);
     sendMessage(prompt);
+  };
+
+  const handleCopyMessage = async (msgId: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedId(msgId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      toast.error('Failed to copy');
+    }
   };
 
   return (
@@ -214,55 +236,76 @@ export default function AiAssistantPage() {
       {/* Chat Area */}
       <div className="flex-1 bg-white rounded-2xl border border-gray-100 flex flex-col">
         {!activeChat && messages.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-2xl mx-auto px-4">
+          <div className="flex-1 flex items-center justify-center overflow-y-auto">
+            <div className="text-center max-w-2xl mx-auto px-4 py-8">
               <div className="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-brand-600" />
+                <BookOpen className="w-8 h-8 text-brand-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">AI Study Assistant</h2>
-              <p className="text-gray-500 max-w-md mx-auto mb-6">
-                Ask me anything about your studies — concepts, doubts, exam tips, revision help, or career guidance.
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Study Assistant</h2>
+              <p className="text-gray-500 max-w-md mx-auto mb-8">
+                Indian-standard study help for concepts, doubts, summaries, and exam answers.
               </p>
 
-              {/* Quick Study Tools */}
-              <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto text-left">
+              {/* 7 Study Mode Quick Actions */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-2xl mx-auto text-left mb-6">
                 <button
-                  onClick={() => handleQuickAction('Generate 10 MCQ questions for Class 10 Social Science - World War 2 with answers and explanations')}
+                  onClick={() => handleQuickAction('Generate 10 MCQ questions for Class 10 CBSE Science — Chemical Reactions and Equations with answers', 'default')}
                   className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-brand-50 hover:border-brand-200 transition-colors"
                 >
                   <FileQuestion className="w-5 h-5 text-brand-600 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Generate Q&amp;A</span>
                 </button>
                 <button
-                  onClick={() => handleQuickAction('Explain Integration by Parts with step-by-step examples for B.Tech Maths 1')}
+                  onClick={() => handleQuickAction('Explain the concept of Federalism in India as per NCERT Political Science Class 10', 'explain_topic')}
                   className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-green-50 hover:border-green-200 transition-colors"
                 >
                   <Lightbulb className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <span className="text-sm text-gray-700">Explain Topic</span>
                 </button>
                 <button
-                  onClick={() => handleQuickAction('Generate IELTS Writing Task 2 essay practice on technology and education with model answer')}
-                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-amber-50 hover:border-amber-200 transition-colors"
+                  onClick={() => handleQuickAction('Solve step by step: A train travels 360 km at a uniform speed. If the speed had been 5 km/h more, it would have taken 1 hour less. Find the speed.', 'solve_step_by_step')}
+                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition-colors"
                 >
-                  <GraduationCap className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">IELTS Practice</span>
+                  <Calculator className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Solve Step by Step</span>
                 </button>
                 <button
-                  onClick={() => handleQuickAction('Give me 10 current affairs questions for UPSC preparation with answers')}
-                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-purple-50 hover:border-purple-200 transition-colors"
+                  onClick={() => handleQuickAction('Write a model exam answer: Discuss the significance of the Indian Constitution Preamble (8 marks)', 'exam_answer')}
+                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
                 >
-                  <Globe className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">Current Affairs</span>
+                  <ListChecks className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Exam Answer</span>
+                </button>
+                <button
+                  onClick={() => handleQuickAction('Compare Mitosis vs Meiosis in a detailed table for Class 11 Biology', 'table_compare')}
+                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-violet-50 hover:border-violet-200 transition-colors"
+                >
+                  <Table2 className="w-5 h-5 text-violet-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Table Compare</span>
+                </button>
+                <button
+                  onClick={() => handleQuickAction('Create memory tricks and mnemonics for Periodic Table Group 1 elements (Alkali Metals)', 'memory_tricks')}
+                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-amber-50 hover:border-amber-200 transition-colors"
+                >
+                  <BookMarked className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Memory Tricks</span>
+                </button>
+                <button
+                  onClick={() => handleQuickAction('Create a diagram summary of the Indian Parliament structure — Lok Sabha, Rajya Sabha, their composition', 'diagram_summary')}
+                  className="flex items-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-rose-50 hover:border-rose-200 transition-colors"
+                >
+                  <BarChart3 className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Diagram Summary</span>
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-2 justify-center mt-4">
+              <div className="flex flex-wrap gap-2 justify-center">
                 {[
-                  'Solve: ∫ x·e^x dx step by step',
-                  'Explain Newton\'s Laws with examples',
-                  'Causes and effects of World War 2',
-                  'JEE Main 2025 preparation strategy',
-                  'Class 10 CBSE Chemistry important questions',
+                  'Explain India\'s three-tier Panchayati Raj system',
+                  'Solve: Find area of triangle with vertices (1,2), (3,4), (5,0)',
+                  'Causes of the Revolt of 1857',
+                  'Compare DNA and RNA in a table',
+                  'CBSE Class 12 Maths — Integration important formulae',
                 ].map((q) => (
                   <button
                     key={q}
@@ -278,26 +321,29 @@ export default function AiAssistantPage() {
         ) : (
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+                  className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm relative group ${
                     msg.role === 'user'
                       ? 'bg-brand-600 text-white rounded-br-md whitespace-pre-wrap'
                       : 'bg-gray-50 text-gray-900 rounded-bl-md border border-gray-100'
                   }`}
                 >
                   {msg.role === 'assistant' ? (
-                    <div className={`prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 ${
-                      answerMode === 'table_compare' ? 'ai-format-table' :
-                      answerMode === 'memory_trick' ? 'ai-format-memory' :
-                      answerMode === 'exam_answer' ? 'ai-format-exam' :
-                      answerMode === 'diagram_summary' ? 'ai-format-diagram' : ''
-                    }`}>
-                      {renderMarkdownContent(msg.content)}
-                    </div>
+                    <>
+                      <div className={`prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 ${MODE_FORMAT_CLASS[studyMode] || ''}`}>
+                        {renderMarkdownContent(msg.content)}
+                      </div>
+                      <button
+                        onClick={() => handleCopyMessage(msg.id, msg.content)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 transition-all"
+                        title="Copy"
+                      >
+                        {copiedId === msg.id
+                          ? <Check className="w-3.5 h-3.5 text-green-600" />
+                          : <Copy className="w-3.5 h-3.5 text-gray-500" />}
+                      </button>
+                    </>
                   ) : msg.content}
                 </div>
               </div>
@@ -316,22 +362,33 @@ export default function AiAssistantPage() {
 
         {/* Input Area */}
         <div className="p-4 border-t border-gray-100">
-          {/* Answer Mode Selector */}
-          <div className="flex gap-1.5 mb-2 overflow-x-auto pb-1">
-            {ANSWER_MODES.map((mode) => (
-              <button
-                key={mode.value}
-                onClick={() => setAnswerMode(answerMode === mode.value ? '' : mode.value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border whitespace-nowrap transition-colors ${
-                  answerMode === mode.value
-                    ? 'bg-brand-50 border-brand-200 text-brand-700'
-                    : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                <mode.icon className="w-3 h-3" />
-                {mode.label}
-              </button>
-            ))}
+          {/* Study Mode + Answer Standard Row */}
+          <div className="flex items-center gap-3 mb-2 overflow-x-auto pb-1">
+            <div className="flex gap-1.5 flex-1">
+              {STUDY_MODES.map((mode) => (
+                <button
+                  key={mode.value}
+                  onClick={() => setStudyMode(studyMode === mode.value ? 'default' : mode.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border whitespace-nowrap transition-colors ${
+                    studyMode === mode.value
+                      ? 'bg-brand-50 border-brand-200 text-brand-700'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  <mode.icon className="w-3 h-3" />
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+            <select
+              value={answerStandard}
+              onChange={(e) => setAnswerStandard(e.target.value)}
+              className="text-xs border border-gray-200 rounded-full px-3 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-brand-400"
+            >
+              {ANSWER_STANDARDS.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
           </div>
           <div className="flex gap-3">
             <input
