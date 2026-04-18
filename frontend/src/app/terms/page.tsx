@@ -72,11 +72,26 @@ Violation of these terms may result in immediate suspension or termination of yo
 • While we strive for accuracy, AI responses may occasionally contain errors or inaccuracies
 • AI features are provided "as is" and should not be relied upon as the sole source of information for critical academic decisions
 • We continuously improve our AI models but do not guarantee specific outcomes or results
-• Usage limits may apply to AI features based on your subscription plan`,
+• Usage limits may apply to AI features based on your subscription plan
+• AI-generated content is filtered for safety and appropriateness. Content that is abusive, violent, sexually explicit, discriminatory, or otherwise harmful is strictly prohibited and will be blocked by our safety systems
+• Users must not attempt to bypass AI safety filters or use the AI for any purpose other than legitimate educational queries`,
+  },
+  {
+    id: 'student-safety',
+    title: '7. Student Safety & Content Policy',
+    content: `SRP Education AI is committed to providing a safe learning environment for all students, including minors. We enforce the following policies:
+
+• Zero Tolerance for Harmful Content: The Platform strictly prohibits content that is abusive, vulgar, profane, sexually explicit or suggestive, violent, discriminatory (based on race, caste, gender, religion, disability, or any other characteristic), or otherwise inappropriate for an educational setting.
+• Student Protection: We implement multiple layers of content filtering to protect students from harmful, misleading, or age-inappropriate content. Our AI systems are designed to refuse inappropriate requests and redirect students to educational content.
+• Anti-Harassment: Bullying, harassment, intimidation, or threatening behavior toward any user is strictly prohibited and will result in immediate account suspension.
+• Reporting: Users can report inappropriate content or behavior by contacting support@srpailabs.com. We investigate all reports within 24 hours.
+• Parental Oversight: For users under 18, we encourage parental oversight of Platform usage. Parents and guardians may request information about their child's usage patterns.
+• Mental Health: If our AI systems detect signs of distress or self-harm, they will provide supportive responses and encourage the student to seek help from a trusted adult or professional helpline.
+• Copyright Compliance: All study materials and resources provided through the Platform use properly licensed, open-source, or government-published content. Users must not upload or share copyrighted materials without proper authorization.`,
   },
   {
     id: 'institution-terms',
-    title: '7. Institution-Specific Terms',
+    title: '8. Institution-Specific Terms',
     content: `For institutions (schools, colleges, coaching centers, universities) using our multi-tenant platform:
 
 • Data Ownership: Student and institutional data belongs to the institution. We process this data as a service provider.
@@ -87,7 +102,7 @@ Violation of these terms may result in immediate suspension or termination of yo
   },
   {
     id: 'termination',
-    title: '8. Termination',
+    title: '9. Termination',
     content: `We may terminate or suspend your account immediately, without prior notice, for any reason including, without limitation, breach of these Terms. Upon termination:
 
 • Your right to use the Platform ceases immediately
@@ -98,7 +113,7 @@ You may delete your account at any time through your account settings or by cont
   },
   {
     id: 'liability',
-    title: '9. Limitation of Liability',
+    title: '10. Limitation of Liability',
     content: `TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
 
 • The Platform is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express or implied
@@ -108,14 +123,14 @@ You may delete your account at any time through your account settings or by cont
   },
   {
     id: 'governing-law',
-    title: '10. Governing Law & Disputes',
+    title: '11. Governing Law & Disputes',
     content: `These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising from these Terms or the use of the Platform shall be subject to the exclusive jurisdiction of the courts in India.
 
 We encourage users to contact us directly at support@srpailabs.com to resolve any issues before pursuing formal dispute resolution.`,
   },
   {
     id: 'modifications',
-    title: '11. Modifications to Terms',
+    title: '12. Modifications to Terms',
     content: `We reserve the right to modify these Terms at any time. Material changes will be communicated through:
 
 • Email notification to your registered email address
@@ -126,7 +141,7 @@ Your continued use of the Platform after the effective date of revised Terms con
   },
   {
     id: 'contact',
-    title: '12. Contact Information',
+    title: '13. Contact Information',
     content: `For questions about these Terms of Service, please contact us:
 
 • Email: support@srpailabs.com

@@ -466,6 +466,47 @@ class StudentDirectService {
     if (!plan) throw new NotFoundError('Study plan not found');
     await prisma.studyPlan.delete({ where: { id: planId } });
   }
+
+  // ─── EXAM PREP SESSIONS ──────────────────────────────────
+
+  async listExamPrepSessions(userId: string, query: Record<string, string>) {
+    const page = parseInt(query.page) || 1;
+    const limit = Math.min(parseInt(query.limit) || 20, 50);
+
+    const [items, total] = await Promise.all([
+      prisma.examPrepSession.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          subject: true,
+          topic: true,
+          board: true,
+          difficulty: true,
+          questionType: true,
+          questionCount: true,
+          educationCategory: true,
+          stream: true,
+          course: true,
+          classYear: true,
+          createdAt: true,
+        },
+      }),
+      prisma.examPrepSession.count({ where: { userId } }),
+    ]);
+
+    return { items, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async getExamPrepSession(userId: string, sessionId: string) {
+    const session = await prisma.examPrepSession.findFirst({
+      where: { id: sessionId, userId },
+    });
+    if (!session) throw new NotFoundError('Exam prep session not found');
+    return session;
+  }
 }
 
 export const studentDirectService = new StudentDirectService();

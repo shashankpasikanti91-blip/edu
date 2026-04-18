@@ -57,7 +57,8 @@ router.get('/streams', (req: Request, res: Response) => {
 router.get('/grades', (req: Request, res: Response) => {
   const { level } = req.query;
   if (level && typeof level === 'string') {
-    res.json({ success: true, data: getGradesForLevel(level) });
+    const grades = getGradesForLevel(level);
+    res.json({ success: true, data: grades.map(g => ({ value: g, label: g })) });
   } else {
     // Return all levels with grades
     res.json({ success: true, data: ACADEMIC_LEVELS.map(l => ({ level: l.value, label: l.label, grades: l.grades })) });
@@ -66,7 +67,8 @@ router.get('/grades', (req: Request, res: Response) => {
 
 // GET /api/v1/taxonomy/boards
 router.get('/boards', (_req: Request, res: Response) => {
-  res.json({ success: true, data: BOARDS });
+  const data = BOARDS.map(b => ({ value: b.shortName, label: b.name, boardType: b.boardType, country: b.country }));
+  res.json({ success: true, data });
 });
 
 // GET /api/v1/taxonomy/regulatory-bodies
@@ -134,7 +136,8 @@ router.get('/question-counts', (_req: Request, res: Response) => {
 
 // GET /api/v1/taxonomy/competitive-exams
 router.get('/competitive-exams', (_req: Request, res: Response) => {
-  res.json({ success: true, data: COMPETITIVE_EXAMS });
+  const data = COMPETITIVE_EXAMS.map(e => ({ value: e, label: e }));
+  res.json({ success: true, data });
 });
 
 export const taxonomyRoutes = router;

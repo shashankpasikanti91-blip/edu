@@ -25,6 +25,9 @@ interface ProfileForm {
   lastName: string;
   phone: string;
   preferredLang: string;
+  dateOfBirth: string;
+  bio: string;
+  displayName: string;
 }
 
 export default function SettingsPage() {
@@ -36,6 +39,7 @@ export default function SettingsPage() {
   // Personal profile state
   const [form, setForm] = useState<ProfileForm>({
     firstName: '', lastName: '', phone: '', preferredLang: 'en',
+    dateOfBirth: '', bio: '', displayName: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -55,10 +59,18 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (user) {
-      setForm({ firstName: user.firstName, lastName: user.lastName, phone: '', preferredLang: 'en' });
+      setForm({ firstName: user.firstName, lastName: user.lastName, phone: '', preferredLang: 'en', dateOfBirth: '', bio: '', displayName: '' });
       api.get('/users/profile').then(({ data }) => {
         const p = data.data;
-        setForm({ firstName: p.firstName, lastName: p.lastName, phone: p.phone || '', preferredLang: p.preferredLang || 'en' });
+        setForm({
+          firstName: p.firstName,
+          lastName: p.lastName,
+          phone: p.phone || '',
+          preferredLang: p.preferredLang || 'en',
+          dateOfBirth: p.dateOfBirth ? p.dateOfBirth.split('T')[0] : '',
+          bio: p.bio || '',
+          displayName: p.displayName || '',
+        });
       }).catch(() => {});
     }
   }, [user]);
@@ -218,12 +230,27 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} className="input-field" placeholder="How you want to be called (optional)" />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" value={user?.email ?? ''} disabled className="input-field bg-gray-50 cursor-not-allowed" />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="input-field" placeholder="+91 XXXXX XXXXX" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                  <input type="date" value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} className="input-field" max={new Date().toISOString().split('T')[0]} />
+                </div>
+              </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="input-field" placeholder="+91 XXXXX XXXXX" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">About Me</label>
+                <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="input-field" rows={3} placeholder="Tell us about yourself — what are you studying, your interests, career goals..." maxLength={500} />
+                <p className="text-xs text-gray-400 mt-1">{form.bio.length}/500 characters</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>

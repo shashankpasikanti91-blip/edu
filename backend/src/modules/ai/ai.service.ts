@@ -127,7 +127,19 @@ RULES:
 - Respond in the language the student uses (Hindi, Telugu, Tamil, etc.) while keeping technical terms in English.
 - For competitive exams, mention exam pattern and marking scheme when relevant.
 - Cite which board/syllabus a topic belongs to when applicable.
-- ALWAYS match complexity to the learner's level — never give B.Tech content to a Class 5 student, and never oversimplify for a PhD scholar.`;
+- ALWAYS match complexity to the learner's level — never give B.Tech content to a Class 5 student, and never oversimplify for a PhD scholar.
+
+STUDENT SAFETY — STRICTLY ENFORCED:
+- You are interacting with STUDENTS, including minors. Maintain the highest standards of safety and appropriateness at all times.
+- NEVER generate content that is abusive, vulgar, profane, sexually explicit, sexually suggestive, or romantic in nature.
+- NEVER generate content that promotes, glorifies, or describes violence, self-harm, substance abuse, bullying, or harassment.
+- NEVER generate content that is discriminatory, hateful, racist, sexist, casteist, or targets any individual or group.
+- NEVER provide instructions for weapons, drugs, hacking, or any illegal activity.
+- NEVER share personal opinions on politics, religion, or controversial social topics — remain neutral and educational.
+- If a student asks something inappropriate, harmful, or off-topic, politely redirect them to educational content. Example: "I'm here to help with your studies! Let's focus on your subjects. What topic would you like to learn about?"
+- If you detect distress, self-harm ideation, or bullying, respond with empathy and encourage the student to speak with a trusted adult, teacher, or counselor. Provide the iCall helpline number: 9152987821.
+- Keep all examples, analogies, and scenarios age-appropriate and culturally sensitive for Indian students.
+- Use encouraging, respectful, and inclusive language at all times.`;
 }
 
 const SYSTEM_PROMPT = buildAdaptiveSystemPrompt();
@@ -362,6 +374,18 @@ class AiService {
   async sendMessage(userId: string, chatId: string, userMessage: string, educationContext?: { level?: string; grade?: string }) {
     if (!userMessage.trim()) {
       throw new BadRequestError('Message cannot be empty');
+    }
+
+    // Content safety check — block obviously harmful input
+    const sanitized = userMessage.toLowerCase();
+    const blockedPatterns = [
+      /\b(porn|sex\s*chat|nude|naked|xxx|hentai|erotic)\b/i,
+      /\b(kill\s+(yourself|myself|someone)|suicide\s+method|how\s+to\s+die)\b/i,
+      /\b(make\s+a?\s*(bomb|weapon|drug|meth))\b/i,
+      /\b(hack\s+(into|someone|account|password))\b/i,
+    ];
+    if (blockedPatterns.some(p => p.test(sanitized))) {
+      throw new BadRequestError('Your message contains content that is not appropriate for an educational platform. Please keep your queries related to your studies.');
     }
 
     const chat = await prisma.aiChat.findFirst({

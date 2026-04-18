@@ -176,4 +176,24 @@ router.delete(
   })
 );
 
+// ─── EXAM PREP SESSIONS ──────────────────────────────────
+
+router.get(
+  '/exam-prep-sessions',
+  asyncHandler(async (req, res) => {
+    const authReq = req as AuthenticatedRequest;
+    const data = await studentDirectService.listExamPrepSessions(authReq.user!.id, req.query as Record<string, string>);
+    res.json({ success: true, message: 'Exam prep sessions retrieved', data });
+  })
+);
+
+router.get(
+  '/exam-prep-sessions/:id',
+  asyncHandler(async (req, res) => {
+    const authReq = req as AuthenticatedRequest;
+    const data = await studentDirectService.getExamPrepSession(authReq.user!.id, req.params.id);
+    res.json({ success: true, message: 'Exam prep session retrieved', data });
+  })
+);
+
 export const studentRoutes = router;

@@ -138,13 +138,18 @@ You can manage cookie preferences through your browser settings. Disabling essen
   },
   {
     id: 'children',
-    title: '9. Children\'s Privacy',
+    title: '9. Children\'s Privacy & Student Safety',
     content: `Our Platform is designed for educational use, which includes use by minors. For users under 18:
 
 • Institutional accounts are managed by the institution, which is responsible for obtaining necessary parental consents
 • B2C student accounts for users under 18 require parental consent during registration
 • We do not knowingly collect personal information from children under 13 without verifiable parental consent
-• Parents and guardians can contact us to review, update, or delete their child's information`,
+• Parents and guardians can contact us to review, update, or delete their child's information
+• All AI-generated content is filtered through multiple safety layers to ensure age-appropriate responses
+• We do not display advertisements or promotional content to minor users
+• Student data is never used for profiling, targeted marketing, or any non-educational purpose
+• Our AI systems are programmed to refuse inappropriate, harmful, violent, or sexually explicit content requests
+• We encourage parents and guardians to actively participate in their child's use of the Platform`,
   },
   {
     id: 'changes',

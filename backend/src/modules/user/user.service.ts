@@ -17,13 +17,18 @@ class UserService {
         avatarUrl: true,
         phone: true,
         dateOfBirth: true,
+        bio: true,
+        displayName: true,
         preferredLang: true,
+        accountType: true,
+        directStudentId: true,
         tenantId: true,
         createdAt: true,
         tenant: { select: { id: true, name: true, slug: true } },
         studentProfile: true,
         parentProfile: true,
         teacherProfile: true,
+        individualAcademic: true,
       },
     });
 
@@ -42,6 +47,8 @@ class UserService {
       phone?: string;
       dateOfBirth?: string;
       preferredLang?: string;
+      bio?: string;
+      displayName?: string;
     }
   ) {
     const user = await prisma.user.update({
@@ -49,9 +56,11 @@ class UserService {
       data: {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
-        ...(data.phone && { phone: data.phone }),
+        ...(data.phone !== undefined && { phone: data.phone || null }),
         ...(data.dateOfBirth && { dateOfBirth: new Date(data.dateOfBirth) }),
         ...(data.preferredLang && { preferredLang: data.preferredLang }),
+        ...(data.bio !== undefined && { bio: data.bio || null }),
+        ...(data.displayName !== undefined && { displayName: data.displayName || null }),
       },
       select: {
         id: true,
@@ -61,6 +70,8 @@ class UserService {
         phone: true,
         dateOfBirth: true,
         preferredLang: true,
+        bio: true,
+        displayName: true,
         updatedAt: true,
       },
     });

@@ -78,7 +78,7 @@ export default function AcademicProfilePage() {
           api.get('/taxonomy/boards'),
           api.get('/taxonomy/competitive-exams'),
           api.get('/taxonomy/grades'),
-          api.get('/student/academic-profile').catch(() => null),
+          api.get('/students/academic-profile').catch(() => null),
         ]);
 
         setAcademicLevels(levelsRes.data.data || []);
@@ -157,7 +157,7 @@ export default function AcademicProfilePage() {
     }
     setSaving(true);
     try {
-      await api.put('/student/academic-profile', formData);
+      await api.put('/students/academic-profile', formData);
       toast.success('Academic profile saved!');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };

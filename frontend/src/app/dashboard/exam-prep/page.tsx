@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileQuestion, BookOpen, Clock, CheckCircle, Copy, Check, Download, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Loader2, FileQuestion, BookOpen, Clock, CheckCircle, Copy, Check, Download, RefreshCw, AlertTriangle, RotateCcw, Eye } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
@@ -38,11 +38,29 @@ interface QuizAttempt {
   quiz: { title: string; subject?: { name: string } };
 }
 
+interface ExamPrepSession {
+  id: string;
+  subject: string;
+  topic: string | null;
+  board: string | null;
+  difficulty: string | null;
+  questionType: string | null;
+  questionCount: number | null;
+  educationCategory: string | null;
+  stream: string | null;
+  course: string | null;
+  classYear: string | null;
+  generatedContent?: string;
+  createdAt: string;
+}
+
 // ─── Component ──────────────────────────────────────────────
 
 export default function ExamPrepPage() {
   const { user } = useAuthStore();
   const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
+  const [pastSessions, setPastSessions] = useState<ExamPrepSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Taxonomy reference data
@@ -53,7 +71,7 @@ export default function ExamPrepPage() {
   const [yearsOrSemesters, setYearsOrSemesters] = useState<string[]>([]);
   const [grades, setGrades] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<SubjectEntry[]>([]);
-  const [boards, setBoards] = useState<{ name: string; shortName: string }[]>([]);
+  const [boards, setBoards] = useState<{ value: string; label: string }[]>([]);
   const [examTypes, setExamTypes] = useState<TaxonomyOption[]>([]);
   const [difficultyLevels, setDifficultyLevels] = useState<TaxonomyOption[]>([]);
 
@@ -163,6 +181,39 @@ export default function ExamPrepPage() {
     }
     load();
   }, [user]);
+
+  // Load past exam prep sessions
+  const loadPastSessions = useCallback(async () => {
+    setLoadingSessions(true);
+    try {
+      const { data } = await api.get('/students/exam-prep-sessions?limit=10');
+      setPastSessions(data.data?.items || []);
+    } catch {
+      // silent
+    } finally {
+      setLoadingSessions(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPastSessions();
+  }, [loadPastSessions]);
+
+  const viewPastSession = async (sessionId: string) => {
+    try {
+      const { data } = await api.get(`/students/exam-prep-sessions/${sessionId}`);
+      const session = data.data;
+      if (session?.generatedContent) {
+        setGeneratedContent(session.generatedContent);
+        setSubject(session.subject || '');
+        toast.success('Loaded previous session');
+      } else {
+        toast.error('No content found for this session');
+      }
+    } catch {
+      toast.error('Failed to load session');
+    }
+  };
 
   // ─── Cascading Filters ─────────────────────────────────
 
@@ -281,6 +332,7 @@ export default function ExamPrepPage() {
       });
 
       setGeneratedContent(data.data.questions);
+      loadPastSessions();
     } catch {
       setGenError(true);
       toast.error('Failed to generate questions. Please try again.');
@@ -416,7 +468,7 @@ export default function ExamPrepPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Board / Curriculum</label>
               <select value={board} onChange={(e) => setBoard(e.target.value)} className="input-field">
                 <option value="">Select Board</option>
-                {boards.map((b) => <option key={b.shortName} value={b.shortName}>{b.name}</option>)}
+                {boards.map((b) => <option key={b.value} value={b.value}>{b.label}</option>)}
               </select>
             </div>
 
@@ -515,6 +567,44 @@ export default function ExamPrepPage() {
             </div>
           </div>
         )}
+
+        {/* Past Exam Prep Sessions */}
+        <div className="card mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <RotateCcw className="w-5 h-5 text-brand-600" />
+            Previous Question Sessions
+          </h2>
+          {loadingSessions ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="w-6 h-6 animate-spin text-brand-600" />
+            </div>
+          ) : pastSessions.length === 0 ? (
+            <div className="text-center py-6 text-gray-500">
+              <RotateCcw className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+              <p>No previous sessions yet. Generate questions above to get started!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pastSessions.map((session) => (
+                <button
+                  key={session.id}
+                  onClick={() => viewPastSession(session.id)}
+                  className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-brand-50 hover:border-brand-200 border border-transparent transition-colors text-left"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">
+                      {session.subject}{session.topic ? ` — ${session.topic}` : ''}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {session.board || 'General'} &middot; {session.difficulty || 'Mixed'} &middot; {session.questionCount || '?'} questions &middot; {new Date(session.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Eye className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Quiz History */}
         <div className="card">
