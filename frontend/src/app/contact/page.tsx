@@ -9,6 +9,7 @@ import {
   ArrowRight, MessageSquare, Clock, Building2, Users,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { api } from '@/lib/api';
 
 const contactReasons = [
   { label: 'General Inquiry', value: 'general' },
@@ -27,19 +28,11 @@ export default function ContactPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (res.ok) {
-        toast.success('Message sent! We\'ll get back to you within 24 hours.');
-        setForm({ name: '', email: '', reason: '', subject: '', message: '' });
-      } else {
-        toast.error('Failed to send message. Please try emailing us directly at support@srpailabs.com');
-      }
+      await api.post('/contact', form);
+      toast.success('Message sent! We\'ll get back to you within 24 hours.');
+      setForm({ name: '', email: '', reason: '', subject: '', message: '' });
     } catch {
-      toast.error('Network error. Please try emailing us directly at support@srpailabs.com');
+      toast.error('Failed to send message. Please try emailing us directly at support@srpailabs.com');
     } finally {
       setSubmitting(false);
     }

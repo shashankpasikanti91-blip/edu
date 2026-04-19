@@ -108,12 +108,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Stricter rate limit for auth endpoints
+// Demo accounts that should never be rate-limited
+import { DEMO_EMAILS } from './shared/constants';
+
+// Stricter rate limit for auth endpoints — skip demo emails
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    const email = req.body?.email?.toLowerCase?.();
+    return !!email && DEMO_EMAILS.includes(email);
+  },
   message: {
     success: false,
     message: 'Too many authentication attempts. Please try again later.',

@@ -111,3 +111,12 @@ export const MAX_LOGIN_ATTEMPTS = 5;
 export const LOCK_DURATION_MINUTES = 30;
 export const EMAIL_TOKEN_EXPIRY_HOURS = 24;
 export const PASSWORD_RESET_EXPIRY_HOURS = 1;
+
+// Demo / internal accounts — exempt from rate-limits & lockout
+export const DEMO_EMAILS: string[] = [
+  'demo-student@srpailabs.com',
+  'demo-institution@srpailabs.com',
+  'owner@srpailabs.com',
+  'admin@srpeducation.ai',
+  'owner@demoschool.edu',
+];

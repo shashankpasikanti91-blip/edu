@@ -15,6 +15,7 @@ import {
   AccountType,
   MAX_LOGIN_ATTEMPTS,
   LOCK_DURATION_MINUTES,
+  DEMO_EMAILS,
   EMAIL_TOKEN_EXPIRY_HOURS,
   PASSWORD_RESET_EXPIRY_HOURS,
   TokenType,
@@ -372,8 +373,10 @@ class AuthService {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    // Check if account is locked
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
+    const isDemoAccount = DEMO_EMAILS.includes(user.email.toLowerCase());
+
+    // Check if account is locked (demo accounts are never locked)
+    if (!isDemoAccount && user.lockedUntil && user.lockedUntil > new Date()) {
       const remainingMinutes = Math.ceil(
         (user.lockedUntil.getTime() - Date.now()) / 60000
       );
@@ -392,6 +395,11 @@ class AuthService {
     const isValid = await argon2.verify(user.passwordHash, data.password);
 
     if (!isValid) {
+      // Demo accounts: never increment lockout counters
+      if (isDemoAccount) {
+        throw new UnauthorizedError('Invalid email or password');
+      }
+
       const attempts = user.loginAttempts + 1;
       const updateData: Record<string, unknown> = { loginAttempts: attempts };
 
