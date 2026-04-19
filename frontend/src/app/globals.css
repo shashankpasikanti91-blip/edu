@@ -7,6 +7,16 @@
 @layer base {
   body {
     @apply bg-surface-secondary text-gray-900 font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Touch-friendly minimum tap targets */
+  @media (pointer: coarse) {
+    button, a, select, input[type="checkbox"], input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 
   ::selection {

@@ -22,41 +22,41 @@ function useScrollReveal() {
 /* ──────────────────────────── Stat counter ──────────────────────────── */
 const stats = [
   { value: '8+', label: 'Academic Streams' },
-  { value: '64', label: 'Data Models' },
-  { value: '7', label: 'User Roles' },
-  { value: '40+', label: 'Platform Features' },
+  { value: '6th–PhD', label: 'Class Coverage' },
+  { value: '5+', label: 'Learning Domains' },
+  { value: '📱', label: 'Mobile Friendly' },
 ];
 
 /* ───────────────────── Academic streams data ───────────────────────── */
 const streams = [
-  { icon: '🏫', name: 'K-12 / CBSE / ICSE', desc: 'Board exam prep & foundations' },
-  { icon: '⚙️', name: 'Engineering / JEE', desc: 'IIT-JEE Main & Advanced' },
-  { icon: '🩺', name: 'Medical / NEET', desc: 'NEET-UG & PG preparation' },
-  { icon: '💊', name: 'Nursing & Allied', desc: 'Nursing entrance & practice' },
-  { icon: '📊', name: 'Commerce / CA', desc: 'CA, CS & commerce streams' },
-  { icon: '🎓', name: 'University / UG-PG', desc: 'Undergraduate & postgraduate' },
-  { icon: '📝', name: 'UPSC / Govt Exams', desc: 'Civil services & state exams' },
-  { icon: '🌍', name: 'IELTS / GRE / TOEFL', desc: 'International study abroad' },
+  { icon: '🏫', name: 'K-12 / CBSE / ICSE', desc: 'Class 6–12 board exam prep & foundations' },
+  { icon: '⚙️', name: 'Engineering & MPC', desc: 'JEE, GATE, BTech & diploma — Maths, Physics, Chemistry' },
+  { icon: '🩺', name: 'Medical / NEET', desc: 'NEET-UG, PG, nursing & allied health' },
+  { icon: '📊', name: 'Commerce & CA', desc: 'CA, CS, CMA, BCom, BBA — accounts, tax, GST' },
+  { icon: '🏭', name: 'Industry & Vocational', desc: 'Workplace safety, ITI, technical certifications' },
+  { icon: '🎓', name: 'University / UG-PG', desc: 'Undergraduate & postgraduate across all streams' },
+  { icon: '📝', name: 'UPSC / Govt Exams', desc: 'Civil services, state PSC & competitive exams' },
+  { icon: '🌍', name: 'IELTS / GRE / TOEFL', desc: 'International study abroad prep' },
 ];
 
 /* ─────────────────── Platform capabilities ─────────────────────────── */
 const capabilities = [
-  { icon: '🤖', title: 'AI Study Assistant', desc: 'Ask questions in any subject. Get step-by-step solutions, explanations, and related concept links.' },
-  { icon: '📋', title: 'Adaptive Exam Prep', desc: 'Practice with JEE, NEET, UPSC-pattern quizzes that adapt difficulty based on your performance.' },
-  { icon: '📈', title: 'Real-Time Analytics', desc: 'Track study hours, quiz scores, strengths, weaknesses — with Power BI-style dashboards.' },
-  { icon: '📅', title: 'Smart Study Planner', desc: 'AI-generated daily study schedules based on your goals, deadlines, and available time.' },
-  { icon: '📝', title: 'Rich Notes & Flashcards', desc: 'Create structured notes with LaTeX math, diagrams, and auto-generated revision flashcards.' },
-  { icon: '🏛️', title: 'Multi-Tenant Architecture', desc: 'Schools, colleges, and coaching centers get their own isolated environment with full branding.' },
+  { icon: '🤖', title: 'AI Study Assistant', desc: 'Ask questions in simple language. Get step-by-step answers with examples, diagrams, and memory tricks — adapted to your level.' },
+  { icon: '📱', title: 'Mobile-First Learning', desc: 'Study from your phone anytime, anywhere. Touch-friendly interface designed for students on the go.' },
+  { icon: '🎨', title: 'Multiple Learning Styles', desc: 'Learn visually with tables & diagrams, point-wise summaries, real-life Indian examples, or memory aids — your choice.' },
+  { icon: '📊', title: 'Engineering & MPC', desc: 'Physics, Chemistry, Maths from basics to GATE. Real-world examples like bridge stress, circuit design, chemical reactions.' },
+  { icon: '💰', title: 'Commerce & CA Prep', desc: 'Accounting, taxation, GST, business law. From family shop examples to professional CA/CS/CMA exam prep.' },
+  { icon: '🏛️', title: 'Multi-Tenant for Institutions', desc: 'Schools & coaching centers get their own environment with branding, student management, and analytics.' },
 ];
 
 /* ───────────────────── Solutions for each role ─────────────────────── */
 const solutionStudents = [
-  'AI-powered doubt solving across all subjects',
-  'Personalized quiz practice that adapts to your level',
-  'Daily study planner with reminders and tracking',
-  'Progress analytics with strength/weakness mapping',
-  'Notes, flashcards, and revision tools in one place',
-  'IELTS, GRE, JEE & NEET specific prep modules',
+  'AI explains in simple language — no complicated English',
+  'Works on your phone — no laptop needed',
+  'Visual learning, point-wise notes & real-life examples',
+  'Engineering, Commerce, Medical & Industry modules',
+  'Current affairs & exam updates built-in',
+  'JEE, NEET, CA, GATE & UPSC specific prep',
 ];
 const solutionInstitutions = [
   'Multi-department management with RBAC',
@@ -70,9 +70,9 @@ const solutionInstitutions = [
 /* ─────────────────── Trust / Differentiators ───────────────────────── */
 const trustItems = [
   { icon: '🔒', title: 'Bank-Level Security', desc: 'Argon2id hashing, JWT sessions, AES-256 encryption, rate limiting, RBAC, and full audit trails.' },
-  { icon: '📊', title: 'Honest Analytics', desc: 'No inflated metrics. Every data point comes directly from actual student activity and quiz performance.' },
-  { icon: '🧠', title: 'Curriculum-Aware AI', desc: 'Our AI models are tuned to Indian and international curricula — CBSE, ICSE, IB, state boards, and competitive exams.' },
-  { icon: '🌐', title: 'Multi-Language Support', desc: 'Interface and AI responses in English, Hindi, Telugu, Tamil, and more — growing every quarter.' },
+  { icon: '�', title: 'Mobile Friendly', desc: 'Designed for students who study on phones. Touch-friendly, fast-loading, works on any device.' },
+  { icon: '🧠', title: 'Simple Language AI', desc: 'AI adapts to your level — Class 6 gets simple words, PhD gets academic language. No confusing English.' },
+  { icon: '⚖️', title: 'Legal & Safe', desc: 'Anti-misuse protection, content filters, and compliance with Indian IT Act & Copyright Act. Your data stays safe.' },
 ];
 
 export default function HomePage() {
@@ -102,7 +102,7 @@ export default function HomePage() {
                 Education
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-xl leading-relaxed">
-                From K-12 to competitive exams, IELTS to UPSC — one platform for students, institutions, and coaching centers. AI tutoring, real analytics, and honest progress tracking.
+                From Class 6 to PhD — Engineering, Commerce, Medical & more. AI explains in simple language, works on your phone, and adapts to how you learn best.
               </p>
               <div className="flex flex-wrap gap-4 pt-2">
                 <Link href="/signup" className="btn-primary text-base px-8 py-3.5 shadow-glow hover:shadow-glow-lg">
@@ -329,7 +329,8 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-r from-brand-600 via-violet-600 to-brand-600 relative overflow-hidden">
         <div className="relative max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Ready to Transform Learning?</h2>
-          <p className="text-lg text-white/80 mb-8">Start your learning journey with AI-powered education tools built for students and institutions.</p>
+          <p className="text-lg text-white/80 mb-8">Simple language. Works on your phone. Adapts to your learning style. From Class 6 to PhD.</p>
+          <p className="text-xs text-white/50 mt-6">SRP Education AI is a supplementary learning tool. Not a substitute for teachers, schools, or official institutions.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup" className="px-8 py-4 rounded-full bg-white text-brand-700 font-bold text-lg hover:bg-gray-100 transition-colors shadow-xl">
               Start Free Trial

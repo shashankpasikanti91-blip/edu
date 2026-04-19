@@ -191,13 +191,16 @@ export default function AiAssistantPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] gap-6 -m-8">
-      {/* Chat List Sidebar */}
-      <div className="w-72 bg-white rounded-2xl border border-gray-100 flex flex-col">
+    <div className="flex h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] h-[calc(100vh-3.5rem)] gap-0 lg:gap-6 -m-4 sm:-m-6 lg:-m-8">
+      {/* Chat List Sidebar — hidden on mobile, shown with toggle */}
+      <div className={`
+        ${activeChat ? 'hidden lg:flex' : 'flex'}
+        w-full lg:w-72 bg-white rounded-none lg:rounded-2xl border-0 lg:border border-gray-100 flex-col
+      `}>
         <div className="p-4 border-b border-gray-100">
           <button
             onClick={createChat}
-            className="btn-primary w-full flex items-center justify-center gap-2"
+            className="btn-primary w-full flex items-center justify-center gap-2 py-3"
           >
             <Plus className="w-4 h-4" />
             New Chat
@@ -215,7 +218,7 @@ export default function AiAssistantPage() {
             chats.map((chat) => (
               <div
                 key={chat.id}
-                className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                className={`group flex items-center gap-2 px-3 py-3 rounded-xl cursor-pointer transition-colors ${
                   activeChat === chat.id
                     ? 'bg-brand-50 text-brand-700'
                     : 'hover:bg-gray-50 text-gray-700'
@@ -237,7 +240,23 @@ export default function AiAssistantPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 bg-white rounded-2xl border border-gray-100 flex flex-col">
+      <div className={`
+        ${!activeChat ? 'hidden lg:flex' : 'flex'}
+        flex-1 bg-white rounded-none lg:rounded-2xl border-0 lg:border border-gray-100 flex-col
+      `}>
+        {/* Mobile back-to-chats button */}
+        {activeChat && (
+          <div className="lg:hidden flex items-center gap-2 p-3 border-b border-gray-100">
+            <button
+              onClick={() => setActiveChat(null)}
+              className="flex items-center gap-1.5 text-sm text-brand-600 font-medium px-2 py-1.5 rounded-lg hover:bg-brand-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              All Chats
+            </button>
+          </div>
+        )}
+
         {!activeChat && messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center overflow-y-auto">
             <div className="text-center max-w-2xl mx-auto px-4 py-8">
@@ -364,36 +383,36 @@ export default function AiAssistantPage() {
         )}
 
         {/* Input Area */}
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-3 sm:p-4 border-t border-gray-100">
           {/* Study Mode + Answer Standard Row */}
-          <div className="flex items-center gap-3 mb-2 overflow-x-auto pb-1">
-            <div className="flex gap-1.5 flex-1">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 overflow-x-auto pb-1 -mx-1 px-1">
+            <div className="flex gap-1.5 flex-shrink-0">
               {STUDY_MODES.map((mode) => (
                 <button
                   key={mode.value}
                   onClick={() => setStudyMode(studyMode === mode.value ? 'default' : mode.value)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border whitespace-nowrap transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-full border whitespace-nowrap transition-colors ${
                     studyMode === mode.value
                       ? 'bg-brand-50 border-brand-200 text-brand-700'
                       : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}
                 >
                   <mode.icon className="w-3 h-3" />
-                  {mode.label}
+                  <span className="hidden sm:inline">{mode.label}</span>
                 </button>
               ))}
             </div>
             <select
               value={answerStandard}
               onChange={(e) => setAnswerStandard(e.target.value)}
-              className="text-xs border border-gray-200 rounded-full px-3 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-brand-400"
+              className="text-xs border border-gray-200 rounded-full px-3 py-2 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-brand-400 flex-shrink-0"
             >
               {ANSWER_STANDARDS.map((s) => (
                 <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <input
               ref={inputRef}
               type="text"

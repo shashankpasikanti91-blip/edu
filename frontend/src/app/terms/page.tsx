@@ -77,8 +77,62 @@ Violation of these terms may result in immediate suspension or termination of yo
 • Users must not attempt to bypass AI safety filters or use the AI for any purpose other than legitimate educational queries`,
   },
   {
+    id: 'content-sourcing',
+    title: '7. Content Sourcing, References & Copyright',
+    content: `SRP Education AI generates educational content using AI models. Our approach to content sourcing:
+
+Content Generation:
+• All content is AI-generated for educational purposes based on publicly available knowledge.
+• We do NOT copy, reproduce, or redistribute copyrighted content from any newspaper, publication, textbook, or website.
+• Current affairs and general knowledge content is based on publicly reported facts and events. Facts and news events are not copyrightable — our AI synthesises and explains them in its own words.
+• When we reference news events or current affairs, we provide educational summaries and analysis, not reproductions of original articles.
+
+References & Attribution:
+• We reference trusted sources (NCERT, ICAI, NMC, NPTEL, government publications, etc.) for accuracy, but do not reproduce their copyrighted text.
+• References to textbooks, standards, and regulations are for educational citation only, consistent with fair use and fair dealing provisions under the Indian Copyright Act, 1957 (Section 52).
+• Any data from government sources (Census, RBI, SEBI, etc.) is public domain information.
+
+What We Are NOT:
+• We are NOT a newspaper, media house, or news aggregator.
+• We are NOT an educational institution, university, or government body.
+• We are NOT replacing any textbook, coaching class, or official study material.
+• We are a supplementary AI-powered learning tool that helps students understand concepts better.
+
+User Responsibility:
+• Users must not use AI-generated content to create counterfeit certificates, fake academic records, or fraudulent documents.
+• Users must verify critical information (exam dates, syllabus changes, legal provisions) from official sources.`,
+  },
+  {
+    id: 'anti-misuse',
+    title: '8. Anti-Misuse & Platform Safety',
+    content: `SRP Education AI is designed exclusively for legitimate educational purposes. The following uses are strictly prohibited and will result in immediate account termination:
+
+Prohibited Uses:
+• Using the Platform to cheat in live examinations, tests, or assessments
+• Submitting AI-generated content as original work without disclosure (plagiarism)
+• Using the Platform to generate harmful, defamatory, or misleading content about any individual, institution, or organisation
+• Attempting to extract, scrape, or systematically download content from the Platform
+• Using the Platform to generate content that could be used to harass, bully, or intimidate others
+• Sharing login credentials or providing access to unauthorised users
+• Using the Platform to generate legal, medical, financial, or tax advice for real situations (content is educational only)
+• Attempting to manipulate, reverse-engineer, or exploit the AI system
+• Using the Platform for competitive intelligence, commercial research, or non-educational commercial purposes
+
+Our Safety Measures:
+• All AI interactions are monitored for safety and compliance
+• Content filters block inappropriate, harmful, and off-topic requests
+• Rate limiting prevents automated abuse
+• Audit logs track all platform activity
+• We reserve the right to suspend accounts engaged in misuse without prior notice
+
+Reporting Misuse:
+• Users can report suspected misuse to support@srpailabs.com
+• We investigate all reports within 24 hours
+• Whistleblower protection is provided for good-faith reports`,
+  },
+  {
     id: 'student-safety',
-    title: '7. Student Safety & Content Policy',
+    title: '9. Student Safety & Content Policy',
     content: `SRP Education AI is committed to providing a safe learning environment for all students, including minors. We enforce the following policies:
 
 • Zero Tolerance for Harmful Content: The Platform strictly prohibits content that is abusive, vulgar, profane, sexually explicit or suggestive, violent, discriminatory (based on race, caste, gender, religion, disability, or any other characteristic), or otherwise inappropriate for an educational setting.
@@ -91,7 +145,7 @@ Violation of these terms may result in immediate suspension or termination of yo
   },
   {
     id: 'institution-terms',
-    title: '8. Institution-Specific Terms',
+    title: '10. Institution-Specific Terms',
     content: `For institutions (schools, colleges, coaching centers, universities) using our multi-tenant platform:
 
 • Data Ownership: Student and institutional data belongs to the institution. We process this data as a service provider.
@@ -102,7 +156,7 @@ Violation of these terms may result in immediate suspension or termination of yo
   },
   {
     id: 'termination',
-    title: '9. Termination',
+    title: '11. Termination',
     content: `We may terminate or suspend your account immediately, without prior notice, for any reason including, without limitation, breach of these Terms. Upon termination:
 
 • Your right to use the Platform ceases immediately
@@ -113,7 +167,7 @@ You may delete your account at any time through your account settings or by cont
   },
   {
     id: 'liability',
-    title: '10. Limitation of Liability',
+    title: '12. Limitation of Liability',
     content: `TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
 
 • The Platform is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express or implied
@@ -123,14 +177,22 @@ You may delete your account at any time through your account settings or by cont
   },
   {
     id: 'governing-law',
-    title: '11. Governing Law & Disputes',
-    content: `These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising from these Terms or the use of the Platform shall be subject to the exclusive jurisdiction of the courts in India.
+    title: '13. Governing Law & Disputes',
+    content: `These Terms shall be governed by and construed in accordance with the laws of India, including but not limited to:
+
+• The Information Technology Act, 2000 and the IT (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021
+• The Indian Copyright Act, 1957
+• The Consumer Protection Act, 2019
+• The Personal Data Protection provisions under applicable Indian law
+• The Indian Penal Code sections applicable to cyber offences
+
+Any disputes arising from these Terms or the use of the Platform shall be subject to the exclusive jurisdiction of the courts in Hyderabad, Telangana, India.
 
 We encourage users to contact us directly at support@srpailabs.com to resolve any issues before pursuing formal dispute resolution.`,
   },
   {
     id: 'modifications',
-    title: '12. Modifications to Terms',
+    title: '14. Modifications to Terms',
     content: `We reserve the right to modify these Terms at any time. Material changes will be communicated through:
 
 • Email notification to your registered email address
@@ -141,7 +203,21 @@ Your continued use of the Platform after the effective date of revised Terms con
   },
   {
     id: 'contact',
-    title: '13. Contact Information',
+    title: '15. Disclaimer & Educational Purpose',
+    content: `SRP Education AI is a supplementary educational tool designed to enhance learning. Important disclaimers:
+
+• NOT a Substitute: This Platform does NOT replace teachers, professors, coaching classes, textbooks, or any formal educational institution. It is a study aid only.
+• NOT Official: Content on this Platform is NOT official government data, NOT certified curriculum material, and NOT endorsed by any educational board, university, or government body.
+• NOT Professional Advice: Medical, legal, tax, financial, and engineering content is for EDUCATIONAL LEARNING only. For real-world decisions, always consult qualified professionals.
+• Accuracy: While we strive for accuracy, AI-generated content may contain errors. Students should cross-verify important facts with official sources (NCERT, ICAI, NMC, university websites, etc.).
+• Exam Results: We do NOT guarantee any specific exam results, scores, ranks, or academic outcomes from using the Platform.
+• Third-Party Content: We are not responsible for the accuracy of any third-party content, external links, or user-generated content on the Platform.
+
+By using this Platform, you acknowledge and accept these limitations.`,
+  },
+  {
+    id: 'contact',
+    title: '16. Contact Information',
     content: `For questions about these Terms of Service, please contact us:
 
 • Email: support@srpailabs.com

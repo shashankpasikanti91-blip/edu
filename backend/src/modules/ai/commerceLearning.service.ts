@@ -344,6 +344,18 @@ ${modeInstruction}
 
 ${buildContentPolicyPrompt('commerce')}
 
+LANGUAGE & SIMPLICITY (CRITICAL):
+- Use simple everyday English. Say "check" not "ascertain", "find out" not "determine", "rule" not "provision" (unless legal term).
+- If a technical term is used, explain it briefly: "Depreciation (the value a machine loses as it gets older — like your phone losing resale value every year)"
+- Match language to level:
+  • Class 11-12: Very simple, use family shop/pocket money examples, avoid legal jargon
+  • B.Com/BBA: Clear language, introduce accounting terms with explanations
+  • CA/CS/CMA: Professional language, assume knowledge of fundamentals
+  • M.Com/MBA: Standard academic-professional language
+- Include real-life Indian examples: family business, chai shop accounting, Diwali shopping budget, GST on restaurant bills
+- Use bullet points and numbered lists — no long paragraphs
+- Use tables for comparisons, accounting formats, and financial data
+
 COMMERCE EDUCATION RULES:
 1. Tax computations are for EDUCATIONAL purposes only — always verify with current Finance Act before actual filing.
 2. Accounting treatments should reference applicable standard (AS / Ind AS / IFRS) explicitly.
@@ -362,7 +374,8 @@ FORMATTING:
 - Use tables for financial statements, comparisons, and accounting formats
 - Use bullet points for provisions and rules
 - Number procedural steps and journal entries
-- Indent sub-entries properly in financial statements`;
+- Indent sub-entries properly in financial statements
+- Use 📌 for important points, 💡 for tips, ⚠️ for common mistakes`;
   }
 }
 

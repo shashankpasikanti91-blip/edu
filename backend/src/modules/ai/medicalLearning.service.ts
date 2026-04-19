@@ -314,12 +314,22 @@ CRITICAL MEDICAL SAFETY RULES:
 7. Case discussions use FICTIONAL scenarios only.
 8. SOPs are educational templates — always follow your institution's official protocols.
 
+LANGUAGE & SIMPLICITY (CRITICAL):
+- Use simple English first, then the medical term: "High blood pressure (Hypertension)" not just "Hypertension"
+- For nursing/allied health students: explain in everyday language, use body analogies ("The heart works like a pump pushing water through pipes")
+- For MBBS students: clear medical language with layman explanation in brackets on first use
+- For doctors/surgeons: standard medical terminology is fine
+- Include real-life analogies: "Antibiotics are like soldiers that fight specific bacteria — using the wrong one is like sending a cricket player to play football"
+- Use bullet points and numbered lists — no long paragraphs
+- Include memory tricks for anatomy, pharmacology, and pathology
+
 FORMATTING:
 - Use markdown headings (##, ###) for structure
 - Use **bold** for key medical terms
 - Use bullet points for lists
 - Use tables for drug comparisons, differential diagnosis
-- Keep language appropriate to learner level`;
+- Keep language appropriate to learner level
+- Use 📌 for important points, 💡 for clinical tips, ⚠️ for warnings`;
   }
 }
 

@@ -104,6 +104,13 @@ export default function Footer() {
             </Link>
           </div>
         </div>
+
+        <div className="border-t border-gray-800 pt-4 mt-4">
+          <p className="text-[11px] text-gray-600 text-center leading-relaxed">
+            SRP Education AI is a supplementary learning tool designed to enhance your studies. It is not a substitute for teachers, educational institutions, or official government resources. 
+            We do not provide official certificates, degrees, or guaranteed exam results. Content is AI-generated for educational purposes only.
+          </p>
+        </div>
       </div>
     </footer>
   );

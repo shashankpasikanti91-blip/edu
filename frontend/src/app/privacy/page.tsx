@@ -152,8 +152,33 @@ You can manage cookie preferences through your browser settings. Disabling essen
 • We encourage parents and guardians to actively participate in their child's use of the Platform`,
   },
   {
+    id: 'ai-data',
+    title: '10. AI Interaction & Content Data',
+    content: `When you interact with our AI features, the following applies:
+
+Data Processing:
+• Your questions and prompts are sent to AI model providers (via OpenRouter) for processing. These are transmitted securely over encrypted connections.
+• We do NOT store your queries for training third-party AI models. Your educational queries remain private.
+• AI-generated responses are stored in your account for your convenience (chat history, saved notes).
+
+Content Safety:
+• All AI inputs are filtered for prohibited content (violence, abuse, explicit material, self-harm).
+• We maintain audit logs of AI interactions for safety monitoring and platform improvement.
+• Content flagged by safety filters is logged and reviewed. Repeated violations may result in account suspension.
+
+Current Affairs & News Content:
+• Our current affairs module synthesises publicly available information. We do NOT reproduce or copy copyrighted newspaper articles.
+• Facts and events are not copyrightable — our AI provides educational analysis and summaries in its own words.
+• References to news sources are for educational citation only, consistent with fair dealing under the Indian Copyright Act, 1957 (Section 52).
+
+What We Do NOT Do:
+• We do NOT sell your learning data or AI interaction data to any third party
+• We do NOT use your data for advertising, profiling, or non-educational purposes
+• We do NOT share individual student queries with other users or institutions (except the student's own institution admin for B2B accounts)`,
+  },
+  {
     id: 'changes',
-    title: '10. Changes to This Policy',
+    title: '11. Changes to This Policy',
     content: `We may update this Privacy Policy from time to time. Changes will be communicated through:
 
 • Email notification to your registered email address
@@ -164,7 +189,7 @@ Material changes will be communicated at least 30 days before they take effect. 
   },
   {
     id: 'contact',
-    title: '11. Contact Us',
+    title: '12. Contact Us',
     content: `For privacy concerns, questions, or data requests, contact us:
 
 • Email: support@srpailabs.com

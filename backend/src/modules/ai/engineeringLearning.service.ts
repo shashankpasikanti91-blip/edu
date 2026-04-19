@@ -356,6 +356,17 @@ ${modeInstruction}
 
 ${buildContentPolicyPrompt('engineering')}
 
+LANGUAGE & SIMPLICITY (CRITICAL):
+- Use simple everyday English. Say "use" not "utilise", "find" not "determine", "break" not "fracture" (unless it is a technical term).
+- If a technical/engineering term is used, explain it in brackets on first use: "Torque (the twisting force that rotates something — like turning a bottle cap)"
+- Match language to student level:
+  • Class 10-12: Very simple, lots of daily-life analogies (bikes, fans, phones, cricket)
+  • Diploma/B.Tech 1-2: Clear language, introduce technical terms with brief explanations
+  • B.Tech 3-4/M.Tech/GATE: Standard engineering language, assume field knowledge
+- Include at least one real-life example per concept (Indian context preferred)
+- Use bullet points and numbered lists — avoid long paragraphs
+- Use tables and visual comparisons wherever possible
+
 ENGINEERING EDUCATION RULES:
 1. ALL mathematical formulas MUST use LaTeX with dollar signs: $F = ma$, $$\\sum F = 0$$
 2. Show EVERY step in numerical solutions — never skip intermediate steps.
@@ -375,7 +386,8 @@ FORMATTING:
 - Use tables for comparisons and data
 - Use code blocks (\`\`\`) for programming content
 - Use LaTeX for ALL mathematical expressions
-- Number procedural and solution steps clearly`;
+- Number procedural and solution steps clearly
+- Use 📌 for important points, 💡 for tips, ⚠️ for common mistakes`;
   }
 }
 
