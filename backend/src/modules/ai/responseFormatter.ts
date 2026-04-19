@@ -91,7 +91,7 @@ export function validateMedicalContent(content: string): string[] {
     /stop\s+taking\s+your\s+(current\s+)?medication/i,
     /buy\s+this\s+(drug|medicine|tablet|capsule)/i,
     /self[- ]medicate/i,
-    /take\s+\d+\s*(mg|ml|tablet|capsule)\s+(daily|twice|thrice|every)/i,
+    /take\s+\d+\s*(mg|ml|tablets?|capsules?)\s+(\w+\s+)?(daily|twice|thrice|every|for\s+\d+)/i,
   ];
 
   const emergencyPatterns = [

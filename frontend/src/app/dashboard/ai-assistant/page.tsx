@@ -42,7 +42,7 @@ const MODE_FORMAT_CLASS: Record<string, string> = {
 };
 
 // Detect medical/pharma/drug content in AI responses to show disclaimer
-const MEDICAL_KEYWORDS = /\b(dosage|medication|drug|prescription|mg\/kg|tablet|capsule|injection|IV|intramuscular|intravenous|oral\s+dose|side\s+effect|contraindication|pharmacology|pharmacokinetic|pharmacodynamic|adverse\s+effect|therapeutic|antidote|overdose|toxicity|diagnosis|prognosis|pathophysiology|clinical\s+feature|symptom|treatment\s+protocol|surgical|anaesthesia|anesthesia|chemotherapy|insulin|antibiotic|analgesic|antipyretic|antihypertensive|NSAID|opioid|sedative|diuretic|steroid|vaccine)\b/i;
+const MEDICAL_KEYWORDS = /\b(dosage|medication|drug|prescription|mg\/kg|tablet|capsule|injection|IV|intramuscular|intravenous|oral\s+dose|side\s+effects?|contraindications?|pharmacology|pharmacokinetics?|pharmacodynamics?|adverse\s+effects?|therapeutic|antidote|overdose|toxicity|diagnosis|prognosis|pathophysiology|clinical\s+features?|symptoms?|treatment\s+protocol|surgical|anaesthesia|anesthesia|chemotherapy|insulin|antibiotics?|analgesic|antipyretic|antihypertensive|NSAID|opioid|sedative|diuretic|steroid|vaccine|mechanism\s+of\s+action)\b/i;
 
 function containsMedicalContent(text: string): boolean {
   // Count matches — only flag if multiple medical terms appear (avoids false positives)
