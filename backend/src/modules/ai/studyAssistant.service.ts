@@ -23,8 +23,13 @@ interface OpenRouterResponse {
 const BLOCKED_PATTERNS = [
   /\b(porn|sex\s*chat|nude|naked|xxx|hentai|erotic)\b/i,
   /\b(kill\s+(yourself|myself|someone)|suicide\s+method|how\s+to\s+die)\b/i,
-  /\b(make\s+a?\s*(bomb|weapon|drug|meth))\b/i,
+  /\b(make\s+a?\s*(bomb|weapon|drug|meth|explosive))\b/i,
   /\b(hack\s+(into|someone|account|password))\b/i,
+  /\b(buy\s+(drugs|narcotics|cocaine|heroin|mdma)\s+online)\b/i,
+  /\b(how\s+to\s+(steal|cheat\s+in\s+exam|forge|counterfeit))\b/i,
+  /\b(illegal\s+download|pirate|crack\s+software)\b/i,
+  /\b(child\s+(abuse|exploitation))\b/i,
+  /\b(self[- ]?harm|cut\s+(yourself|myself)|anorexia\s+tips)\b/i,
 ];
 
 class StudyAssistantService {

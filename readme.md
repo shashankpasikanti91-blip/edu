@@ -77,7 +77,21 @@ SRP Education AI/
 │       │   ├── content/            # Content library CRUD
 │       │   ├── subscription/       # Plans, billing, coupons, invoices
 │       │   ├── addon/              # Add-on modules for institutions
-│       │   ├── ai/                 # OpenRouter AI chat + quick queries
+│       │   ├── ai/                 # AI engine (9 services)
+│       │   │   ├── ai.service.ts          # Core AI + exam/dictionary
+│       │   │   ├── studyAssistant.service.ts  # Chat-based study assistant
+│       │   │   ├── medicalLearning.service.ts # Medical/pharma education
+│       │   │   ├── engineeringLearning.service.ts # Engineering subjects
+│       │   │   ├── commerceLearning.service.ts # Commerce/CA/finance
+│       │   │   ├── industryLearning.service.ts # Industry/workplace
+│       │   │   ├── currentAffairs.service.ts   # GK/current affairs
+│       │   │   ├── promptBuilder.ts       # Study mode prompt templates
+│       │   │   ├── responseFormatter.ts   # Safety notices + validation
+│       │   │   ├── citationManager.ts     # Content policy prompts
+│       │   │   ├── answerStandard.resolver.ts # Indian/intl standards
+│       │   │   ├── examContext.resolver.ts # Exam pattern resolver
+│       │   │   ├── userIntent.resolver.ts  # Domain boundary detection
+│       │   │   └── freshness.validator.ts  # Content freshness rules
 │       │   ├── analytics/          # Platform & tenant analytics
 │       │   ├── audit/              # Audit log queries
 │       │   ├── notification/       # In-app notifications
@@ -192,6 +206,30 @@ SRP Education AI/
 - Context-aware responses (last 20 messages)
 - Auto-generated chat titles
 - Model fallback (GPT-4.1 → GPT-4o)
+- 9 study modes: Default, Explain Topic, Solve Step-by-Step, Exam Answer, Table Compare, Memory Tricks, Diagram Summary, Revision Notes, Quick Quiz
+- 4 answer standards: Indian, International, Neutral, Hybrid
+- KaTeX math rendering (display $$...$$, inline $...$, \[...\], \(...\), bare LaTeX environments)
+- Content safety: blocked patterns for harmful content
+
+### AI Specialized Learning Modules
+| Module | Description |
+|--------|-------------|
+| Medical Learning | 8 modes (Explain Condition, Anatomy, Drug/Pharmacology, Procedure, Quiz, Cert Prep, Case Discussion, SOP) × 8 user levels |
+| Engineering Learning | Engineering subjects with lab/project focus |
+| Commerce Learning | CA/ICWA/commerce with tax computation support |
+| Industry Learning | Workplace SOPs and industry skills |
+| Current Affairs | GK/current affairs for competitive exams with date range |
+| Dictionary | Word lookup with translation support |
+| Exam Prep | Quiz engine with question generation |
+
+### Medical & Pharmaceutical Safety
+- **Permanent disclaimer banners** on medical learning pages
+- **Automatic detection** of medical/drug content in AI responses with visible warnings
+- **Backend safety rules**: 8 critical medical safety rules enforced in AI prompts
+- **Content validation**: Automated pattern matching to flag diagnosis-like, prescription-like, or emergency-discouraging content
+- **All drug/dosage info** marked as educational reference only
+- **Case discussions** use fictional scenarios only
+- **Safety notices** embedded in every medical AI response
 
 ### Student Features (B2C)
 - Auto-generated student IDs (`IND-STU-000001`)
@@ -351,17 +389,21 @@ Annual billing saves ~17% (2 months free).
 
 - **Password hashing:** Argon2id with memory-hard settings
 - **JWT:** Short-lived access tokens (15min) + rotating refresh tokens (7d)
-- **Rate limiting:** Global + auth-specific endpoint limits
+- **Rate limiting:** Global (100 req/15min) + auth (20 req/15min) + AI (30 req/15min) + strict (10 req/60min)
 - **Account lockout:** 5 failed attempts → 30min lock
 - **Input validation:** Zod schemas on all endpoints
-- **HTTP security:** Helmet (CSP, HSTS, X-Frame-Options, etc.)
-- **CORS:** Restricted to frontend origin
+- **Content safety:** Blocked patterns for harmful/inappropriate content in AI inputs
+- **Medical content validation:** Automated flagging of diagnosis/prescription-like AI outputs
+- **HTTP security:** Helmet (CSP, HSTS, X-Frame-Options, Permissions-Policy, Referrer-Policy)
+- **CORS:** Restricted to frontend origin + tenant subdomains
 - **HPP:** HTTP parameter pollution protection
 - **Tenant isolation:** Middleware enforces data boundaries
 - **RBAC:** 7-role permission system
 - **Audit logging:** All auth events with IP + user agent
 - **Non-root Docker:** Both containers run as unprivileged users
 - **SSL/TLS:** Cloudflare origin certificates + Nginx TLS 1.2/1.3
+- **Body size limits:** JSON/URL-encoded capped at 2MB
+- **Error handling:** Production errors hide stack traces; owner notification on unhandled errors
 
 ---
 

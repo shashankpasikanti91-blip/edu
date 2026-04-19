@@ -26,11 +26,13 @@ export function formatResponse(
 ): FormattedResponse {
   const safetyNotices: string[] = [];
 
-  // Medical safety notices
-  if (ctx.domain === 'medical') {
+  // Medical safety notices — always shown, prominent
+  if (ctx.domain === 'medical' || module === 'medical_learning') {
     safetyNotices.push(
-      'This content is for educational purposes only. It does not replace professional medical advice, diagnosis, or treatment.',
-      'Always consult a qualified healthcare provider for medical decisions.'
+      '⚠️ MEDICAL DISCLAIMER: This content is strictly for educational and study purposes only. It does NOT replace professional medical advice, diagnosis, or treatment.',
+      'Do NOT use this information for self-medication, self-diagnosis, or treating any patient. Always consult a qualified healthcare provider.',
+      'Drug dosages and formulations are for educational reference only. Verify with current pharmacopoeia and your institution\'s protocols before any clinical application.',
+      'For medical emergencies, contact your nearest healthcare facility or call emergency services immediately.'
     );
   }
 
@@ -79,6 +81,7 @@ export function validateMedicalContent(content: string): string[] {
     /your\s+diagnosis\s+is/i,
     /i\s+diagnose\s+you/i,
     /this\s+confirms?\s+(you\s+have|the\s+diagnosis)/i,
+    /based\s+on\s+your\s+symptoms,?\s+you\s+(have|likely\s+have)/i,
   ];
 
   const treatmentPatterns = [
@@ -86,12 +89,17 @@ export function validateMedicalContent(content: string): string[] {
     /you\s+must\s+take\s+\d+\s*mg/i,
     /i\s+prescribe\s+you/i,
     /stop\s+taking\s+your\s+(current\s+)?medication/i,
+    /buy\s+this\s+(drug|medicine|tablet|capsule)/i,
+    /self[- ]medicate/i,
+    /take\s+\d+\s*(mg|ml|tablet|capsule)\s+(daily|twice|thrice|every)/i,
   ];
 
   const emergencyPatterns = [
     /instead\s+of\s+(going\s+to|visiting)\s+(the\s+)?(hospital|emergency|ER|doctor)/i,
     /you\s+don'?t\s+need\s+(a\s+doctor|to\s+go\s+to)/i,
     /no\s+need\s+for\s+(medical|professional)\s+(help|attention)/i,
+    /skip\s+(the\s+)?(hospital|doctor|emergency)/i,
+    /avoid\s+(going\s+to\s+)?(the\s+)?(hospital|doctor)/i,
   ];
 
   for (const p of diagnosisPatterns) {

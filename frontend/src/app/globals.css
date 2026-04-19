@@ -87,6 +87,45 @@
 }
 
 /* ═══ Visual Learning: AI Answer Format Styles ═══ */
+
+/* ─── KaTeX Math Rendering ─── */
+.math-display {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0;
+}
+.math-display .katex-display {
+  margin: 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+.math-display .katex {
+  font-size: 1.1em;
+}
+.math-inline .katex {
+  font-size: 1em;
+}
+.math-error {
+  @apply bg-red-50 text-red-600 px-1 py-0.5 rounded text-xs font-mono;
+}
+/* Fix KaTeX array/table rendering */
+.katex .arraycolsep { width: 0.5em !important; }
+.katex .col-align-c { text-align: center; }
+.katex .col-align-l { text-align: left; }
+.katex .col-align-r { text-align: right; }
+
+/* ─── Medical / Safety Disclaimer Styles ─── */
+.medical-disclaimer {
+  @apply bg-amber-50 border border-amber-200 rounded-xl p-4 my-3;
+}
+.medical-disclaimer-icon {
+  @apply text-amber-600 flex-shrink-0;
+}
+.medical-disclaimer-text {
+  @apply text-amber-800 text-xs leading-relaxed;
+}
+
 .ai-format-table table {
   @apply w-full border-collapse my-4 text-sm;
 }

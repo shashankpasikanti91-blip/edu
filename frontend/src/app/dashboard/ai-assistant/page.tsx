@@ -6,6 +6,7 @@ import {
   BookOpen, FileQuestion,
   Lightbulb, Table2, BarChart3, ListChecks,
   Calculator, BookMarked, Copy, Check, Sparkles,
+  AlertTriangle, Shield,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
@@ -39,6 +40,15 @@ const MODE_FORMAT_CLASS: Record<string, string> = {
   exam_answer: 'ai-format-exam',
   diagram_summary: 'ai-format-diagram',
 };
+
+// Detect medical/pharma/drug content in AI responses to show disclaimer
+const MEDICAL_KEYWORDS = /\b(dosage|medication|drug|prescription|mg\/kg|tablet|capsule|injection|IV|intramuscular|intravenous|oral\s+dose|side\s+effect|contraindication|pharmacology|pharmacokinetic|pharmacodynamic|adverse\s+effect|therapeutic|antidote|overdose|toxicity|diagnosis|prognosis|pathophysiology|clinical\s+feature|symptom|treatment\s+protocol|surgical|anaesthesia|anesthesia|chemotherapy|insulin|antibiotic|analgesic|antipyretic|antihypertensive|NSAID|opioid|sedative|diuretic|steroid|vaccine)\b/i;
+
+function containsMedicalContent(text: string): boolean {
+  // Count matches — only flag if multiple medical terms appear (avoids false positives)
+  const matches = text.match(new RegExp(MEDICAL_KEYWORDS.source, 'gi'));
+  return (matches?.length || 0) >= 3;
+}
 
 export default function AiAssistantPage() {
   const { user } = useAuthStore();
@@ -353,6 +363,18 @@ export default function AiAssistantPage() {
                 >
                   {msg.role === 'assistant' ? (
                     <>
+                      {containsMedicalContent(msg.content) && (
+                        <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-amber-700">
+                              <strong>Medical/Drug Disclaimer:</strong> This content is for educational purposes only.
+                              Do not use for self-medication or diagnosis. Always consult your doctor, pharmacist,
+                              or qualified healthcare provider. Verify all drug information with current pharmacopoeia.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                       <div className={`prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 ${MODE_FORMAT_CLASS[studyMode] || ''}`}>
                         {renderMarkdownContent(msg.content)}
                       </div>

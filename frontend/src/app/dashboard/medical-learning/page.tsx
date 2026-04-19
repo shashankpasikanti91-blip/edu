@@ -173,7 +173,7 @@ export default function MedicalLearningPage() {
     <div>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-6">
           <Link href="/dashboard" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </Link>
@@ -184,6 +184,36 @@ export default function MedicalLearningPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Medical Learning Assistant</h1>
               <p className="text-gray-500 mt-0.5">Educational support for healthcare learners — from nursing to surgery.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* PERMANENT Medical/Drug Safety Disclaimer Banner */}
+        <div className="mb-6 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center border-2 border-amber-300">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wide flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Medical &amp; Pharmaceutical Disclaimer
+              </h3>
+              <div className="mt-2 space-y-1.5 text-xs text-amber-700 leading-relaxed">
+                <p className="font-semibold">This content is strictly for <u>educational and study purposes only</u>.</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>DO NOT</strong> use this information for self-diagnosis, self-medication, or treating any patient.</li>
+                  <li>Drug names, dosages, and formulations mentioned are <strong>for educational reference only</strong> — always verify with current pharmacopoeia and institutional protocols.</li>
+                  <li>This platform does <strong>NOT</strong> replace professional medical advice, diagnosis, or treatment from a qualified healthcare provider.</li>
+                  <li>For any health concern, <strong>consult your doctor, pharmacist, or nearest healthcare facility immediately</strong>.</li>
+                  <li>Case scenarios are <strong>fictional</strong> and created solely for learning. They do not represent real patients.</li>
+                </ul>
+                <p className="pt-1 font-semibold text-amber-800">
+                  If you need medical help, contact your healthcare provider, institutional authorities, or call emergency services.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -352,19 +382,26 @@ export default function MedicalLearningPage() {
               </div>
             </div>
 
-            {/* Safety Notices */}
-            {result.safetyNotices && result.safetyNotices.length > 0 && (
-              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Shield className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    {result.safetyNotices.map((notice, i) => (
-                      <p key={i} className="text-xs text-amber-700">{notice}</p>
-                    ))}
-                  </div>
+            {/* Safety Notices — Always shown for medical content */}
+            <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-1">Educational Content Only</p>
+                  <p className="text-xs text-amber-700 mb-1">
+                    The information below is for study and knowledge purposes only. Do not use it for self-medication, diagnosis, or treatment.
+                    Always consult qualified healthcare professionals, your lecturers, or institutional authorities.
+                  </p>
+                  {result.safetyNotices && result.safetyNotices.length > 0 && (
+                    <div className="mt-1.5 pt-1.5 border-t border-amber-200">
+                      {result.safetyNotices.map((notice, i) => (
+                        <p key={i} className="text-xs text-amber-700">{notice}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Medical Warnings */}
             {(result as any).medicalWarnings?.length > 0 && (
