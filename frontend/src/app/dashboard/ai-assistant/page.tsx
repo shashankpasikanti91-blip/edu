@@ -22,12 +22,15 @@ const STUDY_MODES = [
   { value: 'table_compare', label: 'Table Compare', icon: Table2 },
   { value: 'memory_tricks', label: 'Memory Tricks', icon: BookMarked },
   { value: 'diagram_summary', label: 'Diagram Summary', icon: BarChart3 },
+  { value: 'revision_notes', label: 'Revision Notes', icon: BookOpen },
+  { value: 'quick_quiz', label: 'Quick Quiz', icon: FileQuestion },
 ];
 
 const ANSWER_STANDARDS = [
   { value: 'indian', label: 'Indian Standard' },
   { value: 'international', label: 'International' },
   { value: 'neutral', label: 'Neutral' },
+  { value: 'hybrid', label: 'Hybrid' },
 ];
 
 const MODE_FORMAT_CLASS: Record<string, string> = {

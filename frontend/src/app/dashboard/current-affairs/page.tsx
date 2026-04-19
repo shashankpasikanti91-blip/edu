@@ -19,6 +19,10 @@ const CATEGORIES = [
   { value: 'Government Schemes', label: 'Government Schemes' },
   { value: 'Environment', label: 'Environment' },
   { value: 'Defence', label: 'Defence & Security' },
+  { value: 'Medical & Healthcare', label: 'Medical & Healthcare' },
+  { value: 'Industry Updates', label: 'Industry Updates' },
+  { value: 'Education Updates', label: 'Education Updates' },
+  { value: 'Mixed', label: 'Mixed / General' },
 ];
 
 const EXAM_TYPES = [
@@ -29,6 +33,10 @@ const EXAM_TYPES = [
   { value: 'RRB', label: 'Railway RRB' },
   { value: 'State PSC', label: 'State PSC' },
   { value: 'CUET', label: 'CUET' },
+  { value: 'Medical', label: 'Medical (NEET/AIIMS)' },
+  { value: 'Engineering', label: 'Engineering (GATE/JEE)' },
+  { value: 'CA', label: 'CA / CS / CMA' },
+  { value: 'Professional', label: 'Professional / Industry' },
 ];
 
 const OUTPUT_FORMATS = [
@@ -37,6 +45,8 @@ const OUTPUT_FORMATS = [
   { value: 'bullet_points', label: 'Bullet Highlights' },
   { value: 'memory_points', label: 'Memory Points & Mnemonics' },
   { value: 'mini_quiz', label: 'Mini Quiz (MCQ)' },
+  { value: 'mcq_practice', label: 'MCQ Practice Set' },
+  { value: 'editorial_summary', label: 'Editorial Summary' },
 ];
 
 const DATE_RANGES = [
@@ -50,6 +60,7 @@ const ANSWER_STANDARDS = [
   { value: 'indian', label: 'Indian Standard' },
   { value: 'international', label: 'International' },
   { value: 'neutral', label: 'Neutral' },
+  { value: 'hybrid', label: 'Hybrid' },
 ];
 
 const QUICK_TOPICS: Record<string, string[]> = {
@@ -122,6 +133,34 @@ const QUICK_TOPICS: Record<string, string[]> = {
     'Military exercises and cooperation',
     'Indigenous defence manufacturing',
     'Cyber security initiatives',
+  ],
+  'Medical & Healthcare': [
+    'NEET and medical education reforms',
+    'NMC guidelines and updates',
+    'Public health initiatives India',
+    'Ayushman Bharat latest updates',
+    'New drug approvals and CDSCO',
+  ],
+  'Industry Updates': [
+    'Make in India industrial progress',
+    'PLI scheme sector updates',
+    'Startup India new policies',
+    'FDI policy changes by sector',
+    'Industry 4.0 adoption in India',
+  ],
+  'Education Updates': [
+    'NEP 2020 implementation progress',
+    'UGC and AICTE new regulations',
+    'CUET and entrance exam changes',
+    'Skill India and vocational training',
+    'Foreign university campuses in India',
+  ],
+  Mixed: [
+    'Top 10 current affairs this week',
+    'Important dates and events this month',
+    'India in global rankings updates',
+    'National and international days',
+    'Latest amendments to Indian laws',
   ],
 };
 

@@ -39,6 +39,18 @@ router.post('/generate/explain', asyncHandler(async (req, res) => aiController.e
 router.post('/generate/current-affairs', asyncHandler(async (req, res) => aiController.generateCurrentAffairs(req as any, res)));
 router.post('/generate/ielts', asyncHandler(async (req, res) => aiController.generateIELTS(req as any, res)));
 
+// Medical Learning Assistant
+router.post('/medical/generate', asyncHandler(async (req, res) => aiController.generateMedicalContent(req as any, res)));
+
+// Industry Learning Assistant
+router.post('/industry/generate', asyncHandler(async (req, res) => aiController.generateIndustryContent(req as any, res)));
+
+// Engineering Learning Assistant
+router.post('/engineering/generate', asyncHandler(async (req, res) => aiController.generateEngineeringContent(req as any, res)));
+
+// Commerce & CA Learning Assistant
+router.post('/commerce/generate', asyncHandler(async (req, res) => aiController.generateCommerceContent(req as any, res)));
+
 // Dictionary
 router.post('/dictionary', asyncHandler(async (req, res) => aiController.dictionaryLookup(req as any, res)));
 

@@ -13,7 +13,9 @@ export type StudyMode =
   | 'exam_answer'
   | 'table_compare'
   | 'memory_tricks'
-  | 'diagram_summary';
+  | 'diagram_summary'
+  | 'revision_notes'
+  | 'quick_quiz';
 
 const STUDY_MODE_INSTRUCTIONS: Record<StudyMode, string> = {
   default: `Provide a clear, well-structured educational response. Include relevant definitions, explanations, examples, and exam tips where appropriate.`,
@@ -71,6 +73,30 @@ Make the mnemonics creative, easy to remember, and relevant to Indian students.`
 5. **Quick Summary** — 5-7 key takeaways in bullet format
 
 Use clear hierarchical formatting so the student can visualise the structure.`,
+
+  revision_notes: `Create concise revision notes for quick study:
+1. **Topic Title** — Clear heading
+2. **Key Definitions** — Essential definitions in 1-2 lines each
+3. **Important Formulas** — All relevant formulas (use LaTeX)
+4. **Key Points** — Bulleted list of must-remember facts
+5. **Diagrams/Tables** — Quick reference tables or process flows
+6. **Common Questions** — 3-5 frequently asked questions with brief answers
+7. **One-liners** — Ultra-short recall points for last-minute revision
+
+Keep everything concise. This is for quick revision, not detailed learning.`,
+
+  quick_quiz: `Generate a quick quiz on the topic:
+1. Include 5-10 questions of mixed types (MCQ, fill-in-the-blank, true/false, short answer)
+2. For MCQ: provide 4 options with clear correct answer
+3. Include brief explanations for each answer
+4. Vary difficulty within the set
+5. Focus on exam-relevant concepts
+
+Format:
+### Q1. [Question]
+(a) [Option A]  (b) [Option B]  (c) [Option C]  (d) [Option D]
+**Answer:** [Correct option]
+**Explanation:** [Brief explanation]`,
 };
 
 export function buildStudyAssistantPrompt(params: {
@@ -122,7 +148,9 @@ export type CurrentAffairsOutputFormat =
   | 'qa_only'
   | 'bullet_points'
   | 'memory_points'
-  | 'mini_quiz';
+  | 'mini_quiz'
+  | 'mcq_practice'
+  | 'editorial_summary';
 
 const OUTPUT_FORMAT_INSTRUCTIONS: Record<CurrentAffairsOutputFormat, string> = {
   comprehensive: `Structure each current affairs item as:
@@ -192,6 +220,54 @@ Include mnemonics, acronyms, and associations to help remember current affairs. 
 **Explanation:** [Brief explanation with key facts]
 
 Include 10-15 MCQs. Mix difficulty levels. Cover the specified category and date range.`,
+
+  mcq_practice: `Present as structured MCQ practice set for exam preparation:
+### MCQ Practice Set — [Category/Topic]
+
+**Instructions:** Choose the correct answer. Each question carries 1 mark.
+
+### Q1. [Question]
+(a) [Option A]
+(b) [Option B]
+(c) [Option C]
+(d) [Option D]
+
+**Correct Answer:** [Letter]
+**Why:** [One-line explanation]
+**Why others are wrong:**
+- (a) [If wrong — reason]
+- (b) [If wrong — reason]
+
+Include 15-20 MCQs. Match exam pattern (UPSC Prelims / SSC / Banking as applicable). Include previous-year style questions.`,
+
+  editorial_summary: `Present as editorial summary analysis:
+## Editorial Summary — [Topic/Theme]
+
+### Context
+[Background and current situation in 3-4 sentences]
+
+### Key Developments
+[Chronological developments with dates]
+
+### Analysis
+[Multi-dimensional analysis: political, economic, social, environmental angles]
+
+### Government Response
+[Policy measures, official statements, government actions]
+
+### Expert Views
+[Summarised expert perspectives — not copied quotes]
+
+### Impact Assessment
+[Short-term and long-term implications]
+
+### Exam Perspective
+[How this topic can be asked in exams — possible questions and model answer points]
+
+### Key Terms
+[Important terms and their definitions]
+
+Present 3-5 editorial summaries on the most significant topics in the date range.`,
 };
 
 export function buildCurrentAffairsPrompt(params: {

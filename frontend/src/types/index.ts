@@ -375,3 +375,213 @@ export interface ReferralInfo {
     createdAt: string;
   }>;
 }
+
+// ─── MULTI-MODULE LEARNING TYPES ────────────────────────────
+
+export type LearningModule = 'study_assistant' | 'current_affairs' | 'medical_learning' | 'industry_learning' | 'engineering_learning' | 'commerce_learning';
+
+export type LearningStandard = 'indian' | 'international' | 'hybrid';
+
+export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+
+// Medical Learning
+export type MedicalMode =
+  | 'explain_condition'
+  | 'anatomy_learning'
+  | 'drug_basics'
+  | 'procedure_overview'
+  | 'quiz_mode'
+  | 'certification_prep'
+  | 'case_discussion'
+  | 'sop_learning';
+
+export type MedicalUserLevel =
+  | 'nursing_student'
+  | 'staff_nurse'
+  | 'icu_nurse'
+  | 'mbbs_student'
+  | 'doctor'
+  | 'surgeon'
+  | 'allied_health'
+  | 'hospital_admin';
+
+export interface MedicalLearningRequest {
+  topic: string;
+  mode?: MedicalMode;
+  medicalUserLevel?: MedicalUserLevel;
+  standard?: LearningStandard;
+  difficulty?: DifficultyLevel;
+  examType?: string;
+  specialization?: string;
+}
+
+// Industry Learning
+export type IndustryMode =
+  | 'sop_explanation'
+  | 'safety_learning'
+  | 'technical_basics'
+  | 'compliance_summary'
+  | 'process_training'
+  | 'quick_quiz';
+
+export type IndustrySector =
+  | 'metal'
+  | 'engineering'
+  | 'it_software'
+  | 'finance'
+  | 'hr'
+  | 'manufacturing'
+  | 'safety'
+  | 'corporate'
+  | 'general';
+
+export interface IndustryLearningRequest {
+  topic: string;
+  mode?: IndustryMode;
+  sector?: IndustrySector;
+  standard?: LearningStandard;
+  difficulty?: DifficultyLevel;
+  role?: string;
+}
+
+// Engineering Learning
+export type EngineeringMode =
+  | 'concept_explain'
+  | 'solve_numericals'
+  | 'lab_viva_prep'
+  | 'design_problems'
+  | 'formula_revision'
+  | 'quiz_mode'
+  | 'gate_prep'
+  | 'project_guidance'
+  | 'coding_practice';
+
+export type EngineeringBranch =
+  | 'cse'
+  | 'ece'
+  | 'eee'
+  | 'mechanical'
+  | 'civil'
+  | 'it'
+  | 'chemical'
+  | 'marine'
+  | 'aerospace'
+  | 'automobile'
+  | 'biomedical'
+  | 'general';
+
+export type EngineeringUserLevel =
+  | 'class_10'
+  | 'class_11_12'
+  | 'diploma'
+  | 'btech_1_2'
+  | 'btech_3_4'
+  | 'mtech'
+  | 'gate_aspirant'
+  | 'working_engineer';
+
+export interface EngineeringLearningRequest {
+  topic: string;
+  mode?: EngineeringMode;
+  branch?: EngineeringBranch;
+  userLevel?: EngineeringUserLevel;
+  standard?: LearningStandard;
+  difficulty?: DifficultyLevel;
+  examType?: string;
+  semester?: string;
+}
+
+// Commerce & CA Learning
+export type CommerceMode =
+  | 'concept_explain'
+  | 'solve_problems'
+  | 'case_study'
+  | 'exam_prep'
+  | 'standards_learning'
+  | 'tax_computation'
+  | 'audit_learning'
+  | 'quiz_mode';
+
+export type CommerceUserLevel =
+  | 'class_11_12'
+  | 'bcom'
+  | 'bba'
+  | 'ca_foundation'
+  | 'ca_inter'
+  | 'ca_final'
+  | 'cs_student'
+  | 'cma_student'
+  | 'mcom'
+  | 'mba_finance';
+
+export type CommerceSpecialization =
+  | 'accountancy'
+  | 'cost_accounting'
+  | 'taxation'
+  | 'auditing'
+  | 'corporate_law'
+  | 'economics'
+  | 'financial_management'
+  | 'business_studies'
+  | 'statistics'
+  | 'general';
+
+export interface CommerceLearningRequest {
+  topic: string;
+  mode?: CommerceMode;
+  userLevel?: CommerceUserLevel;
+  specialization?: CommerceSpecialization;
+  standard?: LearningStandard;
+  difficulty?: DifficultyLevel;
+  examType?: string;
+}
+
+// Formatted AI Response
+export interface FormattedAIResponse {
+  content: string;
+  module: string;
+  domain: string;
+  standard: string;
+  difficulty: string;
+  outputMode: string;
+  safetyNotices: string[];
+  generatedAt: string;
+  [key: string]: unknown;
+}
+
+// Study modes (extended)
+export type StudyMode =
+  | 'default'
+  | 'explain_topic'
+  | 'solve_step_by_step'
+  | 'exam_answer'
+  | 'table_compare'
+  | 'memory_tricks'
+  | 'diagram_summary'
+  | 'revision_notes'
+  | 'quick_quiz';
+
+// Current Affairs extended
+export type CurrentAffairsOutputFormat =
+  | 'comprehensive'
+  | 'qa_only'
+  | 'bullet_points'
+  | 'memory_points'
+  | 'mini_quiz'
+  | 'mcq_practice'
+  | 'editorial_summary';
+
+export type CurrentAffairsCategory =
+  | 'National'
+  | 'International'
+  | 'Economy'
+  | 'Science & Technology'
+  | 'Sports'
+  | 'Awards & Honours'
+  | 'Government Schemes'
+  | 'Environment'
+  | 'Defence'
+  | 'Medical & Healthcare'
+  | 'Industry Updates'
+  | 'Education Updates'
+  | 'Mixed';

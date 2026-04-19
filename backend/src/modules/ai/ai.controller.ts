@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { aiService } from './ai.service';
 import { studyAssistantService } from './studyAssistant.service';
 import { currentAffairsService } from './currentAffairs.service';
+import { medicalLearningService } from './medicalLearning.service';
+import { industryLearningService } from './industryLearning.service';
+import { engineeringLearningService } from './engineeringLearning.service';
+import { commerceLearningService } from './commerceLearning.service';
 import { AuthenticatedRequest } from '../../shared/types';
 import { logger } from '../../shared/utils/logger';
 
@@ -250,6 +254,106 @@ class AiController {
     res.status(200).json({
       success: true,
       message: 'IELTS practice content generated',
+      data: result,
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // Medical Learning Assistant
+  // ──────────────────────────────────────────────────────────
+
+  async generateMedicalContent(req: AuthenticatedRequest, res: Response) {
+    const userId = req.user!.id;
+    const { topic, mode, medicalUserLevel, standard, difficulty, examType, specialization } = req.body;
+
+    const result = await medicalLearningService.generateMedicalContent(userId, {
+      topic,
+      mode,
+      medicalUserLevel,
+      standard,
+      difficulty,
+      examType,
+      specialization,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Medical learning content generated',
+      data: result,
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // Industry Learning Assistant
+  // ──────────────────────────────────────────────────────────
+
+  async generateIndustryContent(req: AuthenticatedRequest, res: Response) {
+    const userId = req.user!.id;
+    const { topic, mode, sector, standard, difficulty, role } = req.body;
+
+    const result = await industryLearningService.generateIndustryContent(userId, {
+      topic,
+      mode,
+      sector,
+      standard,
+      difficulty,
+      role,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Industry learning content generated',
+      data: result,
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // Engineering Learning Assistant
+  // ──────────────────────────────────────────────────────────
+
+  async generateEngineeringContent(req: AuthenticatedRequest, res: Response) {
+    const userId = req.user!.id;
+    const { topic, mode, branch, userLevel, standard, difficulty, examType, semester } = req.body;
+
+    const result = await engineeringLearningService.generateEngineeringContent(userId, {
+      topic,
+      mode,
+      branch,
+      userLevel,
+      standard,
+      difficulty,
+      examType,
+      semester,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Engineering learning content generated',
+      data: result,
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // Commerce & CA Learning Assistant
+  // ──────────────────────────────────────────────────────────
+
+  async generateCommerceContent(req: AuthenticatedRequest, res: Response) {
+    const userId = req.user!.id;
+    const { topic, mode, userLevel, specialization, standard, difficulty, examType } = req.body;
+
+    const result = await commerceLearningService.generateCommerceContent(userId, {
+      topic,
+      mode,
+      userLevel,
+      specialization,
+      standard,
+      difficulty,
+      examType,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Commerce learning content generated',
       data: result,
     });
   }

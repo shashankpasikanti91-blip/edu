@@ -11,6 +11,7 @@ declare module 'lucide-react' {
   export const ArrowDown: LucideIcon;
   export const ArrowDownRight: LucideIcon;
   export const Award: LucideIcon;
+  export const Banknote: LucideIcon;
   export const BarChart3: LucideIcon;
   export const BarChart2: LucideIcon;
   export const Bell: LucideIcon;
@@ -35,8 +36,10 @@ declare module 'lucide-react' {
   export const Circle: LucideIcon;
   export const ClipboardList: LucideIcon;
   export const Clock: LucideIcon;
+  export const Code2: LucideIcon;
   export const Coffee: LucideIcon;
   export const Copy: LucideIcon;
+  export const Cpu: LucideIcon;
   export const CreditCard: LucideIcon;
   export const Crown: LucideIcon;
   export const Database: LucideIcon;
@@ -46,11 +49,14 @@ declare module 'lucide-react' {
   export const ExternalLink: LucideIcon;
   export const Eye: LucideIcon;
   export const EyeOff: LucideIcon;
+  export const Factory: LucideIcon;
   export const File: LucideIcon;
   export const FileQuestion: LucideIcon;
   export const FileSpreadsheet: LucideIcon;
   export const FileText: LucideIcon;
   export const Filter: LucideIcon;
+  export const FlaskConical: LucideIcon;
+  export const FolderGit2: LucideIcon;
   export const Gift: LucideIcon;
   export const Globe: LucideIcon;
   export const GraduationCap: LucideIcon;
@@ -84,14 +90,17 @@ declare module 'lucide-react' {
   export const Pencil: LucideIcon;
   export const Phone: LucideIcon;
   export const PieChart: LucideIcon;
+  export const Pill: LucideIcon;
   export const Play: LucideIcon;
   export const Plus: LucideIcon;
   export const Puzzle: LucideIcon;
   export const RefreshCw: LucideIcon;
   export const Rocket: LucideIcon;
   export const RotateCcw: LucideIcon;
+  export const Ruler: LucideIcon;
   export const Save: LucideIcon;
   export const Scale: LucideIcon;
+  export const Scissors: LucideIcon;
   export const School: LucideIcon;
   export const Search: LucideIcon;
   export const Send: LucideIcon;
@@ -99,6 +108,7 @@ declare module 'lucide-react' {
   export const Settings: LucideIcon;
   export const Share2: LucideIcon;
   export const Shield: LucideIcon;
+  export const ShieldAlert: LucideIcon;
   export const ShieldCheck: LucideIcon;
   export const Sparkles: LucideIcon;
   export const Stethoscope: LucideIcon;
@@ -117,6 +127,8 @@ declare module 'lucide-react' {
   export const Users: LucideIcon;
   export const Volume2: LucideIcon;
   export const Wifi: LucideIcon;
+  export const Workflow: LucideIcon;
+  export const Wrench: LucideIcon;
   export const X: LucideIcon;
   export const XCircle: LucideIcon;
   export const Zap: LucideIcon;
