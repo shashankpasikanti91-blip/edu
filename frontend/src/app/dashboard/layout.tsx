@@ -187,10 +187,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, loadUser, logout } = useAuthStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     loadUser();
   }, [loadUser]);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -217,12 +223,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const sidebarLinks = getSidebarLinks(user?.role, user?.accountType);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Close sidebar on route change (mobile)
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-gray-50/80 flex">
