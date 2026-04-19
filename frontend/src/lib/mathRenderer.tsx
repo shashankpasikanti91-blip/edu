@@ -220,130 +220,184 @@ function formatInline(text: string): React.ReactNode {
  * Used by ai-assistant, exam-prep, current-affairs, and dictionary pages.
  */
 export function renderMarkdownContent(text: string): React.ReactNode {
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let inCodeBlock = false;
-  let codeContent: string[] = [];
-  let codeLanguage = '';
+  // ── Step 1: Extract multi-line display math & code blocks before line splitting ──
+  // Split text into segments: plain text vs display-math vs code-block
+  type Segment = { kind: 'text'; content: string } | { kind: 'displaymath'; content: string } | { kind: 'code'; content: string; language: string };
+  const segments: Segment[] = [];
+  let remaining = text;
 
-  lines.forEach((line, i) => {
-    // Code blocks
-    if (line.startsWith('```')) {
-      if (inCodeBlock) {
-        elements.push(
-          <pre key={`code-${i}`} className="bg-gray-900 text-green-300 rounded-lg p-4 my-2 text-sm overflow-x-auto font-mono">
-            <code>{codeContent.join('\n')}</code>
-          </pre>
-        );
-        codeContent = [];
-        codeLanguage = '';
-        inCodeBlock = false;
-      } else {
-        codeLanguage = line.slice(3).trim();
-        inCodeBlock = true;
+  while (remaining.length > 0) {
+    const mathIdx = remaining.indexOf('$$');
+    const codeIdx = remaining.indexOf('```');
+
+    // Find which delimiter comes first
+    const firstDelim =
+      mathIdx === -1 && codeIdx === -1 ? null :
+      mathIdx === -1 ? 'code' :
+      codeIdx === -1 ? 'math' :
+      mathIdx < codeIdx ? 'math' : 'code';
+
+    if (!firstDelim) {
+      segments.push({ kind: 'text', content: remaining });
+      break;
+    }
+
+    if (firstDelim === 'math') {
+      // Text before $$
+      if (mathIdx > 0) {
+        segments.push({ kind: 'text', content: remaining.slice(0, mathIdx) });
       }
-      return;
+      const afterOpen = remaining.slice(mathIdx + 2);
+      const closeIdx = afterOpen.indexOf('$$');
+      if (closeIdx === -1) {
+        // No closing $$, treat as plain text
+        segments.push({ kind: 'text', content: remaining.slice(mathIdx) });
+        break;
+      }
+      segments.push({ kind: 'displaymath', content: afterOpen.slice(0, closeIdx).trim() });
+      remaining = afterOpen.slice(closeIdx + 2);
+    } else {
+      // Code block
+      if (codeIdx > 0) {
+        segments.push({ kind: 'text', content: remaining.slice(0, codeIdx) });
+      }
+      const afterOpen = remaining.slice(codeIdx + 3);
+      const langEnd = afterOpen.indexOf('\n');
+      const language = langEnd >= 0 ? afterOpen.slice(0, langEnd).trim() : '';
+      const codeStart = langEnd >= 0 ? afterOpen.slice(langEnd + 1) : afterOpen;
+      const closeIdx = codeStart.indexOf('```');
+      if (closeIdx === -1) {
+        segments.push({ kind: 'text', content: remaining.slice(codeIdx) });
+        break;
+      }
+      segments.push({ kind: 'code', content: codeStart.slice(0, closeIdx), language });
+      remaining = codeStart.slice(closeIdx + 3);
     }
+  }
 
-    if (inCodeBlock) {
-      codeContent.push(line);
-      return;
-    }
+  // ── Step 2: Render each segment ──
+  const elements: React.ReactNode[] = [];
+  let key = 0;
 
-    // Headings
-    if (line.startsWith('#### ')) {
-      elements.push(<h4 key={i} className="text-sm font-semibold text-gray-700 mt-2 mb-1">{formatInline(line.slice(5))}</h4>);
-      return;
-    }
-    if (line.startsWith('### ')) {
-      elements.push(<h3 key={i} className="text-base font-semibold text-gray-800 mt-3 mb-1">{formatInline(line.slice(4))}</h3>);
-      return;
-    }
-    if (line.startsWith('## ')) {
-      elements.push(<h2 key={i} className="text-lg font-bold text-gray-900 mt-4 mb-2">{formatInline(line.slice(3))}</h2>);
-      return;
-    }
-    if (line.startsWith('# ')) {
-      elements.push(<h1 key={i} className="text-xl font-bold text-gray-900 mt-4 mb-2">{formatInline(line.slice(2))}</h1>);
-      return;
-    }
-
-    // Horizontal rule
-    if (line.match(/^---+$/) || line.match(/^\*\*\*+$/)) {
-      elements.push(<hr key={i} className="my-3 border-gray-200" />);
-      return;
-    }
-
-    // Table rows (basic markdown table support)
-    if (line.startsWith('|') && line.endsWith('|')) {
-      // Skip separator rows like |---|---|
-      if (line.match(/^\|[\s-:|]+\|$/)) return;
-
-      const cells = line.split('|').filter(c => c.trim() !== '');
-      const isHeader = i + 1 < lines.length && lines[i + 1]?.match(/^\|[\s-:|]+\|$/);
-      const Tag = isHeader ? 'th' : 'td';
+  segments.forEach((seg) => {
+    if (seg.kind === 'displaymath') {
+      const html = renderLatex(seg.content, true);
       elements.push(
-        <div key={i} className="overflow-x-auto">
-          <table className="min-w-full border-collapse my-1">
-            <tr className={isHeader ? 'bg-gray-100' : ''}>
-              {cells.map((cell, ci) => (
-                <Tag key={ci} className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700">
-                  {formatInline(cell.trim())}
-                </Tag>
-              ))}
-            </tr>
-          </table>
-        </div>
+        <div
+          key={`dmath-${key++}`}
+          className="math-display my-3 overflow-x-auto text-center"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       );
       return;
     }
 
-    // Bullet list
-    if (line.match(/^[\s]*[-*]\s/)) {
-      const indent = line.match(/^(\s*)/)?.[1]?.length || 0;
-      const content = line.replace(/^[\s]*[-*]\s/, '');
+    if (seg.kind === 'code') {
       elements.push(
-        <div key={i} className="flex gap-2 my-0.5" style={{ paddingLeft: `${Math.min(indent, 8) * 4}px` }}>
-          <span className="text-brand-500 mt-1 flex-shrink-0">•</span>
-          <span className="text-gray-700">{formatInline(content)}</span>
-        </div>
+        <pre key={`code-${key++}`} className="bg-gray-900 text-green-300 rounded-lg p-4 my-2 text-sm overflow-x-auto font-mono">
+          <code>{seg.content}</code>
+        </pre>
       );
       return;
     }
 
-    // Numbered list
-    if (line.match(/^\s*\d+\.\s/)) {
-      const match = line.match(/^(\s*)(\d+)\.\s(.*)/);
-      if (match) {
-        const indent = match[1].length;
+    // Process text lines
+    const lines = seg.content.split('\n');
+
+    lines.forEach((line) => {
+      // Headings
+      if (line.startsWith('#### ')) {
+        elements.push(<h4 key={key++} className="text-sm font-semibold text-gray-700 mt-2 mb-1">{formatInline(line.slice(5))}</h4>);
+        return;
+      }
+      if (line.startsWith('### ')) {
+        elements.push(<h3 key={key++} className="text-base font-semibold text-gray-800 mt-3 mb-1">{formatInline(line.slice(4))}</h3>);
+        return;
+      }
+      if (line.startsWith('## ')) {
+        elements.push(<h2 key={key++} className="text-lg font-bold text-gray-900 mt-4 mb-2">{formatInline(line.slice(3))}</h2>);
+        return;
+      }
+      if (line.startsWith('# ')) {
+        elements.push(<h1 key={key++} className="text-xl font-bold text-gray-900 mt-4 mb-2">{formatInline(line.slice(2))}</h1>);
+        return;
+      }
+
+      // Horizontal rule
+      if (line.match(/^---+$/) || line.match(/^\*\*\*+$/)) {
+        elements.push(<hr key={key++} className="my-3 border-gray-200" />);
+        return;
+      }
+
+      // Table rows (markdown table)
+      if (line.startsWith('|') && line.endsWith('|')) {
+        if (line.match(/^\|[\s-:|]+\|$/)) return;
+        const cells = line.split('|').filter(c => c.trim() !== '');
         elements.push(
-          <div key={i} className="flex gap-2 my-0.5" style={{ paddingLeft: `${Math.min(indent, 8) * 4}px` }}>
-            <span className="text-brand-600 font-medium flex-shrink-0">{match[2]}.</span>
-            <span className="text-gray-700">{formatInline(match[3])}</span>
+          <div key={key++} className="overflow-x-auto">
+            <table className="min-w-full border-collapse my-1">
+              <tbody>
+                <tr>
+                  {cells.map((cell, ci) => (
+                    <td key={ci} className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700">
+                      {formatInline(cell.trim())}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
           </div>
         );
         return;
       }
-    }
 
-    // Blockquote
-    if (line.startsWith('> ')) {
-      elements.push(
-        <blockquote key={i} className="border-l-4 border-brand-300 pl-4 my-2 text-gray-600 italic">
-          {formatInline(line.slice(2))}
-        </blockquote>
-      );
-      return;
-    }
+      // Bullet list
+      if (line.match(/^[\s]*[-*]\s/)) {
+        const indent = line.match(/^(\s*)/)?.[1]?.length || 0;
+        const content = line.replace(/^[\s]*[-*]\s/, '');
+        elements.push(
+          <div key={key++} className="flex gap-2 my-0.5" style={{ paddingLeft: `${Math.min(indent, 8) * 4}px` }}>
+            <span className="text-brand-500 mt-1 flex-shrink-0">•</span>
+            <span className="text-gray-700">{formatInline(content)}</span>
+          </div>
+        );
+        return;
+      }
 
-    // Empty line
-    if (line.trim() === '') {
-      elements.push(<div key={i} className="h-2" />);
-      return;
-    }
+      // Numbered list
+      if (line.match(/^\s*\d+\.\s/)) {
+        const match = line.match(/^(\s*)(\d+)\.\s(.*)/);
+        if (match) {
+          const indent = match[1].length;
+          elements.push(
+            <div key={key++} className="flex gap-2 my-0.5" style={{ paddingLeft: `${Math.min(indent, 8) * 4}px` }}>
+              <span className="text-brand-600 font-medium flex-shrink-0">{match[2]}.</span>
+              <span className="text-gray-700">{formatInline(match[3])}</span>
+            </div>
+          );
+          return;
+        }
+      }
 
-    // Regular paragraph
-    elements.push(<p key={i} className="text-gray-700 my-0.5">{formatInline(line)}</p>);
+      // Blockquote
+      if (line.startsWith('> ')) {
+        elements.push(
+          <blockquote key={key++} className="border-l-4 border-brand-300 pl-4 my-2 text-gray-600 italic">
+            {formatInline(line.slice(2))}
+          </blockquote>
+        );
+        return;
+      }
+
+      // Empty line
+      if (line.trim() === '') {
+        elements.push(<div key={key++} className="h-2" />);
+        return;
+      }
+
+      // Regular paragraph
+      elements.push(<p key={key++} className="text-gray-700 my-0.5">{formatInline(line)}</p>);
+    });
   });
 
   return <div className="space-y-0.5">{elements}</div>;
